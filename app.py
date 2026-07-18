@@ -130,8 +130,7 @@ for idx, app_name in enumerate(selected_apps):
             st.plotly_chart(fig_pie, use_container_width=True)
 # 📊 TAMBAHAN: PERSENTASE DISTRIBUSI SENTIMEN
 st.markdown("---")
-st.markdown("### 📊 Persentase Distribusi Sentimen Pengguna")
-
+st.markdown("### Persentase Distribusi Sentimen Pengguna")
 
 for app_name in selected_apps:
 
@@ -311,20 +310,131 @@ with st.container(border=True):
 # 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
 st.markdown("---")
 st.markdown("### 📊 4. Penyebaran Distribusi Rating Bintang Pengguna")
-color_rating_map = {"DANA": "#2377ca", "GoPay": "#01aed6", "ShopeePay": "#ff773c"}
 
-col_rate = st.columns(len(selected_apps))
-for idx, app_name in enumerate(selected_apps):
-    with col_rate[idx]:
-        with st.container(border=True):
-            df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
-            df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
-            
-            fig_rate = px.bar(df_chart_rate, x='score', y='Total',
-                              title=f"Rating Bintang: {app_name}",
-                              labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
-                              color_discrete_sequence=[color_rating_map[app_name]])
-            st.plotly_chart(fig_rate, use_container_width=True)
+
+color_rating_map = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
+
+# =====================================================
+# KONDISI 1:
+# JIKA USER MEMILIH 1 APLIKASI
+# MAKA TETAP BAR CHART BIASA
+# =====================================================
+
+if len(selected_apps) == 1:
+
+    app_name = selected_apps[0]
+
+
+    with st.container(border=True):
+
+        df_app_rate = df_sentimen[
+            df_sentimen['appName'] == app_name
+        ]
+
+
+        df_chart_rate = (
+            df_app_rate
+            .groupby('score')
+            .size()
+            .reset_index(name='Total')
+        )
+
+
+        fig_rate = px.bar(
+            df_chart_rate,
+            x='score',
+            y='Total',
+            title=f"Distribusi Rating Bintang: {app_name}",
+            labels={
+                'score': 'Rating Bintang',
+                'Total': 'Jumlah Ulasan'
+            },
+            color_discrete_sequence=[
+                color_rating_map[app_name]
+            ]
+        )
+
+
+        fig_rate.update_layout(
+            xaxis=dict(
+                dtick=1
+            )
+        )
+
+
+        st.plotly_chart(
+            fig_rate,
+            use_container_width=True
+        )
+
+
+
+# =====================================================
+# KONDISI 2:
+# JIKA USER MEMILIH >1 APLIKASI
+# MAKA MENJADI STACKED BAR CHART
+# =====================================================
+
+else:
+
+
+    # Ambil data rating semua aplikasi aktif
+    df_rating_multi = df_sentimen[
+        df_sentimen['appName'].isin(selected_apps)
+    ]
+
+
+    # Agregasi rating berdasarkan aplikasi
+    df_rating_multi = (
+        df_rating_multi
+        .groupby(
+            ['score', 'appName']
+        )
+        .size()
+        .reset_index(name='Total')
+    )
+
+
+    fig_rate_stack = px.bar(
+        df_rating_multi,
+        x='score',
+        y='Total',
+        color='appName',
+        title="Distribusi Rating Bintang Komparasi E-Wallet",
+        labels={
+            'score':'Rating Bintang',
+            'Total':'Jumlah Ulasan',
+            'appName':'Aplikasi'
+        },
+        color_discrete_map=color_rating_map,
+        barmode='stack'
+    )
+
+
+    fig_rate_stack.update_layout(
+        xaxis=dict(
+            dtick=1
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        )
+    )
+
+
+    st.plotly_chart(
+        fig_rate_stack,
+        use_container_width=True
+    )
+
 
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR
 st.markdown("---")
