@@ -290,7 +290,8 @@ for app_name in selected_apps:
     }
 
 # =====================================================
-# MEMBUAT 1 KOTAK HORIZONTAL UNTUK SETIAP APLIKASI
+# MEMBUAT 1 KOTAK PER APLIKASI
+# POSITIF ATAS - NEGATIF BAWAH
 # =====================================================
 
 cols = st.columns(len(selected_apps))
@@ -302,14 +303,7 @@ for idx, app_name in enumerate(selected_apps):
 
         st.markdown(
             f"""
-            <div class="metric-card"
-            style="
-                min-height:230px;
-                display:flex;
-                flex-direction:column;
-                justify-content:center;
-            ">
-
+            <div class="metric-card">
 
                 <h2 style="
                     margin:0;
@@ -329,14 +323,12 @@ for idx, app_name in enumerate(selected_apps):
                 </p>
 
 
-
                 <hr style="
                     width:80%;
                     border:none;
                     border-top:1px solid #ddd;
                     margin:15px auto;
                 ">
-
 
 
                 <h2 style="
@@ -348,7 +340,6 @@ for idx, app_name in enumerate(selected_apps):
                 </h2>
 
 
-
                 <p style="
                     margin:0;
                     font-size:16px;
@@ -356,7 +347,6 @@ for idx, app_name in enumerate(selected_apps):
                 ">
                     Distribusi Negatif {app_name}
                 </p>
-
 
             </div>
             """,
