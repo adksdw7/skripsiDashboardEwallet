@@ -462,42 +462,151 @@ else:
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR
 st.markdown("---")
 st.markdown("### ☁️ 5. Eksplorasi Awan Kata (Word Cloud)")
-wc_color_map = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
+
+# Warna wordcloud positif tiap aplikasi
+wc_positive_color = {
+    "DANA": "Blues",
+    "GoPay": "Greens",
+    "ShopeePay": "Oranges"
+}
+
+
+# Fungsi membuat warna merah untuk wordcloud negatif
+def red_color_func(
+    word,
+    font_size,
+    position,
+    orientation,
+    random_state=None,
+    **kwargs
+):
+    return "#cc0000"
+
+
+
+# Membuat kolom berdasarkan jumlah aplikasi
 col_wc = st.columns(len(selected_apps))
+
+
 for idx, app_name in enumerate(selected_apps):
+
     with col_wc[idx]:
+
         with st.container(border=True):
-            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Umum: {app_name}</p>", unsafe_allow_html=True)
-            
-            df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
-            text_all = " ".join(df_app_text['content'].astype(str))
-            
-            if text_all.strip():
-                wc_all = WordCloud(background_color="white", max_words=50, colormap=wc_color_map[app_name], width=400, height=250).generate(text_all)
-                fig, ax = plt.subplots(figsize=(4, 2.5))
-                ax.imshow(wc_all, interpolation='bilinear')
+
+            df_app_text = df_sentimen[
+                df_sentimen['appName'] == app_name
+            ]
+
+
+            # =====================================================
+            # WORD CLOUD POSITIF
+            # =====================================================
+
+            st.markdown(
+                f"""
+                <p style='text-align:center;
+                font-weight:bold;
+                margin-bottom:5px;'>
+                Word Cloud Positif {app_name}
+                </p>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            text_positive = " ".join(
+                df_app_text[
+                    df_app_text['sentimen'] == 'Positif'
+                ]['content']
+                .astype(str)
+            )
+
+
+            if text_positive.strip():
+
+                wc_positive = WordCloud(
+                    background_color="white",
+                    max_words=50,
+                    colormap=wc_positive_color[app_name],
+                    width=400,
+                    height=250
+                ).generate(text_positive)
+
+
+                fig, ax = plt.subplots(
+                    figsize=(4, 2.5)
+                )
+
+                ax.imshow(
+                    wc_positive,
+                    interpolation='bilinear'
+                )
+
                 ax.axis("off")
+
                 st.pyplot(fig)
+
                 plt.close()
-                
-            show_pos = st.checkbox(f"Lihat Wordcloud Positif {app_name}", key=f"pos_show_{app_name}")
-            if show_pos:
-                text_pos = " ".join(df_app_text[df_app_text['sentimen'] == 'Positif']['content'].astype(str))
-                if text_pos.strip():
-                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:gray;'>*Word Cloud Positif: {app_name}*</p>", unsafe_allow_html=True)
-                    wc_p = WordCloud(background_color="white", max_words=40, colormap=wc_color_map[app_name], width=400, height=200).generate(text_pos)
-                    fig, ax = plt.subplots(figsize=(4, 2))
-                    ax.imshow(wc_p, interpolation='bilinear')
-                    ax.axis("off")
-                    st.pyplot(fig)
-                    plt.close()
-                    
-            show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")
-            if show_neg:
-                text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))
-                if text_neg.strip():
-                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:red;'>*Word Cloud Negatif: {app_name}*</p>", unsafe_allow_html=True)
+
+
+
+            # =====================================================
+            # WORD CLOUD NEGATIF
+            # =====================================================
+
+            st.markdown(
+                f"""
+                <p style='text-align:center;
+                font-weight:bold;
+                margin-top:15px;
+                margin-bottom:5px;'>
+                Word Cloud Negatif {app_name}
+                </p>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+            text_negative = " ".join(
+                df_app_text[
+                    df_app_text['sentimen'] == 'Negatif'
+                ]['content']
+                .astype(str)
+            )
+
+
+            if text_negative.strip():
+
+                wc_negative = WordCloud(
+                    background_color="white",
+                    max_words=50,
+                    width=400,
+                    height=250
+                ).generate(text_negative)
+
+
+                # Terapkan warna merah
+                wc_negative.recolor(
+                    color_func=red_color_func
+                )
+
+
+                fig, ax = plt.subplots(
+                    figsize=(4, 2.5)
+                )
+
+                ax.imshow(
+                    wc_negative,
+                    interpolation='bilinear'
+                )
+
+                ax.axis("off")
+
+                st.pyplot(fig)
+
+                plt.close()
 
 #📋 URUTAN 6: RINGKASAN EKSTRAKSI SAMPEL KOMENTAR TERPOPULER (ANTI ERROR GITHUB - MURNI DATAFRAME)
 st.markdown("---")
