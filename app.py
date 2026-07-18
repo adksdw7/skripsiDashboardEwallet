@@ -189,7 +189,7 @@ st.markdown("---")
 st.header("🔄 Hasil Analisis")
 
 # 📥 URUTAN 1: TOTAL DATA BERSIH ULASAN
-st.markdown("### 📥 1. Total Data Bersih Ulasan")
+st.markdown("### 📥Total Data Ulasan")
 col_u = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_u[idx]:
@@ -203,7 +203,7 @@ for idx, app_name in enumerate(selected_apps):
 
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN
 st.markdown("---")
-st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
+st.markdown("###Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
@@ -315,7 +315,7 @@ for idx, app_name in enumerate(selected_apps):
 
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
-st.markdown("### 📈 3. Grafik Tren Perkembangan Sentimen Bulanan")
+st.markdown("### 📈 Grafik Tren Perkembangan Sentimen Bulanan")
 
 
 # Filter hanya aplikasi yang dipilih user melalui toggle
@@ -426,7 +426,7 @@ with st.container(border=True):
     
 # 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
 st.markdown("---")
-st.markdown("### 📊 4. Penyebaran Distribusi Rating Bintang Pengguna")
+st.markdown("### 📊 Penyebaran Distribusi Rating Bintang Pengguna")
 
 
 color_rating_map = {
@@ -745,7 +745,7 @@ def get_top_reviews(app_name, sentiment):
 
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOGGLE ULASAN
 st.markdown("---")
-st.markdown("### ☁️ 5. Eksplorasi Awan Kata (Word Cloud)")
+st.markdown("###☁️ Word Cloud Sentimen")
 
 
 # Warna wordcloud positif tiap aplikasi
@@ -990,33 +990,9 @@ for idx, app_name in enumerate(selected_apps):
                         "Data ulasan negatif tidak ditemukan."
                     )
 
-#📋 URUTAN 6: RINGKASAN EKSTRAKSI SAMPEL KOMENTAR TERPOPULER (ANTI ERROR GITHUB - MURNI DATAFRAME)
-st.markdown("---")
-st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")
-
-data_tabel_komparasi = []
-
-for app_name in selected_apps:
-    df_app_search = df_sentimen[df_sentimen['appName'] == app_name]
-    df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']
-    df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']
-    
-    # Perbaikan mutlak struktur if-else satu baris agar tidak memicu IndentationError
-    sample_p = df_pos_reviews['content'].head(1).values[0] if not df_pos_reviews.empty else "Sangat puas dengan kecepatan transaksi aplikasi ini."
-    sample_n = df_neg_reviews['content'].head(1).values[0] if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."
-    
-    data_tabel_komparasi.append({
-        "E-Wallet": app_name,
-        "Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}",
-        "Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"
-    })
-
-df_tabel_final = pd.DataFrame(data_tabel_komparasi)
-st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
-
 #🔮 URUTAN 7: NILAI METRIK KINERJA KLASIFIKASI NBC
 st.markdown("---")
-st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")
+st.markdown("###Nilai Metrik Kinerja Klasifikasi NBC")
 
 
 # Warna nilai metrik berdasarkan aplikasi
@@ -1134,7 +1110,7 @@ for app_name in selected_apps:
 
 #🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
-st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")
+st.markdown("###Elemen Nilai Realisasi Confusion Matrix")
 
 
 # Warna nilai confusion matrix berdasarkan aplikasi
