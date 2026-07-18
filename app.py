@@ -12,7 +12,7 @@ import base64
 # =====================================================================
 st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
 
-# Gaya CSS global untuk mempercantik kartu visual dan tabel agar seragam di PC/HP
+# Gaya CSS global untuk mempercantik kartu visual agar seragam di PC/HP
 st.markdown("""
 <style>
     .metric-card {
@@ -23,24 +23,6 @@ st.markdown("""
         box-shadow: 0px 4px 6px rgba(0,0,0,0.02);
         text-align: center;
         margin-bottom: 15px;
-    }
-    .custom-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 15px 0;
-    }
-    .custom-table th {
-        background-color: #f8f9fa;
-        color: #333333;
-        font-weight: bold;
-        padding: 12px;
-        border: 1px solid #dee2e6;
-        text-align: left;
-    }
-    .custom-table td {
-        padding: 12px;
-        border: 1px solid #dee2e6;
-        vertical-align: top;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -216,26 +198,19 @@ for idx, app_name in enumerate(selected_apps):
                     st.pyplot(fig)
                     plt.close()
                     
-show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")if show_neg:text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))if text_neg.strip():st.markdown(f"Word Cloud Negatif: {app_name}", unsafe_allow_html=True)wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)fig, ax = plt.subplots(figsize=(4, 2))ax.imshow(wc_n, interpolation='bilinear')ax.axis("off")st.pyplot(fig)plt.close()
+            show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")
+            if show_neg:
+                text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))
+                if text_neg.strip():
+                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:red;'>*Word Cloud Negatif: {app_name}*</p>", unsafe_allow_html=True)
 
-#URUTAN 6: TABEL EKSTRAKSI SAMPE KONTEN RELEVAN
-st.markdown("---")st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")table_html = """"st.markdown(table_html, unsafe_allow_html=True)
+#📋 URUTAN 6: RINGKASAN EKSTRAKSI SAMPEL KOMENTAR TERPOPULER (ANTI ERROR GITHUB - MURNI DATAFRAME)
+st.markdown("---")st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")data_tabel_komparasi = []for app_name in selected_apps:df_app_search = df_sentimen[df_sentimen['appName'] == app_name]df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']sample_p = df_pos_reviews['content'].head(1).values[0] if not df_pos_reviews.empty else "Sangat puas dengan kecepatan transaksi aplikasi ini."sample_n = df_neg_reviews['content'].head(1).values[0] if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."data_tabel_komparasi.append({"E-Wallet": app_name,"Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}","Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"})df_tabel_final = pd.DataFrame(data_tabel_komparasi)st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
 
-#URUTAN 7: NILAI METRIK KINERJA NBC
+#🔮 URUTAN 7: NILAI METRIK KINERJA NBC
 st.markdown("---")st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")for app_name in selected_apps:row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_eval.empty:row_eval = row_eval.iloc[0]st.markdown(f"Metrik Performa Pengujian Model NBC: {app_name}")col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)col_m1.markdown(f'Accuracy{str(row_eval["Accuracy"])}', unsafe_allow_html=True)col_m2.markdown(f'Precision{str(row_eval["Precision"])}', unsafe_allow_html=True)col_m3.markdown(f'Recall{str(row_eval["Recall"])}', unsafe_allow_html=True)col_m4.markdown(f'Specificity{str(row_eval["Specificity"])}', unsafe_allow_html=True)col_m5.markdown(f'F1-Score{str(row_eval["F1-Score"])}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
 
-#URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
+#🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")for app_name in selected_apps:row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_cm.empty:row_cm = row_cm.iloc[0]st.markdown(f"Komposisi Hasil Prediksi Matriks: {app_name}")col_c1, col_c2, col_c3, col_c4 = st.columns(4)col_c1.markdown(f'True Negative (TN){int(row_cm["TN"]):,}', unsafe_allow_html=True)col_c2.markdown(f'False Positive (FP){int(row_cm["FP"]):,}', unsafe_allow_html=True)col_c3.markdown(f'False Negative (FN){int(row_cm["FN"]):,}', unsafe_allow_html=True)col_c4.markdown(f'True Positive (TP){int(row_cm["TP"]):,}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
-
-
-
-
-
-
-
-
-
-
-
 
 
