@@ -632,23 +632,123 @@ for app_name in selected_apps:
 df_tabel_final = pd.DataFrame(data_tabel_komparasi)
 st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
 
-#🔮 URUTAN 7: NILAI METRIK KINERJA NBC
+#🔮 URUTAN 7: NILAI METRIK KINERJA KLASIFIKASI NBC
 st.markdown("---")
 st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")
 
+
+# Warna nilai metrik berdasarkan aplikasi
+metric_color_map = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
+
 for app_name in selected_apps:
-    row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
+
+    row_eval = df_evaluasi[
+        df_evaluasi['aplikasi'] == app_name
+    ]
+
     if not row_eval.empty:
+
         row_eval = row_eval.iloc[0]
-        st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
-        
+
+        # mengambil warna sesuai aplikasi
+        app_color = metric_color_map.get(
+            app_name,
+            "#2377ca"
+        )
+
+
+        st.markdown(
+            f"**Metrik Performa Pengujian Model NBC: {app_name}**"
+        )
+
+
         col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-        col_m1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Accuracy</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Accuracy"])}</h3></div>', unsafe_allow_html=True)
-        col_m2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Precision</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Precision"])}</h3></div>', unsafe_allow_html=True)
-        col_m3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Recall</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Recall"])}</h3></div>', unsafe_allow_html=True)
-        col_m4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Specificity</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Specificity"])}</h3></div>', unsafe_allow_html=True)
-        col_m5.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">F1-Score</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["F1-Score"])}</h3></div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
+
+
+        col_m1.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    Accuracy
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {str(row_eval["Accuracy"])}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_m2.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    Precision
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {str(row_eval["Precision"])}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_m3.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    Recall
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {str(row_eval["Recall"])}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_m4.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    Specificity
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {str(row_eval["Specificity"])}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_m5.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    F1-Score
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {str(row_eval["F1-Score"])}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        st.markdown(
+            '<div style="margin-bottom:15px;"></div>',
+            unsafe_allow_html=True
+        )
 
 #🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
