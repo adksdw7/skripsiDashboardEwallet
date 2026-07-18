@@ -4,24 +4,22 @@ import plotly.express as px
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
+import os
 
 # =====================================================================
-# 1. KONFIGURASI HALAMAN UTAMA DASHBOARD
+# 1. KONFIGURASI HALAMAN UTAMA DASHBOARD (MURNI SCROLLING, TANPA SIDEBAR)
 # =====================================================================
-st.set_page_config(page_title="Analisis Sentimen E-Wallet", layout="wide")
-
-# Opsi untuk menyembunyikan peringatan bawaan matplotlib tentang thread-safety
-# st.set_option('deprecation.showPyplotGlobalUse', False)
+st.set_config_option('deprecation.showPyplotGlobalUse', False) if hasattr(st, 'set_config_option') else None
+st.set_page_config(page_title="Komparatif Sentimen E-Wallet", layout="wide")
 
 # =====================================================================
-# 2. FUNGSI MEMUAT DATA DARI GITHUB (ANTI-BERAT, TANPA NBC ULANG)
+# 2. FUNGSI MEMUAT DATA (ANTI-BERAT, MEMBACA HASIL CSV)
 # =====================================================================
 @st.cache_data
 def load_data():
     df_sentimen = pd.read_csv("hasilSentimen.csv")
     df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
     
-    # Menyelaraskan nama kolom tabel evaluasi model
     if len(df_evaluasi.columns) >= 12:
         df_evaluasi.columns = ['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 
                                'jumlahDataTrain', 'jumlahDataTest', 'TN', 'FP', 'FN', 'TP']
@@ -36,9 +34,9 @@ except Exception as e:
     st.stop()
 
 # =====================================================================
-# A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN (SANGAT BAGUS UNTUK SIDANG)
+# A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
 # =====================================================================
-st.title("📊 WEB-DASHBOARD ANALITIK: ANALISIS SENTIMEN KOMPARATIF E-WALLET")
+st.title("📊KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 st.markdown("### **Implementasi Algoritma Multinomial Naïve Bayes Berbasis TF-IDF**")
 
 st.info("""
@@ -49,88 +47,100 @@ dapat melihat perbandingan indikator kepuasan konsumen secara instan tanpa harus
 """)
 
 # =====================================================================
-# B. STATISTIK GABUNGAN SELURUH APLIKASI (HISTORIS MAKRO)
+# B. RANGKUMAN UMUM ULASAN GABUNGAN MAKRO
 # =====================================================================
-st.markdown("---")
-st.subheader("🌐 Rangkuman Statistik Global Terpadu (Integrated Dataset)")
-
-# Perhitungan Metrik Gabungan Makro
 total_ulasan_global = len(df_sentimen)
 total_aplikasi_global = df_sentimen['appName'].nunique()
 pos_count = (df_sentimen['sentimen'] == 'Positif').sum()
 neg_count = (df_sentimen['sentimen'] == 'Negatif').sum()
 
-# Sesuai ruang lingkup skripsi hal 26 (tidak menggunakan penyeimbangan/netral), 
-# Persentase netral diisi 0% dengan keterangan ilmiah untuk dosen pembimbing.
 persen_pos = (pos_count / total_ulasan_global) * 100
 persen_neg = (neg_count / total_ulasan_global) * 100
-persen_net = 0.0 
 
-col_g1, col_g2, col_g3, col_g4, col_g5, col_g6 = st.columns(6)
-col_g1.metric("Total Aplikasi", f"{total_aplikasi_global} Layanan")
+col_g1, col_g2, col_g3, col_g4 = st.columns(4)
+col_g1.metric("Total Aplikasi", f"{total_aplikasi_global} E-Wallet")
 col_g2.metric("Total Korpus Ulasan", f"{total_ulasan_global:,} Data")
-col_g3.metric("Periode Dataset", "2025 - 2026")
-col_g4.metric("Sentimen Positif", f"{persen_pos:.1f}%")
-col_g5.metric("Sentimen Netral", f"{persen_net:.1f}%", help="Sesuai Ruang Lingkup No.5, rating 3 dihapus (non-balancing)")
-col_g6.metric("Sentimen Negatif", f"{persen_neg:.1f}%")
-
-# Menampilkan tabel evaluasi performa model klasifikasi NBC asli dari Colab di beranda
-with st.expander("🔍 Lihat Hasil Evaluasi Performa Model Klasifikasi (Confusion Matrix)") :
-    st.dataframe(df_evaluasi[['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 'jumlahDataTrain', 'jumlahDataTest']], use_container_width=True)
+# Klarifikasi kepemilikan persentase agar pengguna/dosen tidak bingung
+col_g3.metric("Rata-rata Sentimen Positif (3 E-Wallet)", f"{persen_pos:.1f}%")
+col_g4.metric("Rata-rata Sentimen Negatif (3 E-Wallet)", f"{persen_neg:.1f}%")
 
 # =====================================================================
-# C. DASHBOARD ANALITIK INTERAKTIF DENGAN FILTER PILIHAN USER
+# C. INTERFASE TOMBOL IKON LOGO APLIKASI (MENGGUNAKAN SESSION STATE)
 # =====================================================================
 st.markdown("---")
-st.subheader("🎛️ Panel Kontrol Analitik & Filter Komparatif")
+st.subheader("📱 Pilih Aplikasi E-Wallet di Bawah Ini untuk Melihat Visualisasi:")
 
-# Menampilkan tombol pilihan aplikasi tepat di atas halaman utama website (Sesuai Konsep Poin 2)
-list_apps = ["DANA", "GoPay", "ShopeePay"]
-selected_apps = st.multiselect("Pilih Aplikasi E-Wallet untuk Dianalisis (Bisa Pilih 1, 2, atau 3 Aplikasi Sekaligus):", 
-                               options=list_apps, default=list_apps)
+# Inisialisasi penyimpanan status klik tombol agar tidak hilang saat halaman memuat ulang
+if 'dana_active' not in st.session_state: st.session_state.dana_active = True
+if 'gopay_active' not in st.session_state: st.session_state.gopay_active = True
+if 'shopee_active' not in st.session_state: st.session_state.shopee_active = True
 
-# Filter Rentang Waktu Periode Dataset
-min_date = df_sentimen['date'].min().to_pydatetime()
-max_date = df_sentimen['date'].max().to_pydatetime()
+col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-col_t1, col_t2 = st.columns(2)
-with col_t1:
-    start_date = st.date_input("Tanggal Mulai Analisis:", min_value=min_date, max_value=max_date, value=min_date)
-with col_t2:
-    end_date = st.date_input("Tanggal Selesai Analisis:", min_value=min_date, max_value=max_date, value=max_date)
+with col_btn1:
+    if os.path.exists("logoDana.png"):
+        st.image("logoDana.png", width=120)
+    else:
+        st.caption("🔵 [Logo DANA]")
+    if st.button("DANA", key="btn_dana", use_container_width=True):
+        st.session_state.dana_active = not st.session_state.dana_active
 
-# Proteksi Filter Kosong
+with col_btn2:
+    if os.path.exists("logoGoPay.png"):
+        st.image("logoGoPay.png", width=120)
+    else:
+        st.caption("🟢 [Logo GoPay]")
+    if st.button("GoPay", key="btn_gopay", use_container_width=True):
+        st.session_state.gopay_active = not st.session_state.gopay_active
+
+with col_btn3:
+    if os.path.exists("logoShopeePay.png"):
+        st.image("logoShopeePay.png", width=120)
+    else:
+        st.caption("🟠 [Logo ShopeePay]")
+    if st.button("ShopeePay", key="btn_shopee", use_container_width=True):
+        st.session_state.shopee_active = not st.session_state.shopee_active
+
+# Menyusun daftar aplikasi yang dipilih berdasarkan status tombol klik pengguna
+selected_apps = []
+if st.session_state.dana_active: selected_apps.append("DANA")
+if st.session_state.gopay_active: selected_apps.append("GoPay")
+if st.session_state.shopee_active: selected_apps.append("ShopeePay")
+
+# Menampilkan indikator teks status aplikasi yang sedang aktif dipantau
+st.write(f"**Aplikasi Aktif:** " + " , ".join([f"✅ {x}" for x in selected_apps]) if selected_apps else "⚠️ Tidak ada aplikasi yang dipilih. Silakan klik tombol di atas.")
+
+# Proteksi jika user mematikan seluruh tombol aplikasi
 if not selected_apps:
-    st.warning("⚠️ Silakan klik dan pilih minimal satu aplikasi E-Wallet di atas untuk memunculkan visualisasi grafik.")
     st.stop()
 
-# Penyaringan (*Filtering*) Data Berdasarkan Kehendak Pengguna
-filtered_df = df_sentimen[
-    (df_sentimen['appName'].isin(selected_apps)) & 
-    (df_sentimen['date'] >= pd.to_datetime(start_date)) & 
-    (df_sentimen['date'] <= pd.to_datetime(end_date))
-]
-
-if filtered_df.empty:
-    st.warning("⚠️ Tidak ditemukan rekaman data ulasan pada rentang tanggal tersebut.")
-    st.stop()
-
-# LOGIKA ALUR OTOMATIS: JIKA USER MEMILIH LEBIH DARI 1 APLIKASI -> PRESTASI MODE KOMPARATIF BERAKSI
+# =====================================================================
+# D. PROSES FILTER DATA & JUDUL PEMBATAS KOMPARASI ULASAN
+# =====================================================================
+filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
 is_comparative = len(selected_apps) > 1
 
-# =====================================================================
-# D. OUTPUT VISUALISASI GRAFIK YANG BISA GERAK-GERAK (INTERAKTIF PLOTLY)
-# =====================================================================
-st.markdown("### 📊 Hasil Output Visualisasi Analitik")
+st.markdown("---")
+st.header("🔄 Komparasi Ulasan")
+st.markdown("### Visualisasi Sentimen")
 
-# Row 1: Informasi Jumlah Ulasan & Distribusi Sentimen
+# =====================================================================
+# E. OUTPUT EVALUASI MODEL (NBC) SEPERTI PERMINTAAN (MUNCUL PER APLIKASI)
+# =====================================================================
+st.markdown("#### 🔮 Hasil Evaluasi Kinerja Algoritma (NBC) Aplikasi Terpilih")
+df_eval_filtered = df_evaluasi[df_evaluasi['aplikasi'].isin(selected_apps)].reset_index(drop=True)
+st.dataframe(df_eval_filtered[['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 'jumlahDataTrain', 'jumlahDataTest']], use_container_width=True)
+
+# =====================================================================
+# F. VISUALISASI GRAFIK INTERAKTIF PLOTLY
+# =====================================================================
 col_v1, col_v2 = st.columns(2)
 
 with col_v1:
     st.markdown("**Statistik Volume Jumlah Ulasan Terfilter**")
-    st.metric("Jumlah Ulasan yang Ditampilkan", f"{len(filtered_df):,} Baris")
+    # Modifikasi format metrik ulasan ditampilkan sesuai Poin 1.b
+    st.metric(label="Ulasan", value=f"{len(filtered_df):,}", delta="Ditampilkan")
     
-    # Bar chart distribusi rating bintang (1-5)
     df_rating = filtered_df.groupby(['appName', 'score']).size().reset_index(name='Total')
     fig_rate = px.bar(df_rating, x='score', y='Total', color='appName', 
                       barmode='group' if is_comparative else 'stack',
@@ -154,7 +164,9 @@ with col_v2:
                           color_discrete_map={'Positif': '#2ca02c', 'Negatif': '#d62728'})
         st.plotly_chart(fig_sent, use_container_width=True)
 
-# Row 2: Grafik Tren Sentimen Berbasis Waktu bulanan
+# =====================================================================
+# G. GRAFIK TREN BULANAN, CONFUSION MATRIX & WORD CLOUD MALAM KATA
+# =====================================================================
 st.markdown("---")
 st.markdown("**Grafik Tren Perkembangan Sentimen Bulanan**")
 filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
@@ -173,27 +185,13 @@ else:
                         markers=True, color_discrete_map={'Positif': '#2ca02c', 'Negatif': '#d62728'})
     st.plotly_chart(fig_trend, use_container_width=True)
 
-# Row 3: Word Cloud, Top Kata Dominan, & Fitur Gila Ekstraksi Kueri Komentar Mentah 2026
+# Confusion Matrix Interaktif
 st.markdown("---")
-col_w1, col_w2 = st.columns(2)
-
-# Menggabungkan teks untuk ekstraksi kata terpopuler
-all_text = " ".join(filtered_df['content'].astype(str))
-words = all_text.split()
-# Mengambil 5 kata teratas/paling dominan dari korpus teks terfilter
-top_5_words_tuples = Counter(words).most_common(5)
-top_5_words = [item[0] for item in top_5_words_tuples] if top_5_words_tuples else ["sistem", "aplikasi", "dana", "gopay", "shopee"]
-
-with col_w1:
-    st.markdown("**Awan Kata Keseluruhan (Word Cloud)**")
-    if all_text.strip():
-        wordcloud = WordCloud(background_color="white", max_words=60, colormap="viridis", width=600, height=300).generate(all_text)
-        fig, ax = plt.subplots(figsize=(6, 3))
-        ax.imshow(wordcloud, interpolation='bilinear')
-        ax.axis("off")
-        st.pyplot(fig)
-    else:
-        st.write("Teks ulasan kosong.")
-
-with col_w2:
-    st.markdown("**Daftar 5 Top Kata Paling Dominan**")
+st.subheader("🔮 Hasil Pengujian Model Klasifikasi (Confusion Matrix)")
+col_cm = st.columns(len(selected_apps))
+for idx, app_name in enumerate(selected_apps):
+    with col_cm[idx]:
+        row = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
+        if not row.empty:
+            row = row.iloc
+            matrix_data = [[int(row['TN']), int(row['FP'])], [int(row['FN']), int(row['TP'])]]
