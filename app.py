@@ -217,12 +217,12 @@ for idx, app_name in enumerate(selected_apps):
 fig, ax = plt.subplots(figsize=(4, 2))ax.imshow(wc_p, interpolation='bilinear')ax.axis("off")st.pyplot(fig)plt.close()show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")if show_neg:text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))if text_neg.strip():wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)fig, ax = plt.subplots(figsize=(4, 2))ax.imshow(wc_n, interpolation='bilinear')ax.axis("off")st.pyplot(fig)plt.close()st.markdown('', unsafe_allow_html=True)
 
 #URUTAN 6: TABEL EKSTRAKSI 5 ULASAN TERBANYAK BERDASARKAN KATA KUNCI TERPOPULER
-st.markdown("---")st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")table_html = """"st.markdown(table_html, unsafe_allow_html=True)
+st.markdown("---")
+st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")
+table_html = """"st.markdown(table_html, unsafe_allow_html=True)
 
 #URUTAN 7: NILAI METRIK KINERJA NBC (KARTU ELEGAN KE SAMPING PER APLIKASI)
 st.markdown("---")st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")for app_name in selected_apps:row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_eval.empty:row_eval = row_eval.iloc[0]st.markdown(f"Metrik Performa Pengujian Model NBC: {app_name}")col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)col_m1.metric("Accuracy", str(row_eval['Accuracy']))col_m2.metric("Precision", str(row_eval['Precision']))col_m3.metric("Recall", str(row_eval['Recall']))col_m4.metric("Specificity", str(row_eval['Specificity']))col_m5.metric("F1-Score", str(row_eval['F1-Score']))st.markdown('', unsafe_allow_html=True)
 
 #URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")for app_name in selected_apps:row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_cm.empty:row_cm = row_cm.iloc[0]st.markdown(f"Komposisi Hasil Prediksi Matriks: {app_name}")col_c1, col_c2, col_c3, col_c4 = st.columns(4)col_c1.metric("True Negative (TN)", f"{int(row_cm['TN']):,}")col_c2.metric("False Positive (FP)", f"{int(row_cm['FP']):,}")col_c3.metric("False Negative (FN)", f"{int(row_cm['FN']):,}")col_c4.metric("True Positive (TP)", f"{int(row_cm['TP']):,}")st.markdown('', unsafe_allow_html=True)
-
-
