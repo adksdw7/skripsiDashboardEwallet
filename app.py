@@ -74,15 +74,15 @@ col_btn1, col_btn2, col_btn3 = st.columns(3)
 
 with col_btn1:
     st.markdown(f'<div class="metric-card">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
-    dana_active = st.toggle("Aktifkan DANA", value=True, key="tgl_dana")
+    dana_active = st.toggle("DANA", value=True, key="tgl_dana")
 
 with col_btn2:
     st.markdown(f'<div class="metric-card">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
-    gopay_active = st.toggle("Aktifkan GoPay", value=True, key="tgl_gopay")
+    gopay_active = st.toggle("GoPay", value=True, key="tgl_gopay")
 
 with col_btn3:
     st.markdown(f'<div class="metric-card">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
-    shopee_active = st.toggle("Aktifkan ShopeePay", value=True, key="tgl_shopee")
+    shopee_active = st.toggle("ShopeePay", value=True, key="tgl_shopee")
 
 selected_apps = []
 if dana_active: selected_apps.append("DANA")
@@ -90,7 +90,7 @@ if gopay_active: selected_apps.append("GoPay")
 if shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
-    st.warning("⚠️ Silakan aktifkan minimal satu aplikasi di atas melalui tombol sakelar (toggle) untuk memunculkan visualisasi.")
+    st.warning("⚠️ Silakan pilih minimal satu aplikasi untuk menampilkan visualisasi.")
     st.stop()
 
 # =====================================================================
@@ -754,17 +754,102 @@ for app_name in selected_apps:
 st.markdown("---")
 st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")
 
-for app_name in selected_apps:
-    row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
-    if not row_cm.empty:
-        row_cm = row_cm.iloc[0]
-        st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
-        
-        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        col_c1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Negative (TN)</p><h3 style="margin:0;color:#333;">{int(row_cm["TN"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Positive (FP)</p><h3 style="margin:0;color:#333;">{int(row_cm["FP"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Negative (FN)</p><h3 style="margin:0;color:#333;">{int(row_cm["FN"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Positive (TP)</p><h3 style="margin:0;color:#333;">{int(row_cm["TP"]):,}</h3></div>', unsafe_allow_html=True)
 
-        
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
+# Warna nilai confusion matrix berdasarkan aplikasi
+cm_color_map = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
+
+for app_name in selected_apps:
+
+    row_cm = df_evaluasi[
+        df_evaluasi['aplikasi'] == app_name
+    ]
+
+    if not row_cm.empty:
+
+        row_cm = row_cm.iloc[0]
+
+
+        # mengambil warna sesuai aplikasi
+        app_color_cm = cm_color_map.get(
+            app_name,
+            "#2377ca"
+        )
+
+
+        st.markdown(
+            f"**Komposisi Hasil Prediksi Matriks: {app_name}**"
+        )
+
+
+        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
+
+
+        col_c1.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    True Negative (TN)
+                </p>
+                <h3 style="margin:0;color:{app_color_cm};">
+                    {int(row_cm["TN"]):,}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_c2.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    False Positive (FP)
+                </p>
+                <h3 style="margin:0;color:{app_color_cm};">
+                    {int(row_cm["FP"]):,}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_c3.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    False Negative (FN)
+                </p>
+                <h3 style="margin:0;color:{app_color_cm};">
+                    {int(row_cm["FN"]):,}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        col_c4.markdown(
+            f'''
+            <div class="metric-card">
+                <p style="margin:0;color:gray;font-size:14px;">
+                    True Positive (TP)
+                </p>
+                <h3 style="margin:0;color:{app_color_cm};">
+                    {int(row_cm["TP"]):,}
+                </h3>
+            </div>
+            ''',
+            unsafe_allow_html=True
+        )
+
+
+        st.markdown(
+            '<div style="margin-bottom:15px;"></div>',
+            unsafe_allow_html=True
+        )
