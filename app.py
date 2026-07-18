@@ -132,6 +132,10 @@ for idx, app_name in enumerate(selected_apps):
 st.markdown("---")
 st.markdown("### Persentase Distribusi Sentimen Pengguna")
 
+
+# Menyimpan hasil persentase semua aplikasi
+sentiment_percentage = {}
+
 for app_name in selected_apps:
 
     df_app_percentage = df_sentimen[
@@ -153,7 +157,6 @@ for app_name in selected_apps:
     )
 
 
-    # Menghindari pembagian nol
     if total_data > 0:
         persen_positif = (positif / total_data) * 100
         persen_negatif = (negatif / total_data) * 100
@@ -162,15 +165,33 @@ for app_name in selected_apps:
         persen_negatif = 0
 
 
-    col1, col2 = st.columns(2)
+    sentiment_percentage[app_name] = {
+        "Positif": persen_positif,
+        "Negatif": persen_negatif
+    }
 
 
-    with col1:
+
+# =====================================================
+# MEMBUAT KOLOM BERDASARKAN JUMLAH APLIKASI
+# =====================================================
+
+cols = st.columns(len(selected_apps))
+
+
+# =====================================================
+# BARIS POSITIF
+# =====================================================
+
+for idx, app_name in enumerate(selected_apps):
+
+    with cols[idx]:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <h2 style="margin:0;color:#1ccc0d;">
-                    {persen_positif:.2f}%
+                    {sentiment_percentage[app_name]["Positif"]:.2f}%
                 </h2>
                 <p style="margin:0;font-size:16px;font-weight:bold;">
                     Distribusi Positif {app_name}
@@ -181,12 +202,19 @@ for app_name in selected_apps:
         )
 
 
-    with col2:
+# =====================================================
+# BARIS NEGATIF
+# =====================================================
+
+for idx, app_name in enumerate(selected_apps):
+
+    with cols[idx]:
+
         st.markdown(
             f"""
             <div class="metric-card">
                 <h2 style="margin:0;color:#cc0000;">
-                    {persen_negatif:.2f}%
+                    {sentiment_percentage[app_name]["Negatif"]:.2f}%
                 </h2>
                 <p style="margin:0;font-size:16px;font-weight:bold;">
                     Distribusi Negatif {app_name}
