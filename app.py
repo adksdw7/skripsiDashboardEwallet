@@ -136,17 +136,17 @@ st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
-        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
-        df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
-        df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
-        
-        fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
-                          title=f"Distribusi Sentimen: {app_name}",
-                          color='sentimen',
-                          color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
-        fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
-        st.plotly_chart(fig_pie, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Menggunakan Container bawaan Streamlit agar grafik terbungkus kotak tipis secara sempurna
+        with st.container(border=True):
+            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
+            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
+            
+            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
+                              title=f"Distribusi Sentimen: {app_name}",
+                              color='sentimen',
+                              color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
+            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+            st.plotly_chart(fig_pie, use_container_width=True)
 
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
@@ -154,17 +154,16 @@ st.markdown("### 📈 3. Grafik Tren Perkembangan Sentimen Bulanan")
 col_trend = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_trend[idx]:
-        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
-        df_app_trend = df_sentimen[df_sentimen['appName'] == app_name].copy()
-        df_app_trend['Bulan'] = df_app_trend['date'].dt.to_period('M').astype(str)
-        df_chart_trend = df_app_trend.groupby(['Bulan', 'sentimen']).size().reset_index(name='Jumlah')
-        
-        fig_trend = px.line(df_chart_trend, x='Bulan', y='Jumlah', color='sentimen',
-                            title=f"Tren Bulanan: {app_name}", markers=True,
-                            color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
-        fig_trend.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
-        st.plotly_chart(fig_trend, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            df_app_trend = df_sentimen[df_sentimen['appName'] == app_name].copy()
+            df_app_trend['Bulan'] = df_app_trend['date'].dt.to_period('M').astype(str)
+            df_chart_trend = df_app_trend.groupby(['Bulan', 'sentimen']).size().reset_index(name='Jumlah')
+            
+            fig_trend = px.line(df_chart_trend, x='Bulan', y='Jumlah', color='sentimen',
+                                title=f"Tren Bulanan: {app_name}", markers=True,
+                                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
+            fig_trend.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
+            st.plotly_chart(fig_trend, use_container_width=True)
 
 # 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG Pengguna
 st.markdown("---")
@@ -174,16 +173,15 @@ color_rating_map = {"DANA": "#2377ca", "GoPay": "#01aed6", "ShopeePay": "#ff773c
 col_rate = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_rate[idx]:
-        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
-        df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
-        df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
-        
-        fig_rate = px.bar(df_chart_rate, x='score', y='Total',
-                          title=f"Rating Bintang: {app_name}",
-                          labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
-                          color_discrete_sequence=[color_rating_map[app_name]])
-        st.plotly_chart(fig_rate, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        with st.container(border=True):
+            df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
+            df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
+            
+            fig_rate = px.bar(df_chart_rate, x='score', y='Total',
+                              title=f"Rating Bintang: {app_name}",
+                              labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
+                              color_discrete_sequence=[color_rating_map[app_name]])
+            st.plotly_chart(fig_rate, use_container_width=True)
 
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR (POSITIF / NEGATIF)
 st.markdown("---")
@@ -193,44 +191,43 @@ wc_color_map = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 col_wc = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_wc[idx]:
-        st.markdown(f'<div class="metric-card" style="text-align:center;">', unsafe_allow_html=True)
-        st.markdown(f"**Word Cloud Umum: {app_name}**")
-        
-        df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
-        text_all = " ".join(df_app_text['content'].astype(str))
-        
-        if text_all.strip():
-            wc_all = WordCloud(background_color="white", max_words=50, colormap=wc_color_map[app_name], width=400, height=250).generate(text_all)
-            fig, ax = plt.subplots(figsize=(4, 2.5))
-            ax.imshow(wc_all, interpolation='bilinear')
-            ax.axis("off")
-            st.pyplot(fig)
-            plt.close()
+        with st.container(border=True):
+            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Umum: {app_name}</p>", unsafe_allow_html=True)
             
-        show_pos = st.checkbox(f"Lihat Wordcloud Positif {app_name}", key=f"pos_show_{app_name}")
-        if show_pos:
-            text_pos = " ".join(df_app_text[df_app_text['sentimen'] == 'Positif']['content'].astype(str))
-            if text_pos.strip():
-                st.markdown(f"*Word Cloud Positif: {app_name}*")
-                wc_p = WordCloud(background_color="white", max_words=40, colormap=wc_color_map[app_name], width=400, height=200).generate(text_pos)
-                fig, ax = plt.subplots(figsize=(4, 2))
-                ax.imshow(wc_p, interpolation='bilinear')
+            df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
+            text_all = " ".join(df_app_text['content'].astype(str))
+            
+            if text_all.strip():
+                wc_all = WordCloud(background_color="white", max_words=50, colormap=wc_color_map[app_name], width=400, height=250).generate(text_all)
+                fig, ax = plt.subplots(figsize=(4, 2.5))
+                ax.imshow(wc_all, interpolation='bilinear')
                 ax.axis("off")
                 st.pyplot(fig)
                 plt.close()
                 
-        show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")
-        if show_neg:
-            text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))
-            if text_neg.strip():
-                st.markdown(f"*Word Cloud Negatif: {app_name}*")
-                wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)
-                fig, ax = plt.subplots(figsize=(4, 2))
-                ax.imshow(wc_n, interpolation='bilinear')
-                ax.axis("off")
-                st.pyplot(fig)
-                plt.close()
-        st.markdown('</div>', unsafe_allow_html=True)
+            show_pos = st.checkbox(f"Lihat Wordcloud Positif {app_name}", key=f"pos_show_{app_name}")
+            if show_pos:
+                text_pos = " ".join(df_app_text[df_app_text['sentimen'] == 'Positif']['content'].astype(str))
+                if text_pos.strip():
+                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:gray;'>*Word Cloud Positif: {app_name}*</p>", unsafe_allow_html=True)
+                    wc_p = WordCloud(background_color="white", max_words=40, colormap=wc_color_map[app_name], width=400, height=200).generate(text_pos)
+                    fig, ax = plt.subplots(figsize=(4, 2))
+                    ax.imshow(wc_p, interpolation='bilinear')
+                    ax.axis("off")
+                    st.pyplot(fig)
+                    plt.close()
+                    
+            show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")
+            if show_neg:
+                text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))
+                if text_neg.strip():
+                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:red;'>*Word Cloud Negatif: {app_name}*</p>", unsafe_allow_html=True)
+                    wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)
+                    fig, ax = plt.subplots(figsize=(4, 2))
+                    ax.imshow(wc_n, interpolation='bilinear')
+                    ax.axis("off")
+                    st.pyplot(fig)
+                    plt.close()
 
 # 📋 URUTAN 6: TABEL EKSTRAKSI 5 ULASAN TERBANYAK BERDASARKAN KATA KUNCI
 st.markdown("---")
@@ -284,7 +281,7 @@ for app_name in selected_apps:
         col_m3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Recall</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Recall"])}</h3></div>', unsafe_allow_html=True)
         col_m4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Specificity</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Specificity"])}</h3></div>', unsafe_allow_html=True)
         col_m5.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">F1-Score</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["F1-Score"])}</h3></div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-bottom:10px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
 
 # 🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
@@ -300,5 +297,4 @@ for app_name in selected_apps:
         col_c1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Negative (TN)</p><h3 style="margin:0;color:#333;">{int(row_cm["TN"]):,}</h3></div>', unsafe_allow_html=True)
         col_c2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Positive (FP)</p><h3 style="margin:0;color:#333;">{int(row_cm["FP"]):,}</h3></div>', unsafe_allow_html=True)
         col_c3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Negative (FN)</p><h3 style="margin:0;color:#333;">{int(row_cm["FN"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Positive (TP)</p><h3 style="margin:0;color:#333;">{int(row_cm["TP"]):,}</h3></div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-bottom:10px;"></div>', unsafe_allow_html=True)
+col_c4.markdown(f'True Positive (TP){int(row_cm["TP"]):,}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
