@@ -186,20 +186,78 @@ if not selected_apps:
 # 🔄 OUTPUT UTAMA HASIL ANALISIS (URUTAN SCROLLING KE BAWAH)
 # =====================================================================
 st.markdown("---")
-st.header("🔄 Hasil Analisis")
+
+st.markdown(
+    """
+    <h1 style="
+        text-align:center;
+        width:100%;
+        margin-bottom:20px;
+    ">
+    🔄 Hasil Analisis
+    </h1>
+    """,
+    unsafe_allow_html=True
+)
 
 # 📥 URUTAN 1: TOTAL DATA BERSIH ULASAN
 st.markdown("### 📥Total Data Ulasan")
+
+
+# Warna jumlah total ulasan berdasarkan aplikasi
+total_review_color = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
+
 col_u = st.columns(len(selected_apps))
+
+
 for idx, app_name in enumerate(selected_apps):
+
     with col_u[idx]:
-        app_total = len(df_sentimen[df_sentimen['appName'] == app_name])
-        st.markdown(f"""
-        <div class="metric-card">
-            <h2 style="margin:0; color:#333; font-size:36px;">{app_total:,}</h2>
-            <p style="margin:0; color:gray; font-size:16px; font-weight:bold;">Ulasan {app_name}</p>
-        </div>
-        """, unsafe_allow_html=True)
+
+        app_total = len(
+            df_sentimen[
+                df_sentimen['appName'] == app_name
+            ]
+        )
+
+
+        app_color = total_review_color.get(
+            app_name,
+            "#333"
+        )
+
+
+        st.markdown(
+            f"""
+            <div class="metric-card">
+
+                <h2 style="
+                    margin:0;
+                    color:{app_color};
+                    font-size:36px;
+                ">
+                    {app_total:,}
+                </h2>
+
+
+                <p style="
+                    margin:0;
+                    color:gray;
+                    font-size:16px;
+                    font-weight:bold;
+                ">
+                    Ulasan {app_name}
+                </p>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN
 st.markdown("---")
