@@ -64,18 +64,18 @@ with col_btn1:
         st.session_state.dana_active = not st.session_state.dana_active
 
 with col_btn2:
-    if os.path.exists("logoGoPay.png"):
-        st.image("logoGoPay.png", width=120)
+    if os.path.exists("logoGopay.png"):
+        st.image("logoGopay.png", width=120)
     else:
-        st.caption("🟢 [Logo GoPay]")
+        st.caption("🟢 [Logo Gopay]")
     if st.button("GoPay", key="btn_gopay", use_container_width=True):
         st.session_state.gopay_active = not st.session_state.gopay_active
 
 with col_btn3:
-    if os.path.exists("logoShopeePay.png"):
-        st.image("logoShopeePay.png", width=120)
+    if os.path.exists("logoShopeepay.png"):
+        st.image("logoShopeepay.png", width=120)
     else:
-        st.caption("🟠 [Logo ShopeePay]")
+        st.caption("🟠 [Logo Shopeepay]")
     if st.button("ShopeePay", key="btn_shopee", use_container_width=True):
         st.session_state.shopee_active = not st.session_state.shopee_active
 
