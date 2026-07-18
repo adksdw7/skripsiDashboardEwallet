@@ -179,7 +179,7 @@ if gopay_active: selected_apps.append("GoPay")
 if shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
-    st.warning("⚠️ Silakan pilih minimal satu aplikasi untuk menampilkan visualisasi.")
+    st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet ")
     st.stop()
 
 # =====================================================================
