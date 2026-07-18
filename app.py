@@ -136,7 +136,7 @@ st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
-        st.markdown(f'<div style="border: 1px solid #e0e0e0; padding:10px; border-radius:12px; background-color:#fff;">', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
         df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
         df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
         
@@ -154,7 +154,7 @@ st.markdown("### 📈 3. Grafik Tren Perkembangan Sentimen Bulanan")
 col_trend = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_trend[idx]:
-        st.markdown(f'<div style="border: 1px solid #e0e0e0; padding:10px; border-radius:12px; background-color:#fff;">', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
         df_app_trend = df_sentimen[df_sentimen['appName'] == app_name].copy()
         df_app_trend['Bulan'] = df_app_trend['date'].dt.to_period('M').astype(str)
         df_chart_trend = df_app_trend.groupby(['Bulan', 'sentimen']).size().reset_index(name='Jumlah')
@@ -174,7 +174,7 @@ color_rating_map = {"DANA": "#2377ca", "GoPay": "#01aed6", "ShopeePay": "#ff773c
 col_rate = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_rate[idx]:
-        st.markdown(f'<div style="border: 1px solid #e0e0e0; padding:10px; border-radius:12px; background-color:#fff;">', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card">', unsafe_allow_html=True)
         df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
         df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
         
@@ -193,7 +193,7 @@ wc_color_map = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 col_wc = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_wc[idx]:
-        st.markdown(f'<div style="border: 1px solid #e0e0e0; padding:15px; border-radius:12px; background-color:#fff; text-align:center;">', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-card" style="text-align:center;">', unsafe_allow_html=True)
         st.markdown(f"**Word Cloud Umum: {app_name}**")
         
         df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
@@ -251,7 +251,6 @@ table_html = """
 for app_name in selected_apps:
     df_app_search = df_sentimen[df_sentimen['appName'] == app_name]
     
-    # Mencari ulasan riil yang mewakili korpus data skripsimu
     df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']
     df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']
     
@@ -280,12 +279,12 @@ for app_name in selected_apps:
         st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
         
         col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-        col_m1.metric("Accuracy", str(row_eval['Accuracy']))
-        col_m2.metric("Precision", str(row_eval['Precision']))
-        col_m3.metric("Recall", str(row_eval['Recall']))
-        col_m4.metric("Specificity", str(row_eval['Specificity']))
-        col_m5.metric("F1-Score", str(row_eval['F1-Score']))
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
+        col_m1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Accuracy</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Accuracy"])}</h3></div>', unsafe_allow_html=True)
+        col_m2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Precision</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Precision"])}</h3></div>', unsafe_allow_html=True)
+        col_m3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Recall</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Recall"])}</h3></div>', unsafe_allow_html=True)
+        col_m4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Specificity</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Specificity"])}</h3></div>', unsafe_allow_html=True)
+        col_m5.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">F1-Score</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["F1-Score"])}</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-bottom:10px;"></div>', unsafe_allow_html=True)
 
 # 🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
@@ -298,8 +297,8 @@ for app_name in selected_apps:
         st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
         
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        col_c1.metric("True Negative (TN)", f"{int(row_cm['TN']):,}")
-        col_c2.metric("False Positive (FP)", f"{int(row_cm['FP']):,}")
-        col_c3.metric("False Negative (FN)", f"{int(row_cm['FN']):,}")
-        col_c4.metric("True Positive (TP)", f"{int(row_cm['TP']):,}")
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
+        col_c1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Negative (TN)</p><h3 style="margin:0;color:#333;">{int(row_cm["TN"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Positive (FP)</p><h3 style="margin:0;color:#333;">{int(row_cm["FP"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Negative (FN)</p><h3 style="margin:0;color:#333;">{int(row_cm["FN"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Positive (TP)</p><h3 style="margin:0;color:#333;">{int(row_cm["TP"]):,}</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-bottom:10px;"></div>', unsafe_allow_html=True)
