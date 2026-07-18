@@ -251,6 +251,9 @@ for idx, app_name in enumerate(selected_apps):
             st.plotly_chart(fig_pie, use_container_width=True)
 
 # --- BARIS 2: UNTUK KARTU PERSENTASE DISTRIBUSI (TERPISAH KEBANDING PIE CHART) ---
+st.markdown("---")
+st.markdown("### Persentase Distribusi Sentimen Pengguna")
+
 col_pct = st.columns(len(selected_apps))
 
 # Map warna tulisan angka persentase berdasarkan instruksi Anda
