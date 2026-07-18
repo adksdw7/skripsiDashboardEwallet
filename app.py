@@ -54,7 +54,7 @@ if 'shopee_active' not in st.session_state: st.session_state.shopee_active = Tru
 
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-# Fungsi untuk merender elemen kartu sekaligus menjadikannya tombol klik aktif
+# Fungsi untuk merender elemen kartu logo dan tombol nama aplikasi di bawahnya
 def render_kartu_ewallet(file_path, alt_text, is_active, label_btn, key_btn):
     # CSS dinamis: Jika aktif diberi border & shadow hitam tebal, jika tidak aktif hanya border abu tipis biasa
     if is_active:
@@ -68,38 +68,17 @@ def render_kartu_ewallet(file_path, alt_text, is_active, label_btn, key_btn):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; margin-bottom: 10px;">'
+        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto;">'
 
-    # Menyisipkan CSS tersembunyi agar tombol asli Streamlit menjadi transparan seukuran kotak kartu
+    # Tampilkan struktur visual kotak atas (Hanya berisi Logo saja, nama aplikasi sudah dihapus dari sini)
     st.markdown(f"""
-    <style>
-        div[data-testid="stColumn"] {{ position: relative; }}
-        div[data-testid="stButton"] button[key*="{key_btn}"] {{
-            position: absolute !important;
-            top: 0 !important; left: 0 !important;
-            width: 100% !important; height: 100% !important;
-            background: transparent !important;
-            border: none !important;
-            color: transparent !important;
-            z-index: 10 !important;
-            cursor: pointer !important;
-        }}
-        div[data-testid="stButton"] button[key*="{key_btn}"]:hover {{
-            background: rgba(0,0,0,0.02) !important;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Tampilkan struktur visual: Kotak latar belakang -> Logo -> Nama Aplikasi tepat di bawahnya
-    st.markdown(f"""
-    <div style="{border_style} border-radius: 16px; padding: 20px 15px; text-align: center; background-color: #ffffff; position: relative;">
+    <div style="{border_style} border-radius: 16px; padding: 25px 15px; text-align: center; background-color: #ffffff; margin-bottom: 10px;">
         {img_html}
-        <div style="font-weight: bold; font-size: 16px; color: #333333; margin-top: 5px;">{label_btn}</div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Tombol asli diletakkan tepat di atas HTML murni untuk menangkap aksi klik user secara transparan
-    if st.button("", key=key_btn, use_container_width=True):
+    # Tombol bawaan Streamlit sekarang langsung menampilkan teks nama aplikasi di dalamnya
+    if st.button(label_btn, key=key_btn, use_container_width=True):
         st.session_state[f"{key_btn.replace('btn_', '')}_active"] = not is_active
         st.rerun()
 
@@ -120,7 +99,6 @@ if st.session_state.shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
     st.stop()
-
 # =====================================================================
 # D. PROSES FILTER DATA & JUDUL PEMBATAS KOMPARASI ULASAN
 # =====================================================================
