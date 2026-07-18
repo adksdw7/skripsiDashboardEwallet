@@ -292,15 +292,19 @@ for app_name in selected_apps:
 
 
 # =====================================================
-# MEMBUAT KOLOM BERDASARKAN JUMLAH APLIKASI
+# MEMBUAT 1 KOTAK UNTUK SETIAP APLIKASI
 # =====================================================
 
 cols = st.columns(len(selected_apps))
 
 
-# =====================================================
-# BARIS POSITIF
-# =====================================================
+# Warna aplikasi
+sentiment_app_color = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
 
 for idx, app_name in enumerate(selected_apps):
 
@@ -309,40 +313,36 @@ for idx, app_name in enumerate(selected_apps):
         st.markdown(
             f"""
             <div class="metric-card">
+
                 <h2 style="margin:0;color:#1ccc0d;">
                     {sentiment_percentage[app_name]["Positif"]:.2f}%
                 </h2>
+
                 <p style="margin:0;font-size:16px;font-weight:bold;">
                     Distribusi Positif {app_name}
                 </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
 
-# =====================================================
-# BARIS NEGATIF
-# =====================================================
+                <hr style="
+                    border:none;
+                    border-top:1px solid #ddd;
+                    margin:15px 0;
+                ">
 
-for idx, app_name in enumerate(selected_apps):
 
-    with cols[idx]:
-
-        st.markdown(
-            f"""
-            <div class="metric-card">
                 <h2 style="margin:0;color:#cc0000;">
                     {sentiment_percentage[app_name]["Negatif"]:.2f}%
                 </h2>
+
+
                 <p style="margin:0;font-size:16px;font-weight:bold;">
                     Distribusi Negatif {app_name}
                 </p>
+
             </div>
             """,
             unsafe_allow_html=True
         )
-
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
 st.markdown("### 📈 Grafik Tren Perkembangan Sentimen Bulanan")
