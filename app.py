@@ -99,6 +99,7 @@ if st.session_state.shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
     st.stop()
+    
 # =====================================================================
 # D. PROSES FILTER DATA & JUDUL PEMBATAS KOMPARASI ULASAN
 # =====================================================================
@@ -106,16 +107,7 @@ filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
 is_comparative = len(selected_apps) > 1
 
 st.markdown("---")
-st.header("🔄 Komparasi Ulasan")
-st.markdown("### Visualisasi Sentimen")
-
-# =====================================================================
-# E. OUTPUT EVALUASI MODEL (NBC) SEPERTI PERMINTAAN (MUNCUL PER APLIKASI)
-# =====================================================================
-st.markdown("#### 🔮 Hasil Evaluasi Kinerja Algoritma (NBC) Aplikasi Terpilih")
-df_eval_filtered = df_evaluasi[df_evaluasi['aplikasi'].isin(selected_apps)].reset_index(drop=True)
-st.dataframe(df_eval_filtered[['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 'jumlahDataTrain', 'jumlahDataTest']], use_container_width=True)
-
+st.header("🔄 Hasil Analisis")
 # =====================================================================
 # F. VISUALISASI GRAFIK INTERAKTIF PLOTLY
 # =====================================================================
@@ -138,7 +130,7 @@ with col_v2:
         st.markdown("**Diagram Batang Distribusi Sentimen Komparatif**")
         df_chart = filtered_df.groupby(['appName', 'sentimen']).size().reset_index(name='Jumlah')
         fig_sent = px.bar(df_chart, x='appName', y='Jumlah', color='sentimen', barmode='group',
-                          title="Perbandingan Proporsi Volume Sentimen Antar Aplikasi",
+                          tfitle="Perbandingan Proporsi Volume Sentimen Antar Aplikasi",
                           color_discrete_map={'Positif': '#2ca02c', 'Negatif': '#d62728'})
         st.plotly_chart(fig_sent, use_container_width=True)
     else:
@@ -148,6 +140,18 @@ with col_v2:
                           title=f"Proporsi Sentimen Aplikasi {selected_apps[0]}",
                           color_discrete_map={'Positif': '#2ca02c', 'Negatif': '#d62728'})
         st.plotly_chart(fig_sent, use_container_width=True)
+
+
+# =====================================================================
+# E. OUTPUT EVALUASI MODEL (NBC) SEPERTI PERMINTAAN (MUNCUL PER APLIKASI)
+# =====================================================================
+st.markdown("#### 🔮 Metrik Kinerja Algoritma NBC")
+df_eval_filtered = df_evaluasi[df_evaluasi['aplikasi'].isin(selected_apps)].reset_index(drop=True)
+st.dataframe(df_eval_filtered[['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 'jumlahDataTrain', 'jumlahDataTest']], use_container_width=True)
+
+st.info("""
+💡Mengetahui kemampuan NBC dalam menghasilkan prediksi pada proses analisis sentimen
+""")
 
 # =====================================================================
 # G. GRAFIK TREN BULANAN, CONFUSION MATRIX & WORD CLOUD MALAM KATA
