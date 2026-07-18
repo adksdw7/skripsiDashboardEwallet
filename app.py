@@ -113,6 +113,21 @@ for idx, app_name in enumerate(selected_apps):
         """, unsafe_allow_html=True)
 
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN
+st.markdown("---")
+st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
+col_pie = st.columns(len(selected_apps))
+for idx, app_name in enumerate(selected_apps):
+    with col_pie[idx]:
+        with st.container(border=True):
+            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
+            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
+            
+            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
+                              title=f"Distribusi Sentimen: {app_name}",
+                              color='sentimen',
+                              color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
+            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+            st.plotly_chart(fig_pie, use_container_width=True)
 # 📊 TAMBAHAN: PERSENTASE DISTRIBUSI SENTIMEN
 st.markdown("---")
 st.markdown("### 📊 Persentase Distribusi Sentimen Pengguna")
@@ -181,21 +196,6 @@ for app_name in selected_apps:
             """,
             unsafe_allow_html=True
         )
-st.markdown("---")
-st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
-col_pie = st.columns(len(selected_apps))
-for idx, app_name in enumerate(selected_apps):
-    with col_pie[idx]:
-        with st.container(border=True):
-            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
-            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
-            
-            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
-                              title=f"Distribusi Sentimen: {app_name}",
-                              color='sentimen',
-                              color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
-            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
-            st.plotly_chart(fig_pie, use_container_width=True)
 
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
