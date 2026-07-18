@@ -304,6 +304,49 @@ for idx, app_name in enumerate(selected_apps):
         st.markdown(
             f"""
             <div class="metric-card">
+                <h2 style="
+                    margin:0;
+                    color:#1ccc0d;
+                    font-size:36px;
+                ">
+                    {sentiment_percentage[app_name]["Positif"]:.2f}%
+                </h2>
+
+                <p style="
+                    margin:0;
+                    font-size:16px;
+                    font-weight:bold;
+                ">
+                    Distribusi Positif {app_name}
+                </p>
+
+                <hr style="
+                    width:80%;
+                    border:none;
+                    border-top:1px solid #ddd;
+                    margin:15px auto;
+                ">
+
+                <h2 style="
+                    margin:0;
+                    color:#cc0000;
+                    font-size:36px;
+                ">
+                    {sentiment_percentage[app_name]["Negatif"]:.2f}%
+                </h2>
+
+                <p style="
+                    margin:0;
+                    font-size:16px;
+                    font-weight:bold;
+                ">
+                    Distribusi Negatif {app_name}
+                </p>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
                 <h2 style="
                     margin:0;
