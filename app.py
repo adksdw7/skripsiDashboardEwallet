@@ -11,7 +11,7 @@ from collections import Counter
 st.set_page_config(page_title="Analisis Sentimen E-Wallet", layout="wide")
 
 # Opsi untuk menyembunyikan peringatan bawaan matplotlib tentang thread-safety
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# st.set_option('deprecation.showPyplotGlobalUse', False)
 
 # =====================================================================
 # 2. FUNGSI MEMUAT DATA DARI GITHUB (ANTI-BERAT, TANPA NBC ULANG)
