@@ -1117,7 +1117,6 @@ col_cm_img = st.columns([1,2,1])
 with col_cm_img[1]:
     st.image(
         "confussionmatrix.png",
-        caption="Confusion Matrix Hasil Klasifikasi NBC",
         use_container_width=True
     )
 
