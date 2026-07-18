@@ -54,44 +54,50 @@ if 'shopee_active' not in st.session_state: st.session_state.shopee_active = Tru
 
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-# Fungsi pembungkus untuk membuat efek bingkai luar menyatu (Logo + Tombol)
-def buat_kolom_aplikasi(file_path, caption_alt, is_active, key_btn, label_btn):
-    # Jika aktif, buka komponen kotak pembungkus hitam luar dengan sudut melengkung
-    if is_active:
-        st.markdown('<div style="border: 2px solid #000000; border-radius: 20px; padding: 15px; text-align: center; background-color: transparent;">', unsafe_allow_html=True)
-    else:
-        st.markdown('<div style="border: 2px solid transparent; padding: 15px; text-align: center;">', unsafe_allow_html=True)
+# Fungsi untuk merender elemen kartu (kotak belakang logo + nama) secara murni
+def render_kartu_ewallet(file_path, alt_text, is_active, label_btn):
+    # CSS dinamis: Jika aktif diberi border hitam, jika tidak aktif border transparan
+    border_style = "border: 2px solid #000000;" if is_active else "border: 2px solid transparent;"
     
-    # Tampilkan Logo di dalam kotak pembungkus
+    # Deteksi apakah gambar ada di repositori untuk diubah ke HTML img
+    import base64
+    img_html = f'<p style="color: gray; font-size: 14px;">{alt_text}</p>'
     if os.path.exists(file_path):
-        st.image(file_path, width=120)
-    else:
-        st.caption(caption_alt)
-        
-    # Tampilkan Tombol Teks Nama Aplikasi tepat di bawah logo
-    if st.button(label_btn, key=key_btn, use_container_width=True):
-        st.session_state[f"{key_btn.replace('btn_', '')}_active"] = not is_active
-        st.rerun()
-        
-    # Tutup komponen kotak pembungkus HTML
-    st.markdown('</div>', unsafe_allow_html=True)
+        with open(file_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode("utf-8")
+        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; margin-bottom: 10px;">'
+
+    # Tampilkan struktur visual: Kotak latar belakang -> Logo -> Nama Aplikasi tepat di bawahnya
+    st.markdown(f"""
+    <div style="{border_style} border-radius: 16px; padding: 15px; text-align: center; background-color: #ffffff; box-shadow: 0px 2px 4px rgba(0,0,0,0.05); margin-bottom: 10px;">
+        {img_html}
+        <div style="font-weight: bold; font-size: 16px; color: #333333; margin-top: 5px;">{label_btn}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
 with col_btn1:
-    buat_kolom_aplikasi("logoDana.png", "🔵 [Logo DANA]", st.session_state.dana_active, "btn_dana", "DANA")
+    render_kartu_ewallet("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "DANA")
+    if st.button("Pilih DANA", key="btn_dana", use_container_width=True):
+        st.session_state.dana_active = not st.session_state.dana_active
+        st.rerun()
 
 with col_btn2:
-    buat_kolom_aplikasi("logoGopay.png", "🟢 [Logo Gopay]", st.session_state.gopay_active, "btn_gopay", "GoPay")
+    render_kartu_ewallet("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "GoPay")
+    if st.button("Pilih GoPay", key="btn_gopay", use_container_width=True):
+        st.session_state.gopay_active = not st.session_state.gopay_active
+        st.rerun()
 
 with col_btn3:
-    buat_kolom_aplikasi("logoShopeepay.png", "🟠 [Logo Shopeepay]", st.session_state.shopee_active, "btn_shopee", "ShopeePay")
+    render_kartu_ewallet("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "ShopeePay")
+    if st.button("Pilih ShopeePay", key="btn_shopee", use_container_width=True):
+        st.session_state.shopee_active = not st.session_state.shopee_active
+        st.rerun()
 
-# Menyusun daftar aplikasi aktif untuk kebutuhan filter data di bawahnya
 selected_apps = []
 if st.session_state.dana_active: selected_apps.append("DANA")
 if st.session_state.gopay_active: selected_apps.append("GoPay")
 if st.session_state.shopee_active: selected_apps.append("ShopeePay")
 
-# Proteksi langsung jika user mematikan semua aplikasi agar grafik tidak error
 if not selected_apps:
     st.stop()
 
