@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
 import os
+import base64
 
 # =====================================================================
 # 1. KONFIGURASI HALAMAN UTAMA DASHBOARD
@@ -42,58 +43,41 @@ st.info("""
 """)
 
 # =====================================================================
-# C. INTERFASE TOMBOL IKON LOGO APLIKASI (MENGGUNAKAN SESSION STATE)
+# C. INTERFASE TOMBOL IKON LOGO APLIKASI (MENGGUNAKAN TOGGLE BAWAAN)
 # =====================================================================
 st.markdown("---")
 st.subheader("📱 Pilih E-Wallet")
 
-if 'dana_active' not in st.session_state: st.session_state.dana_active = True
-if 'gopay_active' not in st.session_state: st.session_state.gopay_active = True
-if 'shopee_active' not in st.session_state: st.session_state.shopee_active = True
-
-col_btn1, col_btn2, col_btn3 = st.columns(3)
-
-# Fungsi untuk merender elemen kartu logo dan tombol nama aplikasi di bawahnya
-def render_kartu_ewallet(file_path, alt_text, is_active, label_btn, key_btn):
-    if is_active:
-        border_style = "border: 2px solid #000000; box-shadow: 0px 0px 15px rgba(0,0,0,0.4);"
-    else:
-        border_style = "border: 1px solid #e0e0e0; box-shadow: 0px 2px 4px rgba(0,0,0,0.05);"
-    
-    import base64
-    img_html = f'<p style="color: gray; font-size: 14px;">{alt_text}</p>'
+# Fungsi pembantu untuk membaca gambar lokal menjadi HTML aman
+def get_img_html(file_path, alt_text):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto;">'
+        return f'<img src="data:image/png;base64,{data}" style="width: 90px; height: 90px; object-fit: contain; display: block; margin: 0 auto; border-radius: 8px;">'
+    return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
 
-    st.markdown(f"""
-    <div style="{border_style} border-radius: 16px; padding: 25px 15px; text-align: center; background-color: #ffffff; margin-bottom: 10px;">
-        {img_html}
-    </div>
-    """, unsafe_allow_html=True)
-    
-    if st.button(label_btn, key=key_btn, use_container_width=True):
-        st.session_state[f"{key_btn.replace('btn_', '')}_active"] = not is_active
-        st.rerun()
+col_btn1, col_btn2, col_btn3 = st.columns(3)
 
 with col_btn1:
-    render_kartu_ewallet("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "DANA", "btn_dana")
+    st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
+    dana_active = st.toggle("Aktifkan DANA", value=True, key="tgl_dana")
 
 with col_btn2:
-    render_kartu_ewallet("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "GoPay", "btn_gopay")
+    st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
+    gopay_active = st.toggle("Aktifkan GoPay", value=True, key="tgl_gopay")
 
 with col_btn3:
-    render_kartu_ewallet("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "ShopeePay", "btn_shopee")
+    st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
+    shopee_active = st.toggle("Aktifkan ShopeePay", value=True, key="tgl_shopee")
 
 # Menyusun kembali daftar aplikasi aktif untuk filter data grafik di bawahnya
 selected_apps = []
-if st.session_state.dana_active: selected_apps.append("DANA")
-if st.session_state.gopay_active: selected_apps.append("GoPay")
-if st.session_state.shopee_active: selected_apps.append("ShopeePay")
+if dana_active: selected_apps.append("DANA")
+if gopay_active: selected_apps.append("GoPay")
+if shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
-    st.warning("⚠️ Silakan klik tombol di atas untuk mengaktifkan minimal satu aplikasi.")
+    st.warning("⚠️ Silakan klik tombol sakelar (toggle) di atas untuk mengaktifkan minimal satu aplikasi.")
     st.stop()
     
 # =====================================================================
@@ -200,8 +184,18 @@ col_w1, col_w2 = st.columns(2)
 all_text = " ".join(filtered_df['content'].astype(str))
 words = all_text.split()
 top_5_words_tuples = Counter(words).most_common(5)
-top_5_words = [item for item in top_5_words_tuples] if top_5_words_tuples else ["aplikasi"]
+top_5_words = [item[0] for item in top_5_words_tuples] if top_5_words_tuples else ["aplikasi"]
 
 with col_w1:
     st.markdown("**Awan Kata Keseluruhan (Word Cloud)**")
     if all_text.strip():
+        wordcloud = WordCloud(background_color="white", max_words=60, colormap="viridis", width=600, height=300).generate(all_text)
+        fig, ax = plt.subplots(figsize=(6, 3))
+        ax.imshow(wordcloud, interpolation='bilinear')
+        ax.axis("off")
+        st.pyplot(fig)
+    else:
+        st.write("Teks ulasan kosong.")
+
+with col_w2:
+    st.markdown("**Daftar 5 Top Kata Paling Dominan**")
