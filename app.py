@@ -672,6 +672,77 @@ def get_top_reviews(app_name, sentiment):
 
     return []
 
+# =====================================================
+# FUNGSI MENGAMBIL 10 ULASAN TERPOPULER DARI DATA RAW
+# =====================================================
+
+def get_top_reviews(app_name, sentiment):
+
+    # memilih file raw berdasarkan aplikasi
+    if app_name == "DANA":
+        df_raw = df_raw_dana.copy()
+
+    elif app_name == "GoPay":
+        df_raw = df_raw_gopay.copy()
+
+    elif app_name == "ShopeePay":
+        df_raw = df_raw_shopee.copy()
+
+    else:
+        return []
+
+
+    # mengambil data sentimen dari hasilSentimen
+    df_sent = df_sentimen[
+        (df_sentimen['appName'] == app_name) &
+        (df_sentimen['sentimen'] == sentiment)
+    ][['content']]
+
+
+    if df_sent.empty:
+        return []
+
+
+    # normalisasi teks
+    df_sent['content'] = (
+        df_sent['content']
+        .astype(str)
+        .str.lower()
+        .str.strip()
+    )
+
+
+    df_raw['content'] = (
+        df_raw['content']
+        .astype(str)
+        .str.lower()
+        .str.strip()
+    )
+
+
+    # mencari komentar yang sama antara hasilSentimen dan raw
+    hasil = df_raw[
+        df_raw['content'].isin(
+            df_sent['content']
+        )
+    ]
+
+
+    if hasil.empty:
+        return []
+
+
+    # mengambil 10 komentar dengan kata paling sering muncul
+    hasil = (
+        hasil['content']
+        .drop_duplicates()
+        .head(10)
+        .tolist()
+    )
+
+
+    return hasil
+
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOGGLE ULASAN
 st.markdown("---")
 st.markdown("### ☁️ 5. Eksplorasi Awan Kata (Word Cloud)")
