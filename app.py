@@ -320,22 +320,19 @@ color_rating_map = {
 
 
 # =====================================================
-# KONDISI 1:
-# JIKA USER MEMILIH 1 APLIKASI
-# MAKA TETAP BAR CHART BIASA
+# JIKA USER HANYA MEMILIH 1 APLIKASI
+# BAR CHART BIASA
 # =====================================================
 
 if len(selected_apps) == 1:
 
     app_name = selected_apps[0]
 
-
     with st.container(border=True):
 
         df_app_rate = df_sentimen[
             df_sentimen['appName'] == app_name
         ]
-
 
         df_chart_rate = (
             df_app_rate
@@ -375,23 +372,20 @@ if len(selected_apps) == 1:
 
 
 # =====================================================
-# KONDISI 2:
 # JIKA USER MEMILIH >1 APLIKASI
-# MAKA MENJADI STACKED BAR CHART
+# GROUPED BAR CHART
 # =====================================================
 
 else:
 
 
-    # Ambil data rating semua aplikasi aktif
-    df_rating_multi = df_sentimen[
+    df_rating_group = df_sentimen[
         df_sentimen['appName'].isin(selected_apps)
     ]
 
 
-    # Agregasi rating berdasarkan aplikasi
-    df_rating_multi = (
-        df_rating_multi
+    df_rating_group = (
+        df_rating_group
         .groupby(
             ['score', 'appName']
         )
@@ -400,26 +394,28 @@ else:
     )
 
 
-    fig_rate_stack = px.bar(
-        df_rating_multi,
+    fig_rate_group = px.bar(
+        df_rating_group,
         x='score',
         y='Total',
         color='appName',
-        title="Distribusi Rating Bintang Komparasi E-Wallet",
+        barmode='group',
+        title="Komparasi Distribusi Rating Bintang E-Wallet",
         labels={
-            'score':'Rating Bintang',
-            'Total':'Jumlah Ulasan',
-            'appName':'Aplikasi'
+            'score': 'Rating Bintang',
+            'Total': 'Jumlah Ulasan',
+            'appName': 'Aplikasi'
         },
-        color_discrete_map=color_rating_map,
-        barmode='stack'
+        color_discrete_map=color_rating_map
     )
 
 
-    fig_rate_stack.update_layout(
+    fig_rate_group.update_layout(
+
         xaxis=dict(
             dtick=1
         ),
+
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -431,10 +427,9 @@ else:
 
 
     st.plotly_chart(
-        fig_rate_stack,
+        fig_rate_group,
         use_container_width=True
     )
-
 
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR
 st.markdown("---")
