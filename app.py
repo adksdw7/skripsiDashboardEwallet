@@ -247,47 +247,42 @@ for idx, app_name in enumerate(selected_apps):
                               color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
             fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
             st.plotly_chart(fig_pie, use_container_width=True)
-# 📊 TAMBAHAN: PERSENTASE DISTRIBUSI SENTIMEN
-st.markdown("---")
-st.markdown("### Persentase Distribusi Sentimen Pengguna")
+# 📊 TAMBAHAN: PERSENTASE DISTRIBUSI SENTIMEN 
+st.markdown("---") 
+st.markdown("### Persentase Distribusi Sentimen Pengguna") 
 
+# Menyimpan hasil persentase semua aplikasi 
+sentiment_percentage = {} 
 
-# Menyimpan hasil persentase semua aplikasi
-sentiment_percentage = {}
-
-for app_name in selected_apps:
-
-    df_app_percentage = df_sentimen[
-        df_sentimen['appName'] == app_name
-    ]
-
-    total_data = len(df_app_percentage)
-
-    positif = len(
+for app_name in selected_apps: 
+    df_app_percentage = df_sentimen[ 
+    df_sentimen['appName'] == app_name 
+    ] 
+    
+    total_data = len(df_app_percentage) 
+    positif = len( 
         df_app_percentage[
-            df_app_percentage['sentimen'] == 'Positif'
+        df_app_percentage['sentimen'] == 'Positif'
+        ] 
+    ) 
+    negatif = len( 
+        df_app_percentage[ 
+        df_app_percentage['sentimen'] == 'Negatif' 
         ]
-    )
+    ) 
+    
+    if total_data > 0: 
+        persen_positif = (positif / total_data) * 100 
+        persen_negatif = (negatif / total_data) * 100 
+    else: 
+        persen_positif = 0 
+        persen_negatif = 0 
+        
+        sentiment_percentage[app_name] = { 
+            "Positif": persen_positif, 
+            "Negatif": persen_negatif 
+        }
 
-    negatif = len(
-        df_app_percentage[
-            df_app_percentage['sentimen'] == 'Negatif'
-        ]
-    )
-
-
-    if total_data > 0:
-        persen_positif = (positif / total_data) * 100
-        persen_negatif = (negatif / total_data) * 100
-    else:
-        persen_positif = 0
-        persen_negatif = 0
-
-
-    sentiment_percentage[app_name] = {
-        "Positif": persen_positif,
-        "Negatif": persen_negatif
-    }
 
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
