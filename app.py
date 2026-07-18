@@ -278,22 +278,22 @@ for idx, app_name in enumerate(selected_apps):
                 # Mengambil kode warna teks sesuai aplikasi
                 color_code = app_text_color.get(app_name, "#2377ca")
                 
-                # Judul Kontainer Persentase
-                st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:10px;'>Persentase {app_name}</p>", unsafe_allow_html=True)
+                # Judul Kontainer Persentase (Diperbesar & Diberi Jarak Bawah)
+                st.markdown(f"<p style='text-align:center; font-weight:bold; font-size: 18px; margin-top:10px; margin-bottom:20px;'>Persentase {app_name}</p>", unsafe_allow_html=True)
                 
-                # Tampilan persentase positif
+                # Tampilan persentase positif (Padding diperbesar menjadi 35px dan tinggi font naik ke 36px)
                 st.markdown(f'''
-                <div class="metric-card" style="padding: 15px; margin-bottom: 12px;">
-                    <h2 style="margin:0; color:{color_code}; font-size: 28px;">{pos_pct:.1f}%</h2>
-                    <p style="margin:0; color: gray; font-size: 13px;">Distribusi Sentimen Positif {app_name}</p>
+                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 20px; min-height: 140px;">
+                    <h2 style="margin:0; color:{color_code}; font-size: 36px; font-weight: bold;">{pos_pct:.1f}%</h2>
+                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Positif {app_name}</p>
                 </div>
                 ''', unsafe_allow_html=True)
                 
-                # Tampilan persentase negatif
+                # Tampilan persentase negatif (Padding diperbesar menjadi 35px dan tinggi font naik ke 36px)
                 st.markdown(f'''
-                <div class="metric-card" style="padding: 15px; margin-bottom: 0px;">
-                    <h2 style="margin:0; color:{color_code}; font-size: 28px;">{neg_pct:.1f}%</h2>
-                    <p style="margin:0; color: gray; font-size: 13px;">Distribusi Sentimen Negatif {app_name}</p>
+                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 10px; min-height: 140px;">
+                    <h2 style="margin:0; color:{color_code}; font-size: 36px; font-weight: bold;">{neg_pct:.1f}%</h2>
+                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Negatif {app_name}</p>
                 </div>
                 ''', unsafe_allow_html=True)
 
