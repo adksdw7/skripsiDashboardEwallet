@@ -212,9 +212,10 @@ for app_name in selected_apps:
     df_app_search = df_sentimen[df_sentimen['appName'] == app_name]
     df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']
     df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']
-    sample_p = df_pos_reviews['content'].head(1).values[0] if not df_pos_reviews.empty else 
-    "Sangat puas dengan kecepatan transaksi aplikasi ini."
-    sample_n = df_neg_reviews['content'].head(1).values[0] if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."data_tabel_komparasi.append({"E-Wallet": app_name,"Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}","Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"})df_tabel_final = pd.DataFrame(data_tabel_komparasi)st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
+    sample_p = df_pos_reviews['content'].head(1).values[0] 
+    if not df_pos_reviews.empty else "Sangat puas dengan kecepatan transaksi aplikasi ini."
+    sample_n = df_neg_reviews['content'].head(1).values[0] 
+    if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."data_tabel_komparasi.append({"E-Wallet": app_name,"Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}","Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"})df_tabel_final = pd.DataFrame(data_tabel_komparasi)st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
 
 #🔮 URUTAN 7: NILAI METRIK KINERJA NBC
 st.markdown("---")
