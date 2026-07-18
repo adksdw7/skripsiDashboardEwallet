@@ -113,6 +113,74 @@ for idx, app_name in enumerate(selected_apps):
         """, unsafe_allow_html=True)
 
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN
+# 📊 TAMBAHAN: PERSENTASE DISTRIBUSI SENTIMEN
+st.markdown("---")
+st.markdown("### 📊 Persentase Distribusi Sentimen Pengguna")
+
+
+for app_name in selected_apps:
+
+    df_app_percentage = df_sentimen[
+        df_sentimen['appName'] == app_name
+    ]
+
+    total_data = len(df_app_percentage)
+
+    positif = len(
+        df_app_percentage[
+            df_app_percentage['sentimen'] == 'Positif'
+        ]
+    )
+
+    negatif = len(
+        df_app_percentage[
+            df_app_percentage['sentimen'] == 'Negatif'
+        ]
+    )
+
+
+    # Menghindari pembagian nol
+    if total_data > 0:
+        persen_positif = (positif / total_data) * 100
+        persen_negatif = (negatif / total_data) * 100
+    else:
+        persen_positif = 0
+        persen_negatif = 0
+
+
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <h2 style="margin:0;color:#1ccc0d;">
+                    {persen_positif:.2f}%
+                </h2>
+                <p style="margin:0;font-size:16px;font-weight:bold;">
+                    Distribusi Positif {app_name}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+    with col2:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <h2 style="margin:0;color:#cc0000;">
+                    {persen_negatif:.2f}%
+                </h2>
+                <p style="margin:0;font-size:16px;font-weight:bold;">
+                    Distribusi Negatif {app_name}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 st.markdown("---")
 st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
