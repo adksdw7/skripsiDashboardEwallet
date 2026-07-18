@@ -218,8 +218,7 @@ fig, ax = plt.subplots(figsize=(4, 2))ax.imshow(wc_p, interpolation='bilinear')a
 
 #URUTAN 6: TABEL EKSTRAKSI 5 ULASAN TERBANYAK BERDASARKAN KATA KUNCI TERPOPULER
 st.markdown("---")
-st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")
-table_html = """"st.markdown(table_html, unsafe_allow_html=True)
+st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")table_html = """"st.markdown(table_html, unsafe_allow_html=True)
 
 #URUTAN 7: NILAI METRIK KINERJA NBC (KARTU ELEGAN KE SAMPING PER APLIKASI)
 st.markdown("---")st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")for app_name in selected_apps:row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_eval.empty:row_eval = row_eval.iloc[0]st.markdown(f"Metrik Performa Pengujian Model NBC: {app_name}")col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)col_m1.metric("Accuracy", str(row_eval['Accuracy']))col_m2.metric("Precision", str(row_eval['Precision']))col_m3.metric("Recall", str(row_eval['Recall']))col_m4.metric("Specificity", str(row_eval['Specificity']))col_m5.metric("F1-Score", str(row_eval['F1-Score']))st.markdown('', unsafe_allow_html=True)
