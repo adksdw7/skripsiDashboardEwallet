@@ -207,48 +207,60 @@ for idx, app_name in enumerate(selected_apps):
 #📋 URUTAN 6: RINGKASAN EKSTRAKSI SAMPEL KOMENTAR TERPOPULER (ANTI ERROR GITHUB - MURNI DATAFRAME)
 st.markdown("---")
 st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")
+
 data_tabel_komparasi = []
+
 for app_name in selected_apps:
     df_app_search = df_sentimen[df_sentimen['appName'] == app_name]
     df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']
     df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']
-    sample_p = df_pos_reviews['content'].head(1).values[0] 
-    if not df_pos_reviews.empty:
-    else "Sangat puas dengan kecepatan transaksi aplikasi ini."
-    sample_n = df_neg_reviews['content'].head(1).values[0] 
-    if not df_neg_reviews.empty:
-    else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."data_tabel_komparasi.append({"E-Wallet": app_name,"Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}","Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"})df_tabel_final = pd.DataFrame(data_tabel_komparasi)st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
+    
+    # Perbaikan mutlak struktur if-else satu baris agar tidak memicu IndentationError
+    sample_p = df_pos_reviews['content'].head(1).values[0] if not df_pos_reviews.empty else "Sangat puas dengan kecepatan transaksi aplikasi ini."
+    sample_n = df_neg_reviews['content'].head(1).values[0] if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."
+    
+    data_tabel_komparasi.append({
+        "E-Wallet": app_name,
+        "Komentar Positif Terbanyak (Kata Kunci Terpopuler)": f"🔹 {sample_p}",
+        "Kombinasi Komentar Negatif Terbanyak (Aduan Utama)": f"🔻 {sample_n}"
+    })
+
+df_tabel_final = pd.DataFrame(data_tabel_komparasi)
+st.dataframe(df_tabel_final, use_container_width=True, hide_index=True)
 
 #🔮 URUTAN 7: NILAI METRIK KINERJA NBC
 st.markdown("---")
 st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")
+
 for app_name in selected_apps:
     row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
     if not row_eval.empty:
         row_eval = row_eval.iloc[0]
-        st.markdown(f"Metrik Performa Pengujian Model NBC: {app_name}")
+        st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
         
         col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-        col_m1.markdown(f'Accuracy{str(row_eval["Accuracy"])}', unsafe_allow_html=True)
-        col_m2.markdown(f'Precision{str(row_eval["Precision"])}', unsafe_allow_html=True)
-        col_m3.markdown(f'Recall{str(row_eval["Recall"])}', unsafe_allow_html=True)
-        col_m4.markdown(f'Specificity{str(row_eval["Specificity"])}', unsafe_allow_html=True)
-        col_m5.markdown(f'F1-Score{str(row_eval["F1-Score"])}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
+        col_m1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Accuracy</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Accuracy"])}</h3></div>', unsafe_allow_html=True)
+        col_m2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Precision</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Precision"])}</h3></div>', unsafe_allow_html=True)
+        col_m3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Recall</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Recall"])}</h3></div>', unsafe_allow_html=True)
+        col_m4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Specificity</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Specificity"])}</h3></div>', unsafe_allow_html=True)
+        col_m5.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">F1-Score</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["F1-Score"])}</h3></div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
 
 #🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
 st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")
+
 for app_name in selected_apps:
     row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
     if not row_cm.empty:
         row_cm = row_cm.iloc[0]
-        st.markdown(f"Komposisi Hasil Prediksi Matriks: {app_name}")
+        st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
         
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        col_c1.markdown(f'True Negative (TN){int(row_cm["TN"]):,}', unsafe_allow_html=True)
-        col_c2.markdown(f'False Positive (FP){int(row_cm["FP"]):,}', unsafe_allow_html=True)
-        col_c3.markdown(f'False Negative (FN){int(row_cm["FN"]):,}', unsafe_allow_html=True)
-        col_c4.markdown(f'True Positive (TP){int(row_cm["TP"]):,}', unsafe_allow_html=True)
-        st.markdown('', unsafe_allow_html=True)
+        col_c1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Negative (TN)</p><h3 style="margin:0;color:#333;">{int(row_cm["TN"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Positive (FP)</p><h3 style="margin:0;color:#333;">{int(row_cm["FP"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Negative (FN)</p><h3 style="margin:0;color:#333;">{int(row_cm["FN"]):,}</h3></div>', unsafe_allow_html=True)
+        col_c4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Positive (TP)</p><h3 style="margin:0;color:#333;">{int(row_cm["TP"]):,}</h3></div>', unsafe_allow_html=True)
 
-
+        
+        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
