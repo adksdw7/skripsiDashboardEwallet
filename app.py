@@ -60,15 +60,15 @@ col_btn1, col_btn2, col_btn3 = st.columns(3)
 
 with col_btn1:
     st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
-    dana_active = st.toggle("Aktifkan DANA", value=True, key="tgl_dana")
+    dana_active = st.toggle("DANA", value=True, key="tgl_dana")
 
 with col_btn2:
     st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
-    gopay_active = st.toggle("Aktifkan GoPay", value=True, key="tgl_gopay")
+    gopay_active = st.toggle("GoPay", value=True, key="tgl_gopay")
 
 with col_btn3:
     st.markdown(f'<div style="background-color: #ffffff; padding: 15px; border-radius: 12px; border: 1px solid #e0e0e0; margin-bottom: 5px;">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
-    shopee_active = st.toggle("Aktifkan ShopeePay", value=True, key="tgl_shopee")
+    shopee_active = st.toggle("ShopeePay", value=True, key="tgl_shopee")
 
 # Menyusun kembali daftar aplikasi aktif untuk filter data grafik di bawahnya
 selected_apps = []
@@ -77,7 +77,7 @@ if gopay_active: selected_apps.append("GoPay")
 if shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
-    st.warning("⚠️ Silakan klik tombol sakelar (toggle) di atas untuk mengaktifkan minimal satu aplikasi.")
+    st.warning("⚠️ Silakan pilih aplikasi")
     st.stop()
     
 # =====================================================================
@@ -95,8 +95,7 @@ st.header("🔄 Hasil Analisis")
 col_v1, col_v2 = st.columns(2)
 
 with col_v1:
-    st.markdown("**Statistik Volume Jumlah Ulasan Terfilter**")
-    st.metric(label="Ulasan Ditampilkan", value=f"{len(filtered_df):,}")
+    st.metric(value=f"{len(filtered_df):,}", label="Ulasan Pengguna")
     
     df_rating = filtered_df.groupby(['appName', 'score']).size().reset_index(name='Total')
     fig_rate = px.bar(df_rating, x='score', y='Total', color='appName', 
