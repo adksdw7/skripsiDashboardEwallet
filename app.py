@@ -52,62 +52,48 @@ if 'dana_active' not in st.session_state: st.session_state.dana_active = True
 if 'gopay_active' not in st.session_state: st.session_state.gopay_active = True
 if 'shopee_active' not in st.session_state: st.session_state.shopee_active = True
 
+# Memproses perubahan parameter jika komponen kartu diklik lewat URL parameter bawaan Streamlit
+query_params = st.query_params
+if "klik" in query_params:
+    target = query_params["klik"]
+    st.session_state[f"{target}_active"] = not st.session_state[f"{target}_active"]
+    st.query_params.clear()
+    st.rerun()
+
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-# Fungsi untuk membuat satu kartu utuh yang berfungsi langsung sebagai tombol klik
-def buat_tombol_kartu(file_path, alt_text, is_active, key_btn, label_btn):
+# Fungsi murni kartu visual yang dibungkus tautan klik tanpa tombol bawaan Streamlit
+def buat_kartu_klik(file_path, alt_text, is_active, label_btn, key_name):
     import base64
     
-    # CSS dinamis: border hitam jika aktif, border transparan/samar jika tidak aktif
-    border_style = "2px solid #000000" if is_active else "2px solid transparent"
+    # CSS dinamis: memberi garis tepi hitam tebal jika aktif, transparan jika mati
+    border_style = "border: 2px solid #000000;" if is_active else "border: 2px solid transparent;"
     
-    # Konversi gambar lokal ke base64 agar aman dibaca oleh Streamlit dari GitHub
-    img_html = f'<p style="color: gray; font-size: 14px; margin: 0;">{alt_text}</p>'
+    # Konversi logo gambar ke base64 agar aman dibaca dari repositori GitHub
+    img_html = f'<p style="color: gray; font-size: 14px;">{alt_text}</p>'
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto 10px auto;">'
+        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; margin-bottom: 10px;">'
 
-    # Struktur HTML murni di dalam tombol untuk menyatukan logo dan nama aplikasi di bawahnya
-    konten_tombol = f"""
-    <div style="text-align: center; width: 100%;">
-        {img_html}
-        <div style="font-weight: bold; font-size: 16px; color: #333333; margin-top: 5px;">{label_btn}</div>
-    </div>
-    """
-    
-    # CSS Injector untuk menghilangkan gaya tombol asli Streamlit dan mengubahnya menjadi bentuk kartu
+    # Membuat seluruh kotak kartu menjadi tautan yang bisa diklik langsung
     st.markdown(f"""
-    <style>
-        div[data-testid="stButton"] button[key*="{key_btn}"] {{
-            border: {border_style} !important;
-            border-radius: 16px !important;
-            padding: 20px 15px !important;
-            background-color: #ffffff !important;
-            box-shadow: 0px 2px 4px rgba(0,0,0,0.05) !important;
-            width: 100% !important;
-            height: auto !important;
-            display: block !important;
-        }}
-        div[data-testid="stButton"] button[key*="{key_btn}"]:hover {{
-            border: 2px solid #555555 !important;
-        }}
-    </style>
+    <a href="?klik={key_name}" target="_self" style="text-decoration: none; color: inherit; display: block;">
+        <div style="{border_style} border-radius: 16px; padding: 20px 15px; text-align: center; background-color: #ffffff; box-shadow: 0px 2px 4px rgba(0,0,0,0.05); cursor: pointer;">
+            {img_html}
+            <div style="font-weight: bold; font-size: 16px; color: #333333; margin-top: 5px;">{label_btn}</div>
+        </div>
+    </a>
     """, unsafe_allow_html=True)
 
-    # Eksekusi tombol klik (seluruh area kotak kartu sekarang sensitif terhadap klik)
-    if st.button(konten_tombol, key=key_btn, use_container_width=True):
-        st.session_state[f"{key_btn.replace('btn_', '')}_active"] = not is_active
-        st.rerun()
-
 with col_btn1:
-    buat_tombol_kartu("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "btn_dana", "DANA")
+    buat_kartu_klik("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "DANA", "dana")
 
 with col_btn2:
-    buat_tombol_kartu("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "btn_gopay", "GoPay")
+    buat_kartu_klik("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "GoPay", "gopay")
 
 with col_btn3:
-    buat_tombol_kartu("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "btn_shopee", "ShopeePay")
+    buat_kartu_klik("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "ShopeePay", "shopee")
 
 # Menyusun kembali daftar aplikasi aktif untuk filter data grafik di bawahnya
 selected_apps = []
@@ -117,7 +103,7 @@ if st.session_state.shopee_active: selected_apps.append("ShopeePay")
 
 if not selected_apps:
     st.stop()
-
+    
 # =====================================================================
 # D. PROSES FILTER DATA & JUDUL PEMBATAS KOMPARASI ULASAN
 # =====================================================================
