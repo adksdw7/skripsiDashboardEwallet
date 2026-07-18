@@ -459,7 +459,131 @@ else:
         use_container_width=True
     )
 
-# ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR
+# FUNGSI MEMUAT DATA RAW KOMENTAR
+@st.cache_data
+def load_raw_reviews():
+
+    raw_files = {
+        "DANA": "rawDana.csv",
+        "GoPay": "rawGopay.csv",
+        "ShopeePay": "rawShopeepay.csv"
+    }
+
+    raw_data = {}
+
+    for app, file in raw_files.items():
+
+        try:
+            df_raw = pd.read_csv(file)
+
+            raw_data[app] = df_raw
+
+        except:
+            raw_data[app] = pd.DataFrame()
+
+    return raw_data
+
+
+raw_reviews = load_raw_reviews()
+
+
+
+# =====================================================
+# FUNGSI MENGAMBIL 10 ULASAN BERDASARKAN KATA TERPOPULER
+# =====================================================
+
+def get_top_reviews(app_name, sentiment):
+
+    if app_name not in raw_reviews:
+        return []
+
+
+    df_raw = raw_reviews[app_name]
+
+
+    if df_raw.empty:
+        return []
+
+
+    # mencari kolom sentimen
+    sentiment_col = None
+
+    for col in df_raw.columns:
+        if "sentimen" in col.lower():
+            sentiment_col = col
+
+
+    # mencari kolom komentar
+    text_col = None
+
+    for col in df_raw.columns:
+        if "content" in col.lower() or "review" in col.lower() or "text" in col.lower():
+            text_col = col
+
+
+
+    if sentiment_col and text_col:
+
+        df_filter = df_raw[
+            df_raw[sentiment_col] == sentiment
+        ]
+
+
+        if df_filter.empty:
+            return []
+
+
+        # hitung kata yang sering muncul
+        all_text = " ".join(
+            df_filter[text_col]
+            .astype(str)
+        )
+
+
+        words = (
+            all_text
+            .lower()
+            .split()
+        )
+
+
+        counter_words = Counter(words)
+
+
+        top_words = [
+            word 
+            for word, jumlah 
+            in counter_words.most_common(10)
+        ]
+
+
+        hasil = []
+
+
+        for word in top_words:
+
+            temp = df_filter[
+                df_filter[text_col]
+                .astype(str)
+                .str.lower()
+                .str.contains(word, na=False)
+            ]
+
+
+            if not temp.empty:
+
+                hasil.append(
+                    temp[text_col]
+                    .iloc[0]
+                )
+
+
+        return hasil[:10]
+
+
+    return []
+
+# ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOGGLE ULASAN
 st.markdown("---")
 st.markdown("### ☁️ 5. Eksplorasi Awan Kata (Word Cloud)")
 
@@ -470,6 +594,7 @@ wc_positive_color = {
     "GoPay": "Greens",
     "ShopeePay": "Oranges"
 }
+
 
 
 # Fungsi membuat warna merah untuk wordcloud negatif
@@ -485,8 +610,9 @@ def red_color_func(
 
 
 
-# Membuat kolom berdasarkan jumlah aplikasi
+# membuat kolom sesuai jumlah aplikasi
 col_wc = st.columns(len(selected_apps))
+
 
 
 for idx, app_name in enumerate(selected_apps):
@@ -495,9 +621,11 @@ for idx, app_name in enumerate(selected_apps):
 
         with st.container(border=True):
 
+
             df_app_text = df_sentimen[
                 df_sentimen['appName'] == app_name
             ]
+
 
 
             # =====================================================
@@ -518,13 +646,14 @@ for idx, app_name in enumerate(selected_apps):
 
             text_positive = " ".join(
                 df_app_text[
-                    df_app_text['sentimen'] == 'Positif'
+                    df_app_text['sentimen']=="Positif"
                 ]['content']
                 .astype(str)
             )
 
 
             if text_positive.strip():
+
 
                 wc_positive = WordCloud(
                     background_color="white",
@@ -535,16 +664,18 @@ for idx, app_name in enumerate(selected_apps):
                 ).generate(text_positive)
 
 
+
                 fig, ax = plt.subplots(
-                    figsize=(4, 2.5)
+                    figsize=(4,2.5)
                 )
 
                 ax.imshow(
                     wc_positive,
-                    interpolation='bilinear'
+                    interpolation="bilinear"
                 )
 
                 ax.axis("off")
+
 
                 st.pyplot(fig)
 
@@ -552,9 +683,50 @@ for idx, app_name in enumerate(selected_apps):
 
 
 
+            # TOGGLE ULASAN POSITIF
+            show_positive = st.toggle(
+                f"Tampilkan ulasan positif {app_name}",
+                key=f"positive_{app_name}"
+            )
+
+
+
+            if show_positive:
+
+                st.markdown(
+                    "**10 Ulasan Positif Berdasarkan Kata Terpopuler:**"
+                )
+
+
+                positive_reviews = get_top_reviews(
+                    app_name,
+                    "Positif"
+                )
+
+
+                if positive_reviews:
+
+                    for i, review in enumerate(
+                        positive_reviews,
+                        1
+                    ):
+
+                        st.write(
+                            f"{i}. {review}"
+                        )
+
+                else:
+
+                    st.info(
+                        "Data ulasan positif tidak ditemukan."
+                    )
+
+
+
             # =====================================================
             # WORD CLOUD NEGATIF
             # =====================================================
+
 
             st.markdown(
                 f"""
@@ -569,15 +741,17 @@ for idx, app_name in enumerate(selected_apps):
             )
 
 
+
             text_negative = " ".join(
                 df_app_text[
-                    df_app_text['sentimen'] == 'Negatif'
+                    df_app_text['sentimen']=="Negatif"
                 ]['content']
                 .astype(str)
             )
 
 
             if text_negative.strip():
+
 
                 wc_negative = WordCloud(
                     background_color="white",
@@ -587,26 +761,74 @@ for idx, app_name in enumerate(selected_apps):
                 ).generate(text_negative)
 
 
-                # Terapkan warna merah
+
                 wc_negative.recolor(
                     color_func=red_color_func
                 )
 
 
+
                 fig, ax = plt.subplots(
-                    figsize=(4, 2.5)
+                    figsize=(4,2.5)
                 )
+
 
                 ax.imshow(
                     wc_negative,
-                    interpolation='bilinear'
+                    interpolation="bilinear"
                 )
 
+
                 ax.axis("off")
+
 
                 st.pyplot(fig)
 
                 plt.close()
+
+
+
+            # TOGGLE ULASAN NEGATIF
+            show_negative = st.toggle(
+                f"Tampilkan ulasan negatif {app_name}",
+                key=f"negative_{app_name}"
+            )
+
+
+
+            if show_negative:
+
+
+                st.markdown(
+                    "**10 Ulasan Negatif Berdasarkan Kata Terpopuler:**"
+                )
+
+
+                negative_reviews = get_top_reviews(
+                    app_name,
+                    "Negatif"
+                )
+
+
+
+                if negative_reviews:
+
+
+                    for i, review in enumerate(
+                        negative_reviews,
+                        1
+                    ):
+
+                        st.write(
+                            f"{i}. {review}"
+                        )
+
+
+                else:
+
+                    st.info(
+                        "Data ulasan negatif tidak ditemukan."
+                    )
 
 #📋 URUTAN 6: RINGKASAN EKSTRAKSI SAMPEL KOMENTAR TERPOPULER (ANTI ERROR GITHUB - MURNI DATAFRAME)
 st.markdown("---")
