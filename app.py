@@ -1137,68 +1137,20 @@ for app_name in selected_apps:
             f"**Komposisi Hasil Prediksi Matriks: {app_name}**"
         )
 
-
-        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-
-
-        col_c1.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    True Negative (TN)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["TN"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
+        # 1. Bungkus data matriks ke dalam struktur 2x2 yang standar
+        cm_matrix = {
+            "Prediksi NEGATIF": [int(row_cm["TN"]), int(row_cm["FN"])],
+            "Prediksi POSITIF": [int(row_cm["FP"]), int(row_cm["TP"])]
+        }
+        
+        # 2. Ubah menjadi DataFrame dengan baris Aktual
+        df_cm_grid = pd.DataFrame(
+            cm_matrix, 
+            index=["Aktual NEGATIF (Ulasan Jelek)", "Aktual POSITIF (Ulasan Bagus)"]
         )
-
-
-        col_c2.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    False Positive (FP)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["FP"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        col_c3.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    False Negative (FN)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["FN"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        col_c4.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    True Positive (TP)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["TP"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
+        
+        # 3. Tampilkan dalam bentuk tabel matriks kotak yang rapi
+        st.table(df_cm_grid)
 
 
         st.markdown(
