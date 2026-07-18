@@ -10,7 +10,7 @@ import os
 # 1. KONFIGURASI HALAMAN UTAMA DASHBOARD (MURNI SCROLLING, TANPA SIDEBAR)
 # =====================================================================
 st.set_config_option('deprecation.showPyplotGlobalUse', False) if hasattr(st, 'set_config_option') else None
-st.set_page_config(page_title="Komparatif Sentimen E-Wallet", layout="wide")
+st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
 
 # =====================================================================
 # 2. FUNGSI MEMUAT DATA (ANTI-BERAT, MEMBACA HASIL CSV)
@@ -48,47 +48,52 @@ st.info("""
 st.markdown("---")
 st.subheader("📱 Pilih E-Wallet")
 
-# Inisialisasi penyimpanan status klik tombol agar tidak hilang saat halaman memuat ulang
 if 'dana_active' not in st.session_state: st.session_state.dana_active = True
 if 'gopay_active' not in st.session_state: st.session_state.gopay_active = True
 if 'shopee_active' not in st.session_state: st.session_state.shopee_active = True
 
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-with col_btn1:
-    if os.path.exists("logoDana.png"):
-        st.image("logoDana.png", width=120)
+# Fungsi untuk mendesain border melingkar di sekitar logo menggunakan container Streamlit
+def tampilkan_logo_berbingkai(file_path, caption_default, is_active, warna_hex):
+    if os.path.exists(file_path):
+        if is_active:
+            # Membuat kotak pembungkus HTML untuk efek border luar mirip foto
+            st.markdown(f'<div style="border: 6px solid {warna_hex}; border-radius: 22px; width: 132px; padding: 5px; display: inline-block;">', unsafe_allow_html=True)
+            st.image(file_path, width=110)
+            st.markdown('</div>', unsafe_allow_html=True)
+        else:
+            # Jika tidak aktif, logo muncul polos tanpa border sama sekali
+            st.image(file_path, width=120)
     else:
-        st.caption("🔵 [Logo DANA]")
+        # Mempertahankan teks caption bawaan user jika logo hilang di GitHub
+        st.caption(f"{caption_default} (Aktif)" if is_active else caption_default)
+
+with col_btn1:
+    tampilkan_logo_berbingkai("logoDana.png", "🔵 [Logo DANA]", st.session_state.dana_active, "#2196F3")
     if st.button("DANA", key="btn_dana", use_container_width=True):
         st.session_state.dana_active = not st.session_state.dana_active
+        st.rerun()
 
 with col_btn2:
-    if os.path.exists("logoGopay.png"):
-        st.image("logoGopay.png", width=120)
-    else:
-        st.caption("🟢 [Logo Gopay]")
+    tampilkan_logo_berbingkai("logoGopay.png", "🟢 [Logo Gopay]", st.session_state.gopay_active, "#4CAF50")
     if st.button("GoPay", key="btn_gopay", use_container_width=True):
         st.session_state.gopay_active = not st.session_state.gopay_active
+        st.rerun()
 
 with col_btn3:
-    if os.path.exists("logoShopeepay.png"):
-        st.image("logoShopeepay.png", width=120)
-    else:
-        st.caption("🟠 [Logo Shopeepay]")
+    tampilkan_logo_berbingkai("logoShopeepay.png", "🟠 [Logo Shopeepay]", st.session_state.shopee_active, "#FF5722")
     if st.button("ShopeePay", key="btn_shopee", use_container_width=True):
         st.session_state.shopee_active = not st.session_state.shopee_active
+        st.rerun()
 
-# Menyusun daftar aplikasi yang dipilih berdasarkan status tombol klik pengguna
 selected_apps = []
 if st.session_state.dana_active: selected_apps.append("DANA")
 if st.session_state.gopay_active: selected_apps.append("GoPay")
 if st.session_state.shopee_active: selected_apps.append("ShopeePay")
 
-# Menampilkan indikator teks status aplikasi yang sedang aktif dipantau
 st.write(f"**Aplikasi Aktif:** " + " , ".join([f"✅ {x}" for x in selected_apps]) if selected_apps else "⚠️ Tidak ada aplikasi yang dipilih. Silakan klik tombol di atas.")
 
-# Proteksi jika user mematikan seluruh tombol aplikasi
 if not selected_apps:
     st.stop()
 
