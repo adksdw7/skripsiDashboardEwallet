@@ -1139,21 +1139,21 @@ for app_name in selected_apps:
 
 
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-
         
-         col_c1.markdown(
-             f'''
+        
+        col_c1.markdown(
+            f'''
             <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    True Negative (TN)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["TN"]):,}
-                </h3>
+            <p style="margin:0;color:gray;font-size:14px;">
+            True Negative (TN)
+            </p>
+            <h3 style="margin:0;color:{app_color_cm};">
+            {int(row_cm["TN"]):,}
+            </h3>
             </div>
             ''',
             unsafe_allow_html=True
-         )
+        )
 
         
         
