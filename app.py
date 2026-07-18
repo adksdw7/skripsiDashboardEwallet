@@ -37,38 +37,16 @@ except Exception as e:
 # A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
 # =====================================================================
 st.title("📊KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
-st.markdown("### **Implementasi Algoritma Multinomial Naïve Bayes Berbasis TF-IDF**")
 
 st.info("""
-💡 **Kegunaan Website**: Aplikasi dashboard interaktif non-realtime ini dirancang khusus untuk memetakan, 
-menganalisis, dan membandingkan secara makro persepsi masyarakat Indonesia terhadap tiga layanan *e-wallet* terbesar 
-(**DANA, GoPay, dan ShopeePay**). Melalui visualisasi interaktif ini, calon pengguna maupun penyedia layanan 
-dapat melihat perbandingan indikator kepuasan konsumen secara instan tanpa harus membaca puluhan ribu ulasan manual.
+💡 **Kegunaan Website**: Dashboard web komparatif ini digunakan untuk membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay secara instan tanpa harus membaca puluhan ribu ulasan manual.
 """)
-
-# =====================================================================
-# B. RANGKUMAN UMUM ULASAN GABUNGAN MAKRO
-# =====================================================================
-total_ulasan_global = len(df_sentimen)
-total_aplikasi_global = df_sentimen['appName'].nunique()
-pos_count = (df_sentimen['sentimen'] == 'Positif').sum()
-neg_count = (df_sentimen['sentimen'] == 'Negatif').sum()
-
-persen_pos = (pos_count / total_ulasan_global) * 100
-persen_neg = (neg_count / total_ulasan_global) * 100
-
-col_g1, col_g2, col_g3, col_g4 = st.columns(4)
-col_g1.metric("Total Aplikasi", f"{total_aplikasi_global} E-Wallet")
-col_g2.metric("Total Korpus Ulasan", f"{total_ulasan_global:,} Data")
-# Klarifikasi kepemilikan persentase agar pengguna/dosen tidak bingung
-col_g3.metric("Rata-rata Sentimen Positif (3 E-Wallet)", f"{persen_pos:.1f}%")
-col_g4.metric("Rata-rata Sentimen Negatif (3 E-Wallet)", f"{persen_neg:.1f}%")
 
 # =====================================================================
 # C. INTERFASE TOMBOL IKON LOGO APLIKASI (MENGGUNAKAN SESSION STATE)
 # =====================================================================
 st.markdown("---")
-st.subheader("📱 Pilih Aplikasi E-Wallet di Bawah Ini untuk Melihat Visualisasi:")
+st.subheader("📱 Pilih E-Wallet")
 
 # Inisialisasi penyimpanan status klik tombol agar tidak hilang saat halaman memuat ulang
 if 'dana_active' not in st.session_state: st.session_state.dana_active = True
