@@ -8,7 +8,7 @@ import os
 import base64
 
 # =====================================================================
-# 1. KONFIGURASI HALAMAN UTAMA DASHBOARD (MURNI SCROLLING, RESPONSIVE)
+# 1. KONFIGURASI HALAMAN UTAMA DASHBOARD
 # =====================================================================
 st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
 
@@ -117,7 +117,7 @@ if not selected_apps:
 st.markdown("---")
 st.header("🔄 Hasil Analisis")
 
-# 📥 URUTAN 1: TOTAL DATA BERSIH ULASAN (FLEKSIBEL DI TENGAH LAYAR)
+# 📥 URUTAN 1: TOTAL DATA BERSIH ULASAN
 st.markdown("### 📥 1. Total Data Bersih Ulasan")
 col_u = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
@@ -136,7 +136,6 @@ st.markdown("### 🍩 2. Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
-        # Menggunakan Container bawaan Streamlit agar grafik terbungkus kotak tipis secara sempurna
         with st.container(border=True):
             df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
             df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
@@ -165,7 +164,7 @@ for idx, app_name in enumerate(selected_apps):
             fig_trend.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
             st.plotly_chart(fig_trend, use_container_width=True)
 
-# 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG Pengguna
+# 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
 st.markdown("---")
 st.markdown("### 📊 4. Penyebaran Distribusi Rating Bintang Pengguna")
 color_rating_map = {"DANA": "#2377ca", "GoPay": "#01aed6", "ShopeePay": "#ff773c"}
@@ -183,7 +182,7 @@ for idx, app_name in enumerate(selected_apps):
                               color_discrete_sequence=[color_rating_map[app_name]])
             st.plotly_chart(fig_rate, use_container_width=True)
 
-# ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR (POSITIF / NEGATIF)
+# ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOMBOL SAKELAR
 st.markdown("---")
 st.markdown("### ☁️ 5. Eksplorasi Awan Kata (Word Cloud)")
 wc_color_map = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
@@ -216,85 +215,15 @@ for idx, app_name in enumerate(selected_apps):
                     ax.axis("off")
                     st.pyplot(fig)
                     plt.close()
-                    
-            show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")
-            if show_neg:
-                text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))
-                if text_neg.strip():
-                    st.markdown(f"<p style='text-align:center; font-style:italic; font-size:12px; color:red;'>*Word Cloud Negatif: {app_name}*</p>", unsafe_allow_html=True)
-                    wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)
-                    fig, ax = plt.subplots(figsize=(4, 2))
-                    ax.imshow(wc_n, interpolation='bilinear')
-                    ax.axis("off")
-                    st.pyplot(fig)
-                    plt.close()
+                
+show_neg = st.checkbox(f"Lihat Wordcloud Negatif {app_name}", key=f"neg_show_{app_name}")if show_neg:text_neg = " ".join(df_app_text[df_app_text['sentimen'] == 'Negatif']['content'].astype(str))if text_neg.strip():st.markdown(f"Word Cloud Negatif: {app_name}", unsafe_allow_html=True)wc_n = WordCloud(background_color="white", max_words=40, colormap="Reds", width=400, height=200).generate(text_neg)fig, ax = plt.subplots(figsize=(4, 2))ax.imshow(wc_n, interpolation='bilinear')ax.axis("off")st.pyplot(fig)plt.close()
 
-# 📋 URUTAN 6: TABEL EKSTRAKSI 5 ULASAN TERBANYAK BERDASARKAN KATA KUNCI
-st.markdown("---")
-st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")
+#URUTAN 6: TABEL EKSTRAKSI SAMPE KONTEN RELEVAN
+st.markdown("---")st.markdown("### 📋 6. Ringkasan Ekstraksi Sampel Komentar Terpopuler")table_html = """"st.markdown(table_html, unsafe_allow_html=True)
 
-table_html = """
-<table class="custom-table">
-    <thead>
-        <tr>
-            <th style="width: 15%;">E-Wallet</th>
-            <th style="width: 42.5%;">Komentar Positif Terbanyak (Kata Kunci Terpopuler)</th>
-            <th style="width: 42.5%;">Kombinasi Komentar Negatif Terbanyak (Aduan Utama)</th>
-        </tr>
-    </thead>
-    <tbody>
-"""
+#URUTAN 7: NILAI METRIK KINERJA NBC
+st.markdown("---")st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")for app_name in selected_apps:row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_eval.empty:row_eval = row_eval.iloc[0]st.markdown(f"Metrik Performa Pengujian Model NBC: {app_name}")col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)col_m1.markdown(f'Accuracy{str(row_eval["Accuracy"])}', unsafe_allow_html=True)col_m2.markdown(f'Precision{str(row_eval["Precision"])}', unsafe_allow_html=True)col_m3.markdown(f'Recall{str(row_eval["Recall"])}', unsafe_allow_html=True)col_m4.markdown(f'Specificity{str(row_eval["Specificity"])}', unsafe_allow_html=True)col_m5.markdown(f'F1-Score{str(row_eval["F1-Score"])}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
 
-for app_name in selected_apps:
-    df_app_search = df_sentimen[df_sentimen['appName'] == app_name]
-    
-    df_pos_reviews = df_app_search[df_app_search['sentimen'] == 'Positif']
-    df_neg_reviews = df_app_search[df_app_search['sentimen'] == 'Negatif']
-    
-    sample_p = df_pos_reviews['content'].head(1).values[0] if not df_pos_reviews.empty else "Sangat puas dengan kecepatan transaksi aplikasi ini."
-    sample_n = df_neg_reviews['content'].head(1).values[0] if not df_neg_reviews.empty else "Sering terjadi kendala koneksi sistem/error saat transfer saldo."
+#URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
+st.markdown("---")st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")for app_name in selected_apps:row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]if not row_cm.empty:row_cm = row_cm.iloc[0]st.markdown(f"Komposisi Hasil Prediksi Matriks: {app_name}")col_c1, col_c2, col_c3, col_c4 = st.columns(4)col_c1.markdown(f'True Negative (TN){int(row_cm["TN"]):,}', unsafe_allow_html=True)col_c2.markdown(f'False Positive (FP){int(row_cm["FP"]):,}', unsafe_allow_html=True)col_c3.markdown(f'False Negative (FN){int(row_cm["FN"]):,}', unsafe_allow_html=True)col_c4.markdown(f'True Positive (TP){int(row_cm["TP"]):,}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
 
-    table_html += f"""
-        <tr>
-            <td style="font-weight:bold; color:#333;">{app_name}</td>
-            <td>🔹 {sample_p}</td>
-            <td>🔻 {sample_n}</td>
-        </tr>
-    """
-
-table_html += "</tbody></table>"
-st.markdown(table_html, unsafe_allow_html=True)
-
-# 🔮 URUTAN 7: NILAI METRIK KINERJA NBC (KARTU SEJAJAR KE SAMPING PER APLIKASI)
-st.markdown("---")
-st.markdown("### 🔮 7. Nilai Metrik Kinerja Klasifikasi NBC")
-
-for app_name in selected_apps:
-    row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
-    if not row_eval.empty:
-        row_eval = row_eval.iloc[0]
-        st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
-        
-        col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-        col_m1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Accuracy</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Accuracy"])}</h3></div>', unsafe_allow_html=True)
-        col_m2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Precision</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Precision"])}</h3></div>', unsafe_allow_html=True)
-        col_m3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Recall</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Recall"])}</h3></div>', unsafe_allow_html=True)
-        col_m4.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">Specificity</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["Specificity"])}</h3></div>', unsafe_allow_html=True)
-        col_m5.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">F1-Score</p><h3 style="margin:0;color:#2377ca;">{str(row_eval["F1-Score"])}</h3></div>', unsafe_allow_html=True)
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
-
-# 🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
-st.markdown("---")
-st.markdown("### 🎯 8. Elemen Nilai Realisasi Confusion Matrix")
-
-for app_name in selected_apps:
-    row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
-    if not row_cm.empty:
-        row_cm = row_cm.iloc[0]
-        st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
-        
-        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        col_c1.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">True Negative (TN)</p><h3 style="margin:0;color:#333;">{int(row_cm["TN"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c2.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Positive (FP)</p><h3 style="margin:0;color:#333;">{int(row_cm["FP"]):,}</h3></div>', unsafe_allow_html=True)
-        col_c3.markdown(f'<div class="metric-card"><p style="margin:0;color:gray;font-size:14px;">False Negative (FN)</p><h3 style="margin:0;color:#333;">{int(row_cm["FN"]):,}</h3></div>', unsafe_allow_html=True)
-col_c4.markdown(f'True Positive (TP){int(row_cm["TP"]):,}', unsafe_allow_html=True)st.markdown('', unsafe_allow_html=True)
