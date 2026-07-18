@@ -32,20 +32,109 @@ st.markdown("""
 # =====================================================================
 @st.cache_data
 def load_data():
+
+    # Data utama dashboard
     df_sentimen = pd.read_csv("hasilSentimen.csv")
     df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
-    
+
+
+    # Data raw komentar asli
+    df_raw_dana = pd.read_csv("rawDana.csv")
+    df_raw_gopay = pd.read_csv("rawGopay.csv")
+    df_raw_shopee = pd.read_csv("rawShopeepay.csv")
+
+
     if len(df_evaluasi.columns) >= 12:
-        df_evaluasi.columns = ['aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity', 'F1-Score', 
-                               'jumlahDataTrain', 'jumlahDataTest', 'TN', 'FP', 'FN', 'TP']
-        
-    df_sentimen['date'] = pd.to_datetime(df_sentimen['date'])
-    return df_sentimen, df_evaluasi
+        df_evaluasi.columns = [
+            'aplikasi',
+            'Accuracy',
+            'Precision',
+            'Recall',
+            'Specificity',
+            'F1-Score',
+            'jumlahDataTrain',
+            'jumlahDataTest',
+            'TN',
+            'FP',
+            'FN',
+            'TP'
+        ]
+
+
+    df_sentimen['date'] = pd.to_datetime(
+        df_sentimen['date']
+    )
+
+
+    return (
+        df_sentimen,
+        df_evaluasi,
+        df_raw_dana,
+        df_raw_gopay,
+        df_raw_shopee
+    )
+
+    # =====================================================
+    # LOAD DATA RAW REVIEW UNTUK DETAIL KOMENTAR
+    # =====================================================
+
+    raw_dana = pd.read_csv(
+        "rawDana.csv"
+    )
+
+    raw_gopay = pd.read_csv(
+        "rawGopay.csv"
+    )
+
+    raw_shopeepay = pd.read_csv(
+        "rawShopeepay.csv"
+    )
+
+
+    # Tambahkan identitas aplikasi
+    raw_dana["appName"] = "DANA"
+
+    raw_gopay["appName"] = "GoPay"
+
+    raw_shopeepay["appName"] = "ShopeePay"
+
+
+
+    # Gabungkan semua raw review
+    df_raw_review = pd.concat(
+        [
+            raw_dana,
+            raw_gopay,
+            raw_shopeepay
+        ],
+        ignore_index=True
+    )
+
+
+    return (
+        df_sentimen,
+        df_evaluasi,
+        df_raw_review
+    )
 
 try:
-    df_sentimen, df_evaluasi = load_data()
+
+    (
+        df_sentimen,
+        df_evaluasi,
+        df_raw_dana,
+        df_raw_gopay,
+        df_raw_shopee
+
+    ) = load_data()
+
+
 except Exception as e:
-    st.error(f"Gagal memuat data CSV. Pastikan file berada di repositori yang sama. Error: {e}")
+
+    st.error(
+        f"Gagal memuat data CSV. Pastikan file berada di repositori yang sama. Error: {e}"
+    )
+
     st.stop()
 
 # =====================================================================
