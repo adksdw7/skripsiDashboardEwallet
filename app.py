@@ -54,45 +54,62 @@ if 'shopee_active' not in st.session_state: st.session_state.shopee_active = Tru
 
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-# Fungsi untuk merender elemen kartu (kotak belakang logo + nama) secara murni
-def render_kartu_ewallet(file_path, alt_text, is_active, label_btn):
-    # CSS dinamis: Jika aktif diberi border hitam, jika tidak aktif border transparan
-    border_style = "border: 2px solid #000000;" if is_active else "border: 2px solid transparent;"
-    
-    # Deteksi apakah gambar ada di repositori untuk diubah ke HTML img
+# Fungsi untuk membuat satu kartu utuh yang berfungsi langsung sebagai tombol klik
+def buat_tombol_kartu(file_path, alt_text, is_active, key_btn, label_btn):
     import base64
-    img_html = f'<p style="color: gray; font-size: 14px;">{alt_text}</p>'
+    
+    # CSS dinamis: border hitam jika aktif, border transparan/samar jika tidak aktif
+    border_style = "2px solid #000000" if is_active else "2px solid transparent"
+    
+    # Konversi gambar lokal ke base64 agar aman dibaca oleh Streamlit dari GitHub
+    img_html = f'<p style="color: gray; font-size: 14px; margin: 0;">{alt_text}</p>'
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; margin-bottom: 10px;">'
+        img_html = f'<img src="data:image/png;base64,{data}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto 10px auto;">'
 
-    # Tampilkan struktur visual: Kotak latar belakang -> Logo -> Nama Aplikasi tepat di bawahnya
-    st.markdown(f"""
-    <div style="{border_style} border-radius: 16px; padding: 15px; text-align: center; background-color: #ffffff; box-shadow: 0px 2px 4px rgba(0,0,0,0.05); margin-bottom: 10px;">
+    # Struktur HTML murni di dalam tombol untuk menyatukan logo dan nama aplikasi di bawahnya
+    konten_tombol = f"""
+    <div style="text-align: center; width: 100%;">
         {img_html}
         <div style="font-weight: bold; font-size: 16px; color: #333333; margin-top: 5px;">{label_btn}</div>
     </div>
+    """
+    
+    # CSS Injector untuk menghilangkan gaya tombol asli Streamlit dan mengubahnya menjadi bentuk kartu
+    st.markdown(f"""
+    <style>
+        div[data-testid="stButton"] button[key*="{key_btn}"] {{
+            border: {border_style} !important;
+            border-radius: 16px !important;
+            padding: 20px 15px !important;
+            background-color: #ffffff !important;
+            box-shadow: 0px 2px 4px rgba(0,0,0,0.05) !important;
+            width: 100% !important;
+            height: auto !important;
+            display: block !important;
+        }}
+        div[data-testid="stButton"] button[key*="{key_btn}"]:hover {{
+            border: 2px solid #555555 !important;
+        }}
+    </style>
     """, unsafe_allow_html=True)
 
-with col_btn1:
-    render_kartu_ewallet("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "DANA")
-    if st.button("Pilih DANA", key="btn_dana", use_container_width=True):
-        st.session_state.dana_active = not st.session_state.dana_active
+    # Eksekusi tombol klik (seluruh area kotak kartu sekarang sensitif terhadap klik)
+    if st.button(konten_tombol, key=key_btn, use_container_width=True):
+        st.session_state[f"{key_btn.replace('btn_', '')}_active"] = not is_active
         st.rerun()
+
+with col_btn1:
+    buat_tombol_kartu("logoDana.png", "[Logo DANA]", st.session_state.dana_active, "btn_dana", "DANA")
 
 with col_btn2:
-    render_kartu_ewallet("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "GoPay")
-    if st.button("Pilih GoPay", key="btn_gopay", use_container_width=True):
-        st.session_state.gopay_active = not st.session_state.gopay_active
-        st.rerun()
+    buat_tombol_kartu("logoGopay.png", "[Logo GoPay]", st.session_state.gopay_active, "btn_gopay", "GoPay")
 
 with col_btn3:
-    render_kartu_ewallet("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "ShopeePay")
-    if st.button("Pilih ShopeePay", key="btn_shopee", use_container_width=True):
-        st.session_state.shopee_active = not st.session_state.shopee_active
-        st.rerun()
+    buat_tombol_kartu("logoShopeepay.png", "[Logo ShopeePay]", st.session_state.shopee_active, "btn_shopee", "ShopeePay")
 
+# Menyusun kembali daftar aplikasi aktif untuk filter data grafik di bawahnya
 selected_apps = []
 if st.session_state.dana_active: selected_apps.append("DANA")
 if st.session_state.gopay_active: selected_apps.append("GoPay")
