@@ -132,19 +132,47 @@ for idx, app_name in enumerate(selected_apps):
 # 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 st.markdown("---")
 st.markdown("### 📈 3. Grafik Tren Perkembangan Sentimen Bulanan")
-col_trend = st.columns(len(selected_apps))
-for idx, app_name in enumerate(selected_apps):
-    with col_trend[idx]:
-        with st.container(border=True):
-            df_app_trend = df_sentimen[df_sentimen['appName'] == app_name].copy()
-            df_app_trend['Bulan'] = df_app_trend['date'].dt.to_period('M').astype(str)
-            df_chart_trend = df_app_trend.groupby(['Bulan', 'sentimen']).size().reset_index(name='Jumlah')
-            
-            fig_trend = px.line(df_chart_trend, x='Bulan', y='Jumlah', color='sentimen',
-                                title=f"Tren Bulanan: {app_name}", markers=True,
-                                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
-            fig_trend.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5))
-            st.plotly_chart(fig_trend, use_container_width=True)
+
+# Menyiapkan data agregasi bulanan gabungan berdasarkan aplikasi yang aktif dipilih user
+df_trend_global = filtered_df.copy()
+df_trend_global['Bulan'] = df_trend_global['date'].dt.to_period('M').astype(str)
+df_chart_trend_global = df_trend_global.groupby(['Bulan', 'appName', 'sentimen']).size().reset_index(name='Jumlah')
+
+# Definisi palet warna mutlak per identitas aplikasi sesuai perintahmu
+color_apps_map = {"DANA": "#2377ca", "GoPay": "#01aed6", "ShopeePay": "#ff773c"}
+
+# Membuat layout atas-bawah (2 Container Utama)
+# KOTAK 1: DIAGRAM KHUSUS SENTIMEN POSITIF
+with st.container(border=True):
+    df_pos_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Positif']
+    
+    fig_trend_pos = px.line(df_pos_trend, x='Bulan', y='Jumlah', color='appName',
+                            title="📈 Grafik Tren Perkembangan Sentimen POSITIF Bulanan (Komparatif)",
+                            markers=True,
+                            color_discrete_map=color_apps_map)
+    fig_trend_pos.update_layout(
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        xaxis_title="Periode Bulan",
+        yaxis_title="Volume Ulasan"
+    )
+    st.plotly_chart(fig_trend_pos, use_container_width=True)
+
+st.markdown('<div style="margin-bottom: 15px;"></div>', unsafe_allow_html=True)
+
+# KOTAK 2: DIAGRAM KHUSUS SENTIMEN NEGATIF
+with st.container(border=True):
+    df_neg_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Negatif']
+    
+    fig_trend_neg = px.line(df_neg_trend, x='Bulan', y='Jumlah', color='appName',
+                            title="📉 Grafik Tren Perkembangan Sentimen NEGATIF Bulanan (Komparatif)",
+                            markers=True,
+                            color_discrete_map=color_apps_map)
+    fig_trend_neg.update_layout(
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        xaxis_title="Periode Bulan",
+        yaxis_title="Volume Ulasan"
+    )
+    st.plotly_chart(fig_trend_neg, use_container_width=True)
 
 # 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
 st.markdown("---")
