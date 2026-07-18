@@ -1140,6 +1140,7 @@ for app_name in selected_apps:
 
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
 
+        
          col_c1.markdown(
             f'''
             <div class="metric-card">
@@ -1153,6 +1154,8 @@ for app_name in selected_apps:
             ''',
             unsafe_allow_html=True
         )
+
+        
         col_c2.markdown(
             f'''
             <div class="metric-card">
@@ -1167,12 +1170,12 @@ for app_name in selected_apps:
             unsafe_allow_html=True
         )
 
+        
         col_c3.markdown(
             f'''
             <div class="metric-card">
                 <p style="margin:0;color:gray;font-size:14px;">
                     False Negative (FN)
-
                      </p>
                 <h3 style="margin:0;color:{app_color_cm};">
                     {int(row_cm["FN"]):,}
@@ -1181,6 +1184,8 @@ for app_name in selected_apps:
             ''',
             unsafe_allow_html=True
         )
+
+        
         col_c4.markdown(
             f'''
             <div class="metric-card">
@@ -1193,7 +1198,9 @@ for app_name in selected_apps:
             </div>
             ''',
             unsafe_allow_html=True
-        )        
+        )       
+
+        
         st.markdown(
             '<div style="margin-bottom:15px;"></div>',
             unsafe_allow_html=True
