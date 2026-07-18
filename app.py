@@ -203,7 +203,7 @@ for idx, app_name in enumerate(selected_apps):
 
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN
 st.markdown("---")
-st.markdown("###Proporsi Distribusi Sentimen Pengguna")
+st.markdown("### Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
@@ -745,7 +745,7 @@ def get_top_reviews(app_name, sentiment):
 
 # ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOGGLE ULASAN
 st.markdown("---")
-st.markdown("###☁️ Word Cloud Sentimen")
+st.markdown("### ☁️ Word Cloud Sentimen")
 
 
 # Warna wordcloud positif tiap aplikasi
@@ -992,7 +992,7 @@ for idx, app_name in enumerate(selected_apps):
 
 #🔮 URUTAN 7: NILAI METRIK KINERJA KLASIFIKASI NBC
 st.markdown("---")
-st.markdown("###Nilai Metrik Kinerja Klasifikasi NBC")
+st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 
 
 # Warna nilai metrik berdasarkan aplikasi
@@ -1110,8 +1110,16 @@ for app_name in selected_apps:
 
 #🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
 st.markdown("---")
-st.markdown("###Elemen Nilai Realisasi Confusion Matrix")
+st.markdown("### Nilai Confusion Matrix")
 
+col_cm_img = st.columns([1,2,1])
+
+with col_cm_img[1]:
+    st.image(
+        "confussionmatrix.png",
+        caption="Confusion Matrix Hasil Klasifikasi NBC",
+        use_container_width=True
+    )
 
 # Warna nilai confusion matrix berdasarkan aplikasi
 cm_color_map = {
