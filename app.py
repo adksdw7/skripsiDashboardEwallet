@@ -1142,7 +1142,7 @@ for app_name in selected_apps:
 
         
          col_c1.markdown(
-            f'''
+             f'''
             <div class="metric-card">
                 <p style="margin:0;color:gray;font-size:14px;">
                     True Negative (TN)
@@ -1153,8 +1153,9 @@ for app_name in selected_apps:
             </div>
             ''',
             unsafe_allow_html=True
-        )
+         )
 
+        
         
         col_c2.markdown(
             f'''
