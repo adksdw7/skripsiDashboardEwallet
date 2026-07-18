@@ -234,7 +234,24 @@ for idx, app_name in enumerate(selected_apps):
 # 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN DAN PERSENTASE
 st.markdown("---")
 st.markdown("### Proporsi Distribusi Sentimen Pengguna")
+
+# --- BARIS 1: UNTUK GRAFIK PIE/DONUT ---
 col_pie = st.columns(len(selected_apps))
+for idx, app_name in enumerate(selected_apps):
+    with col_pie[idx]:
+        with st.container(border=True):
+            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
+            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
+            
+            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
+                             title=f"Distribusi Sentimen: {app_name}",
+                             color='sentimen',
+                             color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
+            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+# --- BARIS 2: UNTUK KARTU PERSENTASE DISTRIBUSI (TERPISAH KEBANDING PIE CHART) ---
+col_pct = st.columns(len(selected_apps))
 
 # Map warna tulisan angka persentase berdasarkan instruksi Anda
 app_text_color = {
@@ -244,49 +261,39 @@ app_text_color = {
 }
 
 for idx, app_name in enumerate(selected_apps):
-    with col_pie[idx]:
+    with col_pct[idx]:
         with st.container(border=True):
             df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
-            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
-            
-            # --- Bagian Awal: Tampilkan Diagram Lingkaran ---
-            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
-                             title=f"Distribusi Sentimen: {app_name}",
-                             color='sentimen',
-                             color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
-            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
-            st.plotly_chart(fig_pie, use_container_width=True)
-            
-            # --- Bagian Baru: Hitung & Tampilkan Persentase Distribusi ---
-            total_app_review = len(df_app_text) if 'df_app_text' in locals() else len(df_app_sent)
+            total_app_review = len(df_app_sent)
             
             if total_app_review > 0:
                 # Hitung ulasan positif dan negatif
                 pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
                 neg_count = len(df_app_sent[df_app_sent['sentimen'] == 'Negatif'])
                 
-                # Hitung persentase murni
+                # Hitung persentase
                 pos_pct = (pos_count / total_app_review) * 100
                 neg_pct = (neg_count / total_app_review) * 100
                 
                 # Mengambil kode warna teks sesuai aplikasi
                 color_code = app_text_color.get(app_name, "#2377ca")
                 
-                st.markdown("---") # Pembatas kecil di dalam card sebelum teks persentase
+                # Judul Kontainer Persentase
+                st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:10px;'>Persentase {app_name}</p>", unsafe_allow_html=True)
                 
                 # Tampilan persentase positif
                 st.markdown(f'''
-                <div class="metric-card" style="padding: 10px; margin-bottom: 10px;">
+                <div class="metric-card" style="padding: 15px; margin-bottom: 12px;">
                     <h2 style="margin:0; color:{color_code}; font-size: 28px;">{pos_pct:.1f}%</h2>
-                    <p style="margin:0; color: gray; font-size: 14px;">Distribusi Sentimen Positif {app_name}</p>
+                    <p style="margin:0; color: gray; font-size: 13px;">Distribusi Sentimen Positif {app_name}</p>
                 </div>
                 ''', unsafe_allow_html=True)
                 
                 # Tampilan persentase negatif
                 st.markdown(f'''
-                <div class="metric-card" style="padding: 10px; margin-bottom: 0px;">
+                <div class="metric-card" style="padding: 15px; margin-bottom: 0px;">
                     <h2 style="margin:0; color:{color_code}; font-size: 28px;">{neg_pct:.1f}%</h2>
-                    <p style="margin:0; color: gray; font-size: 14px;">Distribusi Sentimen Negatif {app_name}</p>
+                    <p style="margin:0; color: gray; font-size: 13px;">Distribusi Sentimen Negatif {app_name}</p>
                 </div>
                 ''', unsafe_allow_html=True)
 
