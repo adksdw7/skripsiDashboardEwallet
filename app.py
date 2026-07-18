@@ -225,21 +225,9 @@ for idx, app_name in enumerate(selected_apps):
             ]
         )
 
-        app_color = total_review_color[app_name]
-
 
         st.markdown(
-            f"""
-            <div class="metric-card">
-                <h2 style="margin:0; color:{app_color}; font-size:36px;">
-                    {app_total:,}
-                </h2>
-
-                <p style="margin:0; color:gray; font-size:16px; font-weight:bold;">
-                    Ulasan {app_name}
-                </p>
-            </div>
-            """,
+            f'<div class="metric-card"><h2 style="margin:0;color:{total_review_color[app_name]};font-size:36px;">{app_total:,}</h2><p style="margin:0;color:gray;font-size:16px;font-weight:bold;">Ulasan {app_name}</p></div>',
             unsafe_allow_html=True
         )
 
