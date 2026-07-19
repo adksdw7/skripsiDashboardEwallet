@@ -332,9 +332,9 @@ st.markdown(
         🔄 Hasil Analisis
     </h1>
     
-    <h4 style="text-align:center; width:100%; margin-bottom:20px;">
+    <h5 style="text-align:center; width:100%; margin-bottom:20px;">
         Data yang disajikan merupakan rangkuman ulasan selama satu tahun terakhir, yakni periode 1 Juni 2025 hingga 1 Juni 2026
-    </h4>
+    </h5>
     """,
     unsafe_allow_html=True
 )
