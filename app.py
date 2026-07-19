@@ -162,7 +162,7 @@ def red_color_func(word, font_size, position, orientation, random_state=None, **
 # =====================================================================
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 with st.container(key="info_kegunaan"):
-    st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
+    st.info("""💡**Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
 
 
 # =====================================================================
