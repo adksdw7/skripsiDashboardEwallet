@@ -162,7 +162,7 @@ def red_color_func(word, font_size, position, orientation, random_state=None, **
 # =====================================================================
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 with st.container(key="info_kegunaan"):
-    st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
+    st.info("""**Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
 
 
 # =====================================================================
@@ -318,7 +318,14 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
 #          bagian "Hasil Analisis" di bawahnya.
 # =====================================================================
 st.markdown("---")
-st.subheader("📱 Pilih E-Wallet")
+st.markdown(
+    """
+    <h3 style="text-align:center; width:100%; margin-bottom:10px;">
+        📱 Pilih E-Wallet
+    </h3>
+    """,
+    unsafe_allow_html=True
+)
 
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 with col_btn1:
@@ -353,7 +360,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis
+        🔄 Hasil Analisis 🔄
     </h1>
     """,
     unsafe_allow_html=True
