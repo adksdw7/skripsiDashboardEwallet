@@ -264,8 +264,10 @@ st.markdown("""
     }
     .landing-btn-row {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 10px;
         margin-top: 14px;
     }
@@ -351,7 +353,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis 🔄
+        🔄 Hasil Analisis
     </h1>
     """,
     unsafe_allow_html=True
