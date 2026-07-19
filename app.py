@@ -190,6 +190,15 @@ APP_LOGO_FILE = {
     "ShopeePay": "logoShopeepay.png"
 }
 
+# Tautan resmi Play Store tiap aplikasi — dibuka di tab baru saat tombol
+# "Download di Play Store" pada kartu masing-masing aplikasi diklik.
+# Bukan auto-download, hanya mengarahkan user ke halaman Play Store.
+APP_PLAYSTORE_URL = {
+    "DANA": "https://play.google.com/store/apps/details?id=id.dana&hl=id",
+    "GoPay": "https://play.google.com/store/apps/details?id=com.gojek.gopay&hl=id",
+    "ShopeePay": "https://play.google.com/store/apps/details?id=com.shopeepay.id&hl=id"
+}
+
 # CSS khusus kartu landing — ukuran logo dipatok tetap (fixed) di semua
 # breakpoint, dan layout pakai flexbox agar otomatis menyesuaikan lebar
 # layar (menciut jadi tumpukan vertikal di HP, sejajar di tablet/laptop)
@@ -235,12 +244,33 @@ st.markdown("""
         font-size: 15px;
         line-height: 1.6;
     }
+    .landing-btn-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+    }
+    .landing-download-btn {
+        display: inline-block;
+        padding: 8px 18px;
+        border: 2px solid var(--card-color);
+        border-radius: 8px;
+        color: #222222;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        background-color: #ffffff;
+        white-space: nowrap;
+    }
+    .landing-download-btn:hover {
+        background-color: rgba(0,0,0,0.04);
+    }
 </style>
 """, unsafe_allow_html=True)
 
 for app_name in ["DANA", "GoPay", "ShopeePay"]:
     color_code = LANDING_CARD_COLOR[app_name]
     logo_html = get_img_html(APP_LOGO_FILE[app_name], f"[Logo {app_name}]")
+    playstore_url = APP_PLAYSTORE_URL[app_name]
     st.markdown(
         f'''
         <div class="landing-card" style="--card-color: {color_code};">
@@ -248,6 +278,9 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
             <div class="landing-text-wrap">
                 <h2>{app_name}</h2>
                 <p>{APP_DESCRIPTIONS[app_name]}</p>
+                <div class="landing-btn-row">
+                    <a class="landing-download-btn" href="{playstore_url}" target="_blank" rel="noopener noreferrer">Download di Play Store</a>
+                </div>
             </div>
         </div>
         ''',
