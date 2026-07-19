@@ -156,64 +156,103 @@ st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terh
 
 
 # =====================================================================
-# B. LANDING PAGE — PILIHAN ARAH NAVIGASI USER
-# Tujuan : sesuai permintaan, user disambut dengan dua pilihan di awal:
-#          baca info/tinjauan pustaka aplikasi dulu, atau langsung ke
-#          komparasi sentimen. Dashboard tetap satu halaman scroll,
-#          tombol ini hanya menentukan section mana yang tampil aktif
-#          duluan — keduanya tetap bisa diakses kapan saja lewat scroll.
+# B. INFORMASI / TINJAUAN PUSTAKA PER APLIKASI (LANDING PAGE)
+# Asal   : logo aplikasi (logoDana.png, logoGopay.png, logoShopeepay.png)
+#          + teks tinjauan pustaka masing-masing aplikasi
+# Tujuan : menyambut user dengan kartu penuh berisi logo + penjelasan
+#          tiap aplikasi, langsung tampil tanpa perlu memilih apa pun.
+#          Logo dipaksa berukuran sama persis (lebar & tinggi tetap,
+#          object-fit: contain) supaya adil antar aplikasi meski file
+#          logo aslinya punya rasio/resolusi berbeda-beda.
+# Output : tiga kartu (DANA, GoPay, ShopeePay), masing-masing berwarna
+#          sesuai identitas aplikasi, dan responsif — pada layar sempit
+#          logo pindah ke atas teks (bertumpuk vertikal) via CSS
+#          flex-wrap, bukan ukuran diperkecil paksa oleh Streamlit.
 # =====================================================================
 st.markdown("---")
-st.markdown("### 👋 Mulai dari mana?")
 
-if "landing_choice" not in st.session_state:
-    st.session_state["landing_choice"] = None
-
-col_land1, col_land2 = st.columns(2)
-with col_land1:
-    if st.button("📖 Baca Info Aplikasi Terlebih Dahulu", use_container_width=True):
-        st.session_state["landing_choice"] = "info"
-with col_land2:
-    if st.button("📊 Langsung Lihat Komparasi Sentimen", use_container_width=True):
-        st.session_state["landing_choice"] = "komparasi"
-
-if st.session_state["landing_choice"] == "info":
-    st.success("Silakan gulir ke bawah menuju bagian **📖 Informasi Aplikasi**, lalu pilih aplikasi yang ingin kamu baca.")
-elif st.session_state["landing_choice"] == "komparasi":
-    st.success("Silakan gulir ke bawah menuju bagian **📱 Pilih E-Wallet** untuk mulai komparasi sentimen.")
-
-
-# =====================================================================
-# C. INFORMASI / TINJAUAN PUSTAKA PER APLIKASI
-# Tujuan : menyediakan penjelasan teks tentang masing-masing aplikasi.
-#          Sesuai permintaan (c): user memilih dulu aplikasi mana yang
-#          ingin dibaca; jika tidak memilih apa pun, tidak ada konten
-#          penjelasan yang terbuka.
-# Output : expander teks per aplikasi, kosong/placeholder sampai diisi
-#          dengan tinjauan pustaka.
-# =====================================================================
-st.markdown("---")
-st.markdown("### 📖 Informasi Aplikasi")
-st.caption("Pilih aplikasi yang ingin kamu baca penjelasannya. Jika tidak dipilih, bagian ini tetap tertutup.")
-
-info_options = st.multiselect(
-    "Pilih aplikasi untuk dibaca informasinya:",
-    options=["DANA", "GoPay", "ShopeePay"],
-    default=[]
-)
+LANDING_CARD_COLOR = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
 
 # Placeholder teks tinjauan pustaka — silakan ganti isi dictionary ini
 APP_DESCRIPTIONS = {
-    "DANA": "Tulis tinjauan pustaka / penjelasan aplikasi DANA di sini.",
-    "GoPay": "Tulis tinjauan pustaka / penjelasan aplikasi GoPay di sini.",
-    "ShopeePay": "Tulis tinjauan pustaka / penjelasan aplikasi ShopeePay di sini."
+    "DANA": "Solusi transaksi serba ada yang aman dan resmi diawasi Bank Indonesia. Mulai dari bayar tagihan bulanan, beli pulsa, hingga belanja QRIS, semua bisa dilakukan dengan cepat. Nikmati kemudahan transfer, tarik tunai, investasi, hingga bayar pajak kendaraan dalam satu genggaman. Download DANA sekarang untuk kelola keuangan lebih efisien!",
+    "GoPay": "Kini hadir sebagai aplikasi mandiri yang bisa digunakan siapa saja tanpa harus punya aplikasi Gojek. Nikmati kemudahan bayar tagihan, belanja di merchant, hingga transfer instan tanpa biaya admin. Dilengkapi fitur pencatatan pengeluaran otomatis dan akses tabungan, GoPay adalah cara paling praktis dan aman untuk mengatur keuangan harian Anda. Segera unduh dan permudah transaksi Anda!",
+    "ShopeePay": "Partner belanja daring dan luring paling praktis dengan promo eksklusif setiap hari. Terintegrasi langsung dengan Shopee untuk proses checkout super cepat, ShopeePay juga bisa digunakan untuk bayar tagihan, transfer saldo, dan transaksi QRIS di berbagai merchant. Aktivasi mudah dan terjamin keamanannya. Download ShopeePay sekarang dan nikmati belanja yang lebih hemat dan efisien!"
 }
 
-if info_options:
-    for app_name in info_options:
-        with st.expander(f"ℹ️ Tentang {app_name}", expanded=True):
-            st.markdown(f'<div class="metric-card">{get_img_html(f"logo{app_name}.png".replace("GoPay", "Gopay"), f"[Logo {app_name}]")}</div>', unsafe_allow_html=True)
-            st.write(APP_DESCRIPTIONS[app_name])
+APP_LOGO_FILE = {
+    "DANA": "logoDana.png",
+    "GoPay": "logoGopay.png",
+    "ShopeePay": "logoShopeepay.png"
+}
+
+# CSS khusus kartu landing — ukuran logo dipatok tetap (fixed) di semua
+# breakpoint, dan layout pakai flexbox agar otomatis menyesuaikan lebar
+# layar (menciut jadi tumpukan vertikal di HP, sejajar di tablet/laptop)
+st.markdown("""
+<style>
+    .landing-card {
+        border: 2px solid var(--card-color);
+        border-radius: 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 24px;
+    }
+    .landing-logo-wrap {
+        flex: 0 0 auto;
+        width: 100px;
+        height: 100px;
+        border-radius: 16px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .landing-logo-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    .landing-text-wrap {
+        flex: 1 1 280px;
+        min-width: 0;
+    }
+    .landing-text-wrap h2 {
+        margin: 0 0 8px 0;
+        color: var(--card-color);
+        font-size: 28px;
+    }
+    .landing-text-wrap p {
+        margin: 0;
+        color: #333333;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+for app_name in ["DANA", "GoPay", "ShopeePay"]:
+    color_code = LANDING_CARD_COLOR[app_name]
+    logo_html = get_img_html(APP_LOGO_FILE[app_name], f"[Logo {app_name}]")
+    st.markdown(
+        f'''
+        <div class="landing-card" style="--card-color: {color_code};">
+            <div class="landing-logo-wrap">{logo_html}</div>
+            <div class="landing-text-wrap">
+                <h2>{app_name}</h2>
+                <p>{APP_DESCRIPTIONS[app_name]}</p>
+            </div>
+        </div>
+        ''',
+        unsafe_allow_html=True
+    )
 
 
 # =====================================================================
