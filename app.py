@@ -329,13 +329,13 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis
+        🔄 Hasil Analisis 🔄
     </h1>
     """,
     unsafe_allow_html=True
 )
 
-st.info("💡 **Catatan**: Data yang disajikan merupakan rangkuman ulasan selama satu tahun terakhir, yakni periode 1 Juni 2025 hingga 1 Juni 2026.")
+st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 1 Juni 2026.")
 
 # ------------------------------------------------------------
 # URUTAN 1: TOTAL DATA BERSIH ULASAN
