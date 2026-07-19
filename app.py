@@ -331,13 +331,11 @@ st.markdown(
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
         🔄 Hasil Analisis
     </h1>
-    
-    <h5 style="text-align:center; width:100%; margin-bottom:20px;">
-        Data yang disajikan merupakan rangkuman ulasan selama satu tahun terakhir, yakni periode 1 Juni 2025 hingga 1 Juni 2026
-    </h5>
     """,
     unsafe_allow_html=True
 )
+
+st.info("💡 **Catatan**: Data yang disajikan merupakan rangkuman ulasan selama satu tahun terakhir, yakni periode 1 Juni 2025 hingga 1 Juni 2026.")
 
 # ------------------------------------------------------------
 # URUTAN 1: TOTAL DATA BERSIH ULASAN
