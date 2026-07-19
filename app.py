@@ -9,10 +9,13 @@ import base64
 
 # =====================================================================
 # 1. KONFIGURASI HALAMAN UTAMA DASHBOARD
+# Tujuan   : mengatur judul tab browser, layout lebar penuh (tanpa sidebar
+#            karena semua navigasi dilakukan dengan scrolling ke bawah),
+#            dan gaya CSS global untuk kartu metrik (.metric-card)
+# Output   : konfigurasi halaman + style yang dipakai di seluruh dashboard
 # =====================================================================
 st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
 
-# Gaya CSS global untuk mempercantik kartu visual agar seragam di PC/HP
 st.markdown("""
 <style>
     .metric-card {
@@ -27,292 +30,319 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
 # =====================================================================
-# 2. FUNGSI MEMUAT DATA DARI GITHUB
+# 2. FUNGSI MEMUAT SELURUH DATA (SUMBER TUNGGAL)
+# Asal    : file CSV hasil pipeline Colab (01scraping, 02preparation,
+#           03modelling) yang disimpan satu repo dengan app.py
+# Tujuan  : membaca semua CSV yang dibutuhkan dashboard HANYA SEKALI,
+#           lalu men-cache-nya (@st.cache_data) supaya tidak dibaca
+#           ulang setiap kali user berinteraksi dengan toggle/tombol.
+#           Ini menggantikan versi lama yang membaca rawDana.csv,
+#           rawGopay.csv, rawShopeepay.csv DUA KALI (di dalam dan di
+#           luar fungsi load_data) — bug redundansi yang sudah dihapus.
+# Output  : df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay,
+#           df_raw_shopee — lima DataFrame yang dipakai di seluruh
+#           bagian dashboard.
 # =====================================================================
 @st.cache_data
 def load_data():
-
-    # Data utama dashboard
+    # --- Data hasil klasifikasi sentimen & evaluasi model ---
     df_sentimen = pd.read_csv("hasilSentimen.csv")
     df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
 
-
-    # Data raw komentar asli
+    # --- Data ulasan mentah (dipakai untuk menampilkan teks ulasan asli) ---
     df_raw_dana = pd.read_csv("rawDana.csv")
     df_raw_gopay = pd.read_csv("rawGopay.csv")
     df_raw_shopee = pd.read_csv("rawShopeepay.csv")
 
-
+    # Penamaan ulang kolom hasil evaluasi agar konsisten dipakai di dashboard
     if len(df_evaluasi.columns) >= 12:
         df_evaluasi.columns = [
-            'aplikasi',
-            'Accuracy',
-            'Precision',
-            'Recall',
-            'Specificity',
-            'F1-Score',
-            'jumlahDataTrain',
-            'jumlahDataTest',
-            'TN',
-            'FP',
-            'FN',
-            'TP'
+            'aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity',
+            'F1-Score', 'jumlahDataTrain', 'jumlahDataTest',
+            'TN', 'FP', 'FN', 'TP'
         ]
 
+    # Konversi kolom tanggal ke tipe datetime agar bisa diagregasi per bulan
+    df_sentimen['date'] = pd.to_datetime(df_sentimen['date'])
 
-    df_sentimen['date'] = pd.to_datetime(
-        df_sentimen['date']
-    )
+    return df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay, df_raw_shopee
 
-
-    return (
-        df_sentimen,
-        df_evaluasi,
-        df_raw_dana,
-        df_raw_gopay,
-        df_raw_shopee
-    )
-
-    # =====================================================
-    # LOAD DATA RAW REVIEW UNTUK DETAIL KOMENTAR
-    # =====================================================
-
-    raw_dana = pd.read_csv(
-        "rawDana.csv"
-    )
-
-    raw_gopay = pd.read_csv(
-        "rawGopay.csv"
-    )
-
-    raw_shopeepay = pd.read_csv(
-        "rawShopeepay.csv"
-    )
-
-
-    # Tambahkan identitas aplikasi
-    raw_dana["appName"] = "DANA"
-
-    raw_gopay["appName"] = "GoPay"
-
-    raw_shopeepay["appName"] = "ShopeePay"
-
-
-
-    # Gabungkan semua raw review
-    df_raw_review = pd.concat(
-        [
-            raw_dana,
-            raw_gopay,
-            raw_shopeepay
-        ],
-        ignore_index=True
-    )
-
-
-    return (
-        df_sentimen,
-        df_evaluasi,
-        df_raw_review
-    )
 
 try:
-
-    (
-        df_sentimen,
-        df_evaluasi,
-        df_raw_dana,
-        df_raw_gopay,
-        df_raw_shopee
-
-    ) = load_data()
-
-
+    df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay, df_raw_shopee = load_data()
 except Exception as e:
-
-    st.error(
-        f"Gagal memuat data CSV. Pastikan file berada di repositori yang sama. Error: {e}"
-    )
-
+    st.error(f"Gagal memuat data CSV. Pastikan file berada di repositori yang sama. Error: {e}")
     st.stop()
 
-# =====================================================================
-# A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
-# =====================================================================
-st.title("📊KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 
-st.info("""
-💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay secara instan tanpa harus membaca puluhan ribu ulasan manual.
-""")
-
-# =====================================================================
-# B. INTERFASE TOMBOL SAKELAR (TOGGLE) LOGO APLIKASI
-# =====================================================================
-st.markdown("---")
-st.subheader("📱 Pilih E-Wallet")
-
-def get_img_html(file_path, alt_text):
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as f:
-            data = base64.b64encode(f.read()).decode("utf-8")
-        return f'<img src="data:image/png;base64,{data}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto;">'
-    return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
-
-col_btn1, col_btn2, col_btn3 = st.columns(3)
-
-with col_btn1:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
-    dana_active = st.toggle("DANA", value=True, key="tgl_dana")
-
-with col_btn2:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
-    gopay_active = st.toggle("GoPay", value=True, key="tgl_gopay")
-
-with col_btn3:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
-    shopee_active = st.toggle("ShopeePay", value=True, key="tgl_shopee")
-
-selected_apps = []
-if dana_active: selected_apps.append("DANA")
-if gopay_active: selected_apps.append("GoPay")
-if shopee_active: selected_apps.append("ShopeePay")
-
-if not selected_apps:
-    st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet ")
-    st.stop()
-
-# =====================================================================
-# 🔄 OUTPUT UTAMA HASIL ANALISIS (URUTAN SCROLLING KE BAWAH)
-# =====================================================================
-st.markdown("---")
-
-st.markdown(
-    """
-    <h1 style="
-        text-align:center;
-        width:100%;
-        margin-bottom:20px;
-    ">
-    🔄 Hasil Analisis
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
-
-# 📥 URUTAN 1: TOTAL DATA BERSIH ULASAN
-st.markdown("### 📥Total Data Ulasan")
-
-
-# Warna angka jumlah ulasan tiap aplikasi
-total_review_color = {
+# Warna identitas tiap aplikasi — dipakai berulang di banyak grafik/kartu,
+# jadi didefinisikan sekali di sini sebagai satu sumber kebenaran warna.
+APP_COLOR_MAP = {
     "DANA": "#2377ca",
     "GoPay": "#01aed6",
     "ShopeePay": "#ff773c"
 }
 
 
+# =====================================================================
+# FUNGSI BANTUAN: MENAMPILKAN LOGO SEBAGAI GAMBAR BASE64
+# Tujuan : mengubah file logo lokal (png) menjadi tag <img> yang bisa
+#          ditempel langsung di dalam HTML markdown Streamlit.
+# Output : string HTML <img> jika file logo ditemukan, atau teks
+#          placeholder abu-abu jika file tidak ada.
+# =====================================================================
+def get_img_html(file_path, alt_text):
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode("utf-8")
+        return f'<img src="data:image/png;base64,{data}" style="width: 80px; height: 80px; object-fit: contain;">'
+    return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
+
+
+# =====================================================================
+# FUNGSI: MENGAMBIL 10 ULASAN ASLI TERKAIT KATA TERPOPULER
+# Asal   : mencocokkan konten yang sudah diklasifikasi di df_sentimen
+#          dengan teks aslinya di file raw (df_raw_dana/gopay/shopee)
+# Tujuan : menampilkan ulasan asli (belum di-preprocessing) kepada user
+#          agar lebih mudah dibaca, saat toggle "tampilkan ulasan" aktif
+# Output : list berisi maksimal 10 string ulasan asli
+# Catatan: versi lama mendefinisikan fungsi bernama sama ini DUA KALI —
+#          definisi pertama (yang mengandalkan file eksternal terpisah
+#          via load_raw_reviews) tidak pernah terpakai karena langsung
+#          ditimpa definisi kedua. Duplikasi itu sudah dihapus di sini,
+#          hanya menyisakan satu implementasi yang benar-benar dipakai.
+# =====================================================================
+def get_top_reviews(app_name, sentiment):
+    if app_name == "DANA":
+        df_raw = df_raw_dana.copy()
+    elif app_name == "GoPay":
+        df_raw = df_raw_gopay.copy()
+    elif app_name == "ShopeePay":
+        df_raw = df_raw_shopee.copy()
+    else:
+        return []
+
+    df_sent = df_sentimen[
+        (df_sentimen['appName'] == app_name) &
+        (df_sentimen['sentimen'] == sentiment)
+    ][['content']]
+
+    if df_sent.empty:
+        return []
+
+    df_sent['content'] = df_sent['content'].astype(str).str.lower().str.strip()
+    df_raw['content'] = df_raw['content'].astype(str).str.lower().str.strip()
+
+    hasil = df_raw[df_raw['content'].isin(df_sent['content'])]
+
+    if hasil.empty:
+        return []
+
+    return hasil['content'].drop_duplicates().head(10).tolist()
+
+
+# Fungsi pewarna khusus wordcloud negatif (selalu merah, tidak memakai colormap)
+def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+    return "#cc0000"
+
+
+# =====================================================================
+# A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
+# =====================================================================
+st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
+st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
+
+
+# =====================================================================
+# B. LANDING PAGE — PILIHAN ARAH NAVIGASI USER
+# Tujuan : sesuai permintaan, user disambut dengan dua pilihan di awal:
+#          baca info/tinjauan pustaka aplikasi dulu, atau langsung ke
+#          komparasi sentimen. Dashboard tetap satu halaman scroll,
+#          tombol ini hanya menentukan section mana yang tampil aktif
+#          duluan — keduanya tetap bisa diakses kapan saja lewat scroll.
+# =====================================================================
+st.markdown("---")
+st.markdown("### 👋 Mulai dari mana?")
+
+if "landing_choice" not in st.session_state:
+    st.session_state["landing_choice"] = None
+
+col_land1, col_land2 = st.columns(2)
+with col_land1:
+    if st.button("📖 Baca Info Aplikasi Terlebih Dahulu", use_container_width=True):
+        st.session_state["landing_choice"] = "info"
+with col_land2:
+    if st.button("📊 Langsung Lihat Komparasi Sentimen", use_container_width=True):
+        st.session_state["landing_choice"] = "komparasi"
+
+if st.session_state["landing_choice"] == "info":
+    st.success("Silakan gulir ke bawah menuju bagian **📖 Informasi Aplikasi**, lalu pilih aplikasi yang ingin kamu baca.")
+elif st.session_state["landing_choice"] == "komparasi":
+    st.success("Silakan gulir ke bawah menuju bagian **📱 Pilih E-Wallet** untuk mulai komparasi sentimen.")
+
+
+# =====================================================================
+# C. INFORMASI / TINJAUAN PUSTAKA PER APLIKASI
+# Tujuan : menyediakan penjelasan teks tentang masing-masing aplikasi.
+#          Sesuai permintaan (c): user memilih dulu aplikasi mana yang
+#          ingin dibaca; jika tidak memilih apa pun, tidak ada konten
+#          penjelasan yang terbuka.
+# Output : expander teks per aplikasi, kosong/placeholder sampai diisi
+#          dengan tinjauan pustaka.
+# =====================================================================
+st.markdown("---")
+st.markdown("### 📖 Informasi Aplikasi")
+st.caption("Pilih aplikasi yang ingin kamu baca penjelasannya. Jika tidak dipilih, bagian ini tetap tertutup.")
+
+info_options = st.multiselect(
+    "Pilih aplikasi untuk dibaca informasinya:",
+    options=["DANA", "GoPay", "ShopeePay"],
+    default=[]
+)
+
+# Placeholder teks tinjauan pustaka — silakan ganti isi dictionary ini
+APP_DESCRIPTIONS = {
+    "DANA": "Tulis tinjauan pustaka / penjelasan aplikasi DANA di sini.",
+    "GoPay": "Tulis tinjauan pustaka / penjelasan aplikasi GoPay di sini.",
+    "ShopeePay": "Tulis tinjauan pustaka / penjelasan aplikasi ShopeePay di sini."
+}
+
+if info_options:
+    for app_name in info_options:
+        with st.expander(f"ℹ️ Tentang {app_name}", expanded=True):
+            st.markdown(f'<div class="metric-card">{get_img_html(f"logo{app_name}.png".replace("GoPay", "Gopay"), f"[Logo {app_name}]")}</div>', unsafe_allow_html=True)
+            st.write(APP_DESCRIPTIONS[app_name])
+
+
+# =====================================================================
+# D. INTERFASE TOMBOL SAKELAR (TOGGLE) LOGO APLIKASI
+# Tujuan : menentukan aplikasi mana yang ikut dianalisis di seluruh
+#          bagian "Hasil Analisis" di bawahnya.
+# =====================================================================
+st.markdown("---")
+st.subheader("📱 Pilih E-Wallet")
+
+col_btn1, col_btn2, col_btn3 = st.columns(3)
+with col_btn1:
+    st.markdown(f'<div class="metric-card">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
+    dana_active = st.toggle("DANA", value=True, key="tgl_dana")
+with col_btn2:
+    st.markdown(f'<div class="metric-card">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
+    gopay_active = st.toggle("GoPay", value=True, key="tgl_gopay")
+with col_btn3:
+    st.markdown(f'<div class="metric-card">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
+    shopee_active = st.toggle("ShopeePay", value=True, key="tgl_shopee")
+
+selected_apps = []
+if dana_active:
+    selected_apps.append("DANA")
+if gopay_active:
+    selected_apps.append("GoPay")
+if shopee_active:
+    selected_apps.append("ShopeePay")
+
+# Jika tidak ada toggle yang aktif, seluruh bagian "Hasil Analisis" di
+# bawah TIDAK akan ditampilkan sama sekali — dan warning tetap muncul.
+if not selected_apps:
+    st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet")
+    st.stop()
+
+
+# =====================================================================
+# 🔄 OUTPUT UTAMA HASIL ANALISIS (URUTAN SCROLLING KE BAWAH)
+# =====================================================================
+st.markdown("---")
+st.markdown(
+    """
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+        🔄 Hasil Analisis
+    </h1>
+    """,
+    unsafe_allow_html=True
+)
+
+# ------------------------------------------------------------
+# URUTAN 1: TOTAL DATA BERSIH ULASAN
+# ------------------------------------------------------------
+st.markdown("### 📥 Total Data Ulasan")
+
 col_u = st.columns(len(selected_apps))
-
-
 for idx, app_name in enumerate(selected_apps):
-
     with col_u[idx]:
-
-        app_total = len(
-            df_sentimen[
-                df_sentimen['appName'] == app_name
-            ]
-        )
-
-
+        app_total = len(df_sentimen[df_sentimen['appName'] == app_name])
         st.markdown(
-            f'<div class="metric-card"><h2 style="margin:0;color:{total_review_color[app_name]};font-size:36px;">{app_total:,}</h2><p style="margin:0;color:gray;font-size:16px;font-weight:bold;">Ulasan {app_name}</p></div>',
+            f'<div class="metric-card"><h2 style="margin:0;color:{APP_COLOR_MAP[app_name]};">{app_total:,}</h2><p style="margin:5px 0 0 0;color:gray;font-size:14px;">Total Ulasan {app_name}</p></div>',
             unsafe_allow_html=True
         )
 
-# 🍩 URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN DAN PERSENTASE
+# ------------------------------------------------------------
+# URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN + PERSENTASE
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### Proporsi Distribusi Sentimen Pengguna")
 
-# --- BARIS 1: UNTUK GRAFIK PIE/DONUT ---
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
         with st.container(border=True):
             df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
             df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
-            
-            fig_pie = px.pie(df_chart_pie, values='count', names='sentimen', hole=0.4,
-                             title=f"Distribusi Sentimen: {app_name}",
-                             color='sentimen',
-                             color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'})
+
+            fig_pie = px.pie(
+                df_chart_pie, values='count', names='sentimen', hole=0.4,
+                title=f"Distribusi Sentimen: {app_name}",
+                color='sentimen',
+                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
+            )
             fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
             st.plotly_chart(fig_pie, use_container_width=True)
 
-# --- BARIS 2: UNTUK KARTU PERSENTASE DISTRIBUSI (TERPISAH KEBANDING PIE CHART) ---
 st.markdown("---")
 st.markdown("### Persentase Distribusi Sentimen Pengguna")
-
 col_pct = st.columns(len(selected_apps))
-
-# Map warna tulisan angka persentase berdasarkan instruksi Anda
-app_text_color = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
 
 for idx, app_name in enumerate(selected_apps):
     with col_pct[idx]:
         with st.container(border=True):
             df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
             total_app_review = len(df_app_sent)
-            
+
             if total_app_review > 0:
-                # Hitung ulasan positif dan negatif
                 pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
                 neg_count = len(df_app_sent[df_app_sent['sentimen'] == 'Negatif'])
-                
-                # Hitung persentase
                 pos_pct = (pos_count / total_app_review) * 100
                 neg_pct = (neg_count / total_app_review) * 100
-                
-                # Mengambil kode warna teks sesuai aplikasi
-                color_code = app_text_color.get(app_name, "#2377ca")
-                
-                # Judul Kontainer Persentase (Diperbesar & Diberi Jarak Bawah)
-                st.markdown(f"<p style='text-align:center; font-weight:bold; font-size: 18px; margin-top:10px; margin-bottom:20px;'>Persentase {app_name}</p>", unsafe_allow_html=True)
-                
-                # Tampilan persentase positif (Padding diperbesar menjadi 35px dan tinggi font naik ke 36px)
+                color_code = APP_COLOR_MAP.get(app_name, "#2377ca")
+
+                st.markdown(f"<p style='text-align:center; font-weight:bold; font-size: 18px; margin-bottom: 15px;'>{app_name}</p>", unsafe_allow_html=True)
+
                 st.markdown(f'''
-                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 20px; min-height: 140px;">
+                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 20px; min-height: 100px;">
                     <h2 style="margin:0; color:{color_code}; font-size: 36px; font-weight: bold;">{pos_pct:.1f}%</h2>
-                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Positif {app_name}</p>
-                </div>
-                ''', unsafe_allow_html=True)
-                
-                # Tampilan persentase negatif (Padding diperbesar menjadi 35px dan tinggi font naik ke 36px)
-                st.markdown(f'''
-                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 10px; min-height: 140px;">
-                    <h2 style="margin:0; color:{color_code}; font-size: 36px; font-weight: bold;">{neg_pct:.1f}%</h2>
-                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Negatif {app_name}</p>
+                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Positif</p>
                 </div>
                 ''', unsafe_allow_html=True)
 
-# 📈 URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
+                st.markdown(f'''
+                <div class="metric-card" style="padding: 35px 20px; margin-bottom: 10px; min-height: 100px;">
+                    <h2 style="margin:0; color:{color_code}; font-size: 36px; font-weight: bold;">{neg_pct:.1f}%</h2>
+                    <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Negatif</p>
+                </div>
+                ''', unsafe_allow_html=True)
+
+# ------------------------------------------------------------
+# URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
+# (positif & negatif ditampilkan terpisah — ini yang menggantikan
+#  fungsi filter periode yang tidak lagi diperlukan)
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### 📈 Grafik Tren Perkembangan Sentimen Bulanan")
 
-
-# Filter hanya aplikasi yang dipilih user melalui toggle
 filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
-
-# Membuat kolom bulan
 filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
 
-
-# Agregasi jumlah sentimen per bulan dan aplikasi
 df_chart_trend_global = (
     filtered_df
     .groupby(['Bulan', 'appName', 'sentimen'])
@@ -320,889 +350,198 @@ df_chart_trend_global = (
     .reset_index(name='Jumlah')
 )
 
-
-# Warna garis setiap aplikasi
-color_apps_map = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
-
-# ==========================
-# DIAGRAM SENTIMEN POSITIF
-# ==========================
-
 with st.container(border=True):
-
-    df_pos_trend = df_chart_trend_global[
-        df_chart_trend_global['sentimen'] == 'Positif'
-    ]
-
-
+    df_pos_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Positif']
     fig_trend_pos = px.line(
-        df_pos_trend,
-        x='Bulan',
-        y='Jumlah',
-        color='appName',
-        markers=True,
+        df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
         title="📈 Tren Perkembangan Sentimen Positif Bulanan",
-        color_discrete_map=color_apps_map
+        color_discrete_map=APP_COLOR_MAP
     )
-
-
     fig_trend_pos.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
-        ),
-        xaxis_title="Periode Bulan",
-        yaxis_title="Jumlah Ulasan"
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        xaxis_title="Periode Bulan", yaxis_title="Jumlah Ulasan"
     )
-
-
-    st.plotly_chart(
-        fig_trend_pos,
-        use_container_width=True
-    )
-
-
-
-# ==========================
-# DIAGRAM SENTIMEN NEGATIF
-# ==========================
+    st.plotly_chart(fig_trend_pos, use_container_width=True)
 
 with st.container(border=True):
-
-    df_neg_trend = df_chart_trend_global[
-        df_chart_trend_global['sentimen'] == 'Negatif'
-    ]
-
-
+    df_neg_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Negatif']
     fig_trend_neg = px.line(
-        df_neg_trend,
-        x='Bulan',
-        y='Jumlah',
-        color='appName',
-        markers=True,
+        df_neg_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
         title="📉 Tren Perkembangan Sentimen Negatif Bulanan",
-        color_discrete_map=color_apps_map
+        color_discrete_map=APP_COLOR_MAP
     )
-
-
     fig_trend_neg.update_layout(
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
-        ),
-        xaxis_title="Periode Bulan",
-        yaxis_title="Jumlah Ulasan"
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
+        xaxis_title="Periode Bulan", yaxis_title="Jumlah Ulasan"
     )
+    st.plotly_chart(fig_trend_neg, use_container_width=True)
 
-
-    st.plotly_chart(
-        fig_trend_neg,
-        use_container_width=True
-    )
-    
-# 📊 URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
+# ------------------------------------------------------------
+# URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### 📊 Penyebaran Distribusi Rating Bintang Pengguna")
 
-
-color_rating_map = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
-
-# =====================================================
-# JIKA USER HANYA MEMILIH 1 APLIKASI
-# BAR CHART BIASA
-# =====================================================
-
 if len(selected_apps) == 1:
-
     app_name = selected_apps[0]
-
     with st.container(border=True):
-
-        df_app_rate = df_sentimen[
-            df_sentimen['appName'] == app_name
-        ]
-
-        df_chart_rate = (
-            df_app_rate
-            .groupby('score')
-            .size()
-            .reset_index(name='Total')
-        )
-
+        df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
+        df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
 
         fig_rate = px.bar(
-            df_chart_rate,
-            x='score',
-            y='Total',
+            df_chart_rate, x='score', y='Total',
             title=f"Distribusi Rating Bintang: {app_name}",
-            labels={
-                'score': 'Rating Bintang',
-                'Total': 'Jumlah Ulasan'
-            },
-            color_discrete_sequence=[
-                color_rating_map[app_name]
-            ]
+            labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
+            color_discrete_sequence=[APP_COLOR_MAP[app_name]]
         )
-
-
-        fig_rate.update_layout(
-            xaxis=dict(
-                dtick=1
-            )
-        )
-
-
-        st.plotly_chart(
-            fig_rate,
-            use_container_width=True
-        )
-
-
-
-# =====================================================
-# JIKA USER MEMILIH >1 APLIKASI
-# GROUPED BAR CHART
-# =====================================================
-
+        fig_rate.update_layout(xaxis=dict(dtick=1))
+        st.plotly_chart(fig_rate, use_container_width=True)
 else:
-
-
-    df_rating_group = df_sentimen[
-        df_sentimen['appName'].isin(selected_apps)
-    ]
-
-
-    df_rating_group = (
-        df_rating_group
-        .groupby(
-            ['score', 'appName']
-        )
-        .size()
-        .reset_index(name='Total')
-    )
-
+    df_rating_group = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
+    df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
 
     fig_rate_group = px.bar(
-        df_rating_group,
-        x='score',
-        y='Total',
-        color='appName',
-        barmode='group',
+        df_rating_group, x='score', y='Total', color='appName', barmode='group',
         title="Komparasi Distribusi Rating Bintang E-Wallet",
-        labels={
-            'score': 'Rating Bintang',
-            'Total': 'Jumlah Ulasan',
-            'appName': 'Aplikasi'
-        },
-        color_discrete_map=color_rating_map
+        labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
+        color_discrete_map=APP_COLOR_MAP
     )
-
-
     fig_rate_group.update_layout(
-
-        xaxis=dict(
-            dtick=1
-        ),
-
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
-        )
+        xaxis=dict(dtick=1),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
     )
-
-
-    st.plotly_chart(
-        fig_rate_group,
-        use_container_width=True
-    )
-
-# FUNGSI MEMUAT DATA RAW KOMENTAR
-@st.cache_data
-def load_raw_reviews():
-
-    raw_files = {
-        "DANA": "rawDana.csv",
-        "GoPay": "rawGopay.csv",
-        "ShopeePay": "rawShopeepay.csv"
-    }
-
-    raw_data = {}
-
-    for app, file in raw_files.items():
-
-        try:
-            df_raw = pd.read_csv(file)
-
-            raw_data[app] = df_raw
-
-        except:
-            raw_data[app] = pd.DataFrame()
-
-    return raw_data
-
-
-raw_reviews = load_raw_reviews()
-
-
-
-# =====================================================
-# FUNGSI MENGAMBIL 10 ULASAN BERDASARKAN KATA TERPOPULER
-# =====================================================
-
-def get_top_reviews(app_name, sentiment):
-
-    if app_name not in raw_reviews:
-        return []
-
-
-    df_raw = raw_reviews[app_name]
-
-
-    if df_raw.empty:
-        return []
-
-
-    # mencari kolom sentimen
-    sentiment_col = None
-
-    for col in df_raw.columns:
-        if "sentimen" in col.lower():
-            sentiment_col = col
-
-
-    # mencari kolom komentar
-    text_col = None
-
-    for col in df_raw.columns:
-        if "content" in col.lower() or "review" in col.lower() or "text" in col.lower():
-            text_col = col
-
-
-
-    if sentiment_col and text_col:
-
-        df_filter = df_raw[
-            df_raw[sentiment_col] == sentiment
-        ]
-
-
-        if df_filter.empty:
-            return []
-
-
-        # hitung kata yang sering muncul
-        all_text = " ".join(
-            df_filter[text_col]
-            .astype(str)
-        )
-
-
-        words = (
-            all_text
-            .lower()
-            .split()
-        )
-
-
-        counter_words = Counter(words)
-
-
-        top_words = [
-            word 
-            for word, jumlah 
-            in counter_words.most_common(10)
-        ]
-
-
-        hasil = []
-
-
-        for word in top_words:
-
-            temp = df_filter[
-                df_filter[text_col]
-                .astype(str)
-                .str.lower()
-                .str.contains(word, na=False)
-            ]
-
-
-            if not temp.empty:
-
-                hasil.append(
-                    temp[text_col]
-                    .iloc[0]
-                )
-
-
-        return hasil[:10]
-
-
-    return []
-
-# =====================================================
-# FUNGSI MENGAMBIL 10 ULASAN TERPOPULER DARI DATA RAW
-# =====================================================
-
-def get_top_reviews(app_name, sentiment):
-
-    # memilih file raw berdasarkan aplikasi
-    if app_name == "DANA":
-        df_raw = df_raw_dana.copy()
-
-    elif app_name == "GoPay":
-        df_raw = df_raw_gopay.copy()
-
-    elif app_name == "ShopeePay":
-        df_raw = df_raw_shopee.copy()
-
-    else:
-        return []
-
-
-    # mengambil data sentimen dari hasilSentimen
-    df_sent = df_sentimen[
-        (df_sentimen['appName'] == app_name) &
-        (df_sentimen['sentimen'] == sentiment)
-    ][['content']]
-
-
-    if df_sent.empty:
-        return []
-
-
-    # normalisasi teks
-    df_sent['content'] = (
-        df_sent['content']
-        .astype(str)
-        .str.lower()
-        .str.strip()
-    )
-
-
-    df_raw['content'] = (
-        df_raw['content']
-        .astype(str)
-        .str.lower()
-        .str.strip()
-    )
-
-
-    # mencari komentar yang sama antara hasilSentimen dan raw
-    hasil = df_raw[
-        df_raw['content'].isin(
-            df_sent['content']
-        )
-    ]
-
-
-    if hasil.empty:
-        return []
-
-
-    # mengambil 10 komentar dengan kata paling sering muncul
-    hasil = (
-        hasil['content']
-        .drop_duplicates()
-        .head(10)
-        .tolist()
-    )
-
-
-    return hasil
-
-# ☁️ URUTAN 5: WORD CLOUD INTERAKTIF DENGAN TOGGLE ULASAN
+    st.plotly_chart(fig_rate_group, use_container_width=True)
+
+# ------------------------------------------------------------
+# URUTAN 5: WORD CLOUD SENTIMEN + TOGGLE ULASAN TERKAIT
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### ☁️ Word Cloud Sentimen")
 
+wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
-# Warna wordcloud positif tiap aplikasi
-wc_positive_color = {
-    "DANA": "Blues",
-    "GoPay": "Greens",
-    "ShopeePay": "Oranges"
-}
-
-
-
-# Fungsi membuat warna merah untuk wordcloud negatif
-def red_color_func(
-    word,
-    font_size,
-    position,
-    orientation,
-    random_state=None,
-    **kwargs
-):
-    return "#cc0000"
-
-
-
-# membuat kolom sesuai jumlah aplikasi
 col_wc = st.columns(len(selected_apps))
-
-
-
 for idx, app_name in enumerate(selected_apps):
-
     with col_wc[idx]:
-
         with st.container(border=True):
+            df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
 
+            # --- Word Cloud Positif ---
+            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Positif {app_name}</p>", unsafe_allow_html=True)
 
-            df_app_text = df_sentimen[
-                df_sentimen['appName'] == app_name
-            ]
-
-
-
-            # =====================================================
-            # WORD CLOUD POSITIF
-            # =====================================================
-
-            st.markdown(
-                f"""
-                <p style='text-align:center;
-                font-weight:bold;
-                margin-bottom:5px;'>
-                Word Cloud Positif {app_name}
-                </p>
-                """,
-                unsafe_allow_html=True
-            )
-
-
-            text_positive = " ".join(
-                df_app_text[
-                    df_app_text['sentimen']=="Positif"
-                ]['content']
-                .astype(str)
-            )
-
-
+            text_positive = " ".join(df_app_text[df_app_text['sentimen'] == "Positif"]['content'].astype(str))
             if text_positive.strip():
-
-
                 wc_positive = WordCloud(
-                    background_color="white",
-                    max_words=50,
-                    colormap=wc_positive_color[app_name],
-                    width=400,
-                    height=250
+                    background_color="white", max_words=50,
+                    colormap=wc_positive_color[app_name], width=400, height=250
                 ).generate(text_positive)
 
-
-
-                fig, ax = plt.subplots(
-                    figsize=(4,2.5)
-                )
-
-                ax.imshow(
-                    wc_positive,
-                    interpolation="bilinear"
-                )
-
+                fig, ax = plt.subplots(figsize=(4, 2.5))
+                ax.imshow(wc_positive, interpolation="bilinear")
                 ax.axis("off")
-
-
                 st.pyplot(fig)
-
                 plt.close()
 
-
-
-            # TOGGLE ULASAN POSITIF
-            show_positive = st.toggle(
-                f"Tampilkan ulasan positif {app_name}",
-                key=f"positive_{app_name}"
-            )
-
-
-
+            show_positive = st.toggle(f"Tampilkan ulasan positif {app_name}", key=f"positive_{app_name}")
             if show_positive:
-
-                st.markdown(
-                    "**10 Ulasan Positif Berdasarkan Kata Terpopuler:**"
-                )
-
-
-                positive_reviews = get_top_reviews(
-                    app_name,
-                    "Positif"
-                )
-
-
+                st.markdown("**10 Ulasan Positif Berdasarkan Kata Terpopuler:**")
+                positive_reviews = get_top_reviews(app_name, "Positif")
                 if positive_reviews:
-
-                    for i, review in enumerate(
-                        positive_reviews,
-                        1
-                    ):
-
-                        st.write(
-                            f"{i}. {review}"
-                        )
-
+                    for i, review in enumerate(positive_reviews, 1):
+                        st.write(f"{i}. {review}")
                 else:
+                    st.info("Data ulasan positif tidak ditemukan.")
 
-                    st.info(
-                        "Data ulasan positif tidak ditemukan."
-                    )
+            # --- Word Cloud Negatif ---
+            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-top:15px; margin-bottom:5px;'>Word Cloud Negatif {app_name}</p>", unsafe_allow_html=True)
 
-
-
-            # =====================================================
-            # WORD CLOUD NEGATIF
-            # =====================================================
-
-
-            st.markdown(
-                f"""
-                <p style='text-align:center;
-                font-weight:bold;
-                margin-top:15px;
-                margin-bottom:5px;'>
-                Word Cloud Negatif {app_name}
-                </p>
-                """,
-                unsafe_allow_html=True
-            )
-
-
-
-            text_negative = " ".join(
-                df_app_text[
-                    df_app_text['sentimen']=="Negatif"
-                ]['content']
-                .astype(str)
-            )
-
-
+            text_negative = " ".join(df_app_text[df_app_text['sentimen'] == "Negatif"]['content'].astype(str))
             if text_negative.strip():
-
-
                 wc_negative = WordCloud(
-                    background_color="white",
-                    max_words=50,
-                    width=400,
-                    height=250
+                    background_color="white", max_words=50, width=400, height=250
                 ).generate(text_negative)
+                wc_negative.recolor(color_func=red_color_func)
 
-
-
-                wc_negative.recolor(
-                    color_func=red_color_func
-                )
-
-
-
-                fig, ax = plt.subplots(
-                    figsize=(4,2.5)
-                )
-
-
-                ax.imshow(
-                    wc_negative,
-                    interpolation="bilinear"
-                )
-
-
+                fig, ax = plt.subplots(figsize=(4, 2.5))
+                ax.imshow(wc_negative, interpolation="bilinear")
                 ax.axis("off")
-
-
                 st.pyplot(fig)
-
                 plt.close()
 
-
-
-            # TOGGLE ULASAN NEGATIF
-            show_negative = st.toggle(
-                f"Tampilkan ulasan negatif {app_name}",
-                key=f"negative_{app_name}"
-            )
-
-
-
+            show_negative = st.toggle(f"Tampilkan ulasan negatif {app_name}", key=f"negative_{app_name}")
             if show_negative:
-
-
-                st.markdown(
-                    "**10 Ulasan Negatif Berdasarkan Kata Terpopuler:**"
-                )
-
-
-                negative_reviews = get_top_reviews(
-                    app_name,
-                    "Negatif"
-                )
-
-
-
+                st.markdown("**10 Ulasan Negatif Berdasarkan Kata Terpopuler:**")
+                negative_reviews = get_top_reviews(app_name, "Negatif")
                 if negative_reviews:
-
-
-                    for i, review in enumerate(
-                        negative_reviews,
-                        1
-                    ):
-
-                        st.write(
-                            f"{i}. {review}"
-                        )
-
-
+                    for i, review in enumerate(negative_reviews, 1):
+                        st.write(f"{i}. {review}")
                 else:
+                    st.info("Data ulasan negatif tidak ditemukan.")
 
-                    st.info(
-                        "Data ulasan negatif tidak ditemukan."
-                    )
-
-#🔮 URUTAN 7: NILAI METRIK KINERJA KLASIFIKASI NBC
+# ------------------------------------------------------------
+# URUTAN 6: NILAI METRIK KINERJA KLASIFIKASI NBC
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 
-
-# Warna nilai metrik berdasarkan aplikasi
-metric_color_map = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
-
 for app_name in selected_apps:
-
-    row_eval = df_evaluasi[
-        df_evaluasi['aplikasi'] == app_name
-    ]
-
+    row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
     if not row_eval.empty:
-
         row_eval = row_eval.iloc[0]
+        app_color = APP_COLOR_MAP.get(app_name, "#2377ca")
 
-        # mengambil warna sesuai aplikasi
-        app_color = metric_color_map.get(
-            app_name,
-            "#2377ca"
-        )
-
-
-        st.markdown(
-            f"**Metrik Performa Pengujian Model NBC: {app_name}**"
-        )
-
-
+        st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
         col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
+        metric_labels = [
+            ("Accuracy", col_m1), ("Precision", col_m2), ("Recall", col_m3),
+            ("Specificity", col_m4), ("F1-Score", col_m5)
+        ]
+        for label, col in metric_labels:
+            col.markdown(
+                f'''
+                <div class="metric-card">
+                    <p style="margin:0;color:gray;font-size:14px;">{label}</p>
+                    <h3 style="margin:0;color:{app_color};">{str(row_eval[label])}</h3>
+                </div>
+                ''',
+                unsafe_allow_html=True
+            )
 
-        col_m1.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    Accuracy
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {str(row_eval["Accuracy"])}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
 
-
-        col_m2.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    Precision
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {str(row_eval["Precision"])}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        col_m3.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    Recall
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {str(row_eval["Recall"])}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        col_m4.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    Specificity
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {str(row_eval["Specificity"])}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        col_m5.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    F1-Score
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {str(row_eval["F1-Score"])}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-
-        st.markdown(
-            '<div style="margin-bottom:15px;"></div>',
-            unsafe_allow_html=True
-        )
-
-#🎯 URUTAN 8: JUMLAH ELEMEN VALUE CONFUSION MATRIX
+# ------------------------------------------------------------
+# URUTAN 7: JUMLAH ELEMEN VALUE CONFUSION MATRIX
+# ------------------------------------------------------------
 st.markdown("---")
 st.markdown("### Nilai Confusion Matrix")
 
-col_cm_img = st.columns([1,2,1])
-
+col_cm_img = st.columns([1, 2, 1])
 with col_cm_img[1]:
-    st.image(
-        "confussionmatrix.png",
-        use_container_width=True
-    )
-
-# Warna nilai confusion matrix berdasarkan aplikasi
-cm_color_map = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
+    st.image("confussionmatrix.png", use_container_width=True)
 
 for app_name in selected_apps:
-
-    row_cm = df_evaluasi[
-        df_evaluasi['aplikasi'] == app_name
-    ]
-
+    row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
     if not row_cm.empty:
-
         row_cm = row_cm.iloc[0]
+        app_color_cm = APP_COLOR_MAP.get(app_name, "#2377ca")
 
-
-        # mengambil warna sesuai aplikasi
-        app_color_cm = cm_color_map.get(
-            app_name,
-            "#2377ca"
-        )
-
-
-        st.markdown(
-            f"**Komposisi Hasil Prediksi Matriks: {app_name}**"
-        )
-
-
+        st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-        
-        
-        col_c1.markdown(
-            f'''
-            <div class="metric-card">
-            <p style="margin:0;color:gray;font-size:14px;">
-            True Negative (TN)
-            </p>
-            <h3 style="margin:0;color:{app_color_cm};">
-            {int(row_cm["TN"]):,}
-            </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
 
-        
-        
-        col_c2.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    False Positive (FP)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["FP"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
+        cm_labels = [
+            ("True Negative (TN)", "TN", col_c1), ("False Positive (FP)", "FP", col_c2),
+            ("False Negative (FN)", "FN", col_c3), ("True Positive (TP)", "TP", col_c4)
+        ]
+        for label, key, col in cm_labels:
+            col.markdown(
+                f'''
+                <div class="metric-card">
+                    <p style="margin:0;color:gray;font-size:14px;">{label}</p>
+                    <h3 style="margin:0;color:{app_color_cm};">{int(row_cm[key]):,}</h3>
+                </div>
+                ''',
+                unsafe_allow_html=True
+            )
 
-        
-        col_c3.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    False Negative (FN)
-                     </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["FN"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )
-
-        
-        col_c4.markdown(
-            f'''
-            <div class="metric-card">
-                <p style="margin:0;color:gray;font-size:14px;">
-                    True Positive (TP)
-                </p>
-                <h3 style="margin:0;color:{app_color_cm};">
-                    {int(row_cm["TP"]):,}
-                </h3>
-            </div>
-            ''',
-            unsafe_allow_html=True
-        )       
-
-        
-        st.markdown(
-            '<div style="margin-bottom:15px;"></div>',
-            unsafe_allow_html=True
-        )
+        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
