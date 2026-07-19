@@ -162,7 +162,7 @@ def red_color_func(word, font_size, position, orientation, random_state=None, **
 # =====================================================================
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 with st.container(key="info_kegunaan"):
-    st.info("""**Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
+    st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
 
 
 # =====================================================================
@@ -207,6 +207,14 @@ APP_PLAYSTORE_URL = {
     "DANA": "https://play.google.com/store/apps/details?id=id.dana&hl=id",
     "GoPay": "https://play.google.com/store/apps/details?id=com.gojek.gopay&hl=id",
     "ShopeePay": "https://play.google.com/store/apps/details?id=com.shopeepay.id&hl=id"
+}
+
+# Tautan website resmi tiap aplikasi — dibuka di tab baru saat tombol
+# "Kunjungi Website Resmi" pada kartu masing-masing aplikasi diklik.
+APP_WEBSITE_URL = {
+    "DANA": "https://www.dana.id/",
+    "GoPay": "https://gopay.co.id/",
+    "ShopeePay": "https://shopeepay.co.id/"
 }
 
 # CSS khusus kartu landing — ukuran logo dipatok tetap (fixed) di semua
@@ -256,7 +264,9 @@ st.markdown("""
     }
     .landing-btn-row {
         display: flex;
-        justify-content: flex-end;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
         margin-top: 14px;
     }
     .landing-download-btn {
@@ -280,6 +290,7 @@ st.markdown("""
 for app_name in ["DANA", "GoPay", "ShopeePay"]:
     color_code = LANDING_CARD_COLOR[app_name]
     logo_html = get_img_html(APP_LOGO_FILE[app_name], f"[Logo {app_name}]")
+    website_url = APP_WEBSITE_URL[app_name]
     playstore_url = APP_PLAYSTORE_URL[app_name]
     st.markdown(
         f'''
@@ -289,6 +300,7 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
                 <h2>{app_name}</h2>
                 <p>{APP_DESCRIPTIONS[app_name]}</p>
                 <div class="landing-btn-row">
+                    <a class="landing-download-btn" href="{website_url}" target="_blank" rel="noopener noreferrer">Kunjungi Website Resmi</a>
                     <a class="landing-download-btn" href="{playstore_url}" target="_blank" rel="noopener noreferrer">Download di Play Store</a>
                 </div>
             </div>
@@ -339,7 +351,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis
+        🔄 Hasil Analisis 🔄
     </h1>
     """,
     unsafe_allow_html=True
