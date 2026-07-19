@@ -27,6 +27,15 @@ st.markdown("""
         text-align: center;
         margin-bottom: 15px;
     }
+    /* Menengahkan teks HANYA pada dua info box tertentu (dibungkus
+       st.container(key=...) di bawah), supaya kotak info/warning lain
+       di dashboard tidak ikut berubah perataannya. */
+    .st-key-info_kegunaan [data-testid="stAlertContainer"],
+    .st-key-info_kegunaan [data-testid="stAlert"],
+    .st-key-info_periode [data-testid="stAlertContainer"],
+    .st-key-info_periode [data-testid="stAlert"] {
+        text-align: center;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -152,7 +161,8 @@ def red_color_func(word, font_size, position, orientation, random_state=None, **
 # A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
 # =====================================================================
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
-st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
+with st.container(key="info_kegunaan"):
+    st.info("""💡 **Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
 
 
 # =====================================================================
@@ -329,13 +339,13 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis 🔄
+        🔄 Hasil Analisis
     </h1>
     """,
     unsafe_allow_html=True
 )
-
-st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 1 Juni 2026.")
+with st.container(key="info_periode"):
+    st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 1 Juni 2026")
 
 # ------------------------------------------------------------
 # URUTAN 1: TOTAL DATA BERSIH ULASAN
