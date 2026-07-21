@@ -614,39 +614,3 @@ for app_name in selected_apps:
             )
 
         st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
-
-# ------------------------------------------------------------
-# URUTAN 7: JUMLAH ELEMEN VALUE CONFUSION MATRIX
-# ------------------------------------------------------------
-st.markdown("---")
-st.markdown("### Nilai Confusion Matrix")
-
-col_cm_img = st.columns([1, 2, 1])
-with col_cm_img[1]:
-    st.image("confussionmatrix.png", use_container_width=True)
-
-for app_name in selected_apps:
-    row_cm = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
-    if not row_cm.empty:
-        row_cm = row_cm.iloc[0]
-        app_color_cm = APP_COLOR_MAP.get(app_name, "#2377ca")
-
-        st.markdown(f"**Komposisi Hasil Prediksi Matriks: {app_name}**")
-        col_c1, col_c2, col_c3, col_c4 = st.columns(4)
-
-        cm_labels = [
-            ("True Negative (TN)", "TN", col_c1), ("False Positive (FP)", "FP", col_c2),
-            ("False Negative (FN)", "FN", col_c3), ("True Positive (TP)", "TP", col_c4)
-        ]
-        for label, key, col in cm_labels:
-            col.markdown(
-                f'''
-                <div class="metric-card">
-                    <p style="margin:0;color:gray;font-size:14px;">{label}</p>
-                    <h3 style="margin:0;color:{app_color_cm};">{int(row_cm[key]):,}</h3>
-                </div>
-                ''',
-                unsafe_allow_html=True
-            )
-
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
