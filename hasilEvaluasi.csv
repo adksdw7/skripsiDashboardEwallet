@@ -1,0 +1,4 @@
+aplikasi,Accuracy,Precision,Recall,Specificity,F1-Score,jumlahDataTrain,jumlahDataTest,TN,FP,FN,TP
+DANA,87.9%,90.3%,94.3%,67.6%,92.2%,8784,2196,354,170,95,1577
+GoPay,92.8%,93.6%,98.0%,67.5%,95.8%,8886,2222,257,124,36,1805
+ShopeePay,92.9%,93.6%,98.4%,61.2%,95.9%,8873,2219,202,128,30,1859
