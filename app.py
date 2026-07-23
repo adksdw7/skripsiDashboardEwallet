@@ -366,7 +366,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 with st.container(key="info_periode"):
-    st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 1 Juni 2026")
+    st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 31 Mei 2026")
 
 # ------------------------------------------------------------
 # URUTAN 1: TOTAL DATA BERSIH ULASAN
