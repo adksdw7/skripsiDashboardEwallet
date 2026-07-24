@@ -549,7 +549,7 @@ for idx, app_name in enumerate(selected_apps):
 
             show_positive = st.toggle(f"Tampilkan ulasan positif {app_name}", key=f"positive_{app_name}")
             if show_positive:
-                st.markdown("**10 Ulasan Positif Berdasarkan Kata Terpopuler:**")
+                st.markdown("**10 Contoh Ulasan Positif:**")
                 positive_reviews = get_top_reviews(app_name, "Positif")
                 if positive_reviews:
                     for i, review in enumerate(positive_reviews, 1):
@@ -575,7 +575,7 @@ for idx, app_name in enumerate(selected_apps):
 
             show_negative = st.toggle(f"Tampilkan ulasan negatif {app_name}", key=f"negative_{app_name}")
             if show_negative:
-                st.markdown("**10 Ulasan Negatif Berdasarkan Kata Terpopuler:**")
+                st.markdown("**10 Contoh Ulasan Negatif:**")
                 negative_reviews = get_top_reviews(app_name, "Negatif")
                 if negative_reviews:
                     for i, review in enumerate(negative_reviews, 1):
