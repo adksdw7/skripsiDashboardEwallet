@@ -189,9 +189,9 @@ LANDING_CARD_COLOR = {
 
 # Placeholder teks tinjauan pustaka — silakan ganti isi dictionary ini
 APP_DESCRIPTIONS = {
-    "DANA": "Karakteristik utama platform ini terletak pada penerapan sistem open platform yang mempermudah integrasi dengan berbagai mitra bisnis dan aplikasi pihak ketiga. Fokus operasionalnya diarahkan untuk memfasilitasi ekosistem transaksi harian secara non-tunai, seperti transfer dana, pembayaran tagihan, dan pemindaian kode QRIS. Selain itu, ketersediaan fitur DANA Bisnis menjadi nilai tambah penting dalam mendukung digitalisasi dan manajemen keuangan para pelaku UMKM",
+    "DANA": "Aplikasi dengan penerapan sistem open platform yang mempermudah integrasi berbagai mitra bisnis dan aplikasi pihak ketiga. Fokus operasionalnya diarahkan untuk memfasilitasi ekosistem transaksi harian secara non-tunai, seperti transfer dana, pembayaran tagihan, dan pemindaian kode QRIS. Ketersediaan fitur DANA Bisnis menjadi nilai tambah penting dalam mendukung digitalisasi dan manajemen keuangan para pelaku UMKM",
     "GoPay": "Produk finansial dari GoTo Financial yang kini beroperasi sebagai aplikasi mandiri ini lebih menekankan fungsionalitasnya pada efisiensi manajemen keuangan personal. Di samping melayani kebutuhan transaksi pembayaran dan transfer dana, keunggulan utamanya berada pada sistem pencatatan pengeluaran otomatis. Aplikasi ini juga memperluas cakupan layanannya melalui integrasi perbankan digital lewat fitur GoPay Tabungan by Jago",
-    "ShopeePay": "Keunggulan kompetitif platform yang dikelola oleh PT AirPay International Indonesia ini berakar kuat pada ekosistem belanja daring (e-commerce) Shopee. Setelah memperluas jangkauannya melalui aplikasi mandiri, sistem fokus pada penyelesaian transaksi komersial yang instan, pengelolaan beberapa sumber dana sekaligus, serta perluasan akses pembayaran berbasis QRIS di berbagai merchant luring"
+    "ShopeePay": "Keunggulan aplikasi yang dikelola oleh PT AirPay International Indonesia ini berakar kuat pada ekosistem belanja daring aplikasi Shopee. Setelah memperluas jangkauannya melalui aplikasi mandiri, sistem fokus pada penyelesaian transaksi komersial yang instan, pengelolaan beberapa sumber dana sekaligus, serta perluasan akses pembayaran berbasis QRIS di berbagai merchant luring"
 }
 
 APP_LOGO_FILE = {
