@@ -612,5 +612,27 @@ for app_name in selected_apps:
                 ''',
                 unsafe_allow_html=True
             )
-
+            
+            # Confusion Matrix
+        st.markdown(f"<p style='text-align:center;font-weight:bold;margin-top:10px;'>Confusion Matrix: {app_name}</p>", unsafe_allow_html=True)
+        st.markdown(f'''
+        <table style="width:100%;text-align:center;border-collapse:collapse;">
+            <tr>
+                <td></td>
+                <td style="font-weight:bold;padding:6px;">Prediksi Positif</td>
+                <td style="font-weight:bold;padding:6px;">Prediksi Negatif</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;padding:6px;">Aktual Positif</td>
+                <td style="background:#eafbe7;padding:10px;border:1px solid #ddd;">{int(row_eval['TP'])} (TP)</td>
+                <td style="background:#fdeaea;padding:10px;border:1px solid #ddd;">{int(row_eval['FN'])} (FN)</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;padding:6px;">Aktual Negatif</td>
+                <td style="background:#fdeaea;padding:10px;border:1px solid #ddd;">{int(row_eval['FP'])} (FP)</td>
+                <td style="background:#eafbe7;padding:10px;border:1px solid #ddd;">{int(row_eval['TN'])} (TN)</td>
+            </tr>
+        </table>
+        ''', unsafe_allow_html=True)
+        
         st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
