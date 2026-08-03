@@ -447,6 +447,7 @@ st.markdown("### Proporsi Distribusi Sentimen Pengguna")
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
     with col_pie[idx]:
+        # Menggunakan satu container utama agar latar belakang putih menyatu penuh
         with st.container(border=True):
             df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
             df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
@@ -457,10 +458,14 @@ for idx, app_name in enumerate(selected_apps):
                 color='sentimen',
                 color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
             )
-            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+            # 1. Mengubah legenda menjadi vertikal di atas-kiri dan memotong margin bawah chart
+            fig_pie.update_layout(
+                legend=dict(orientation="v", yanchor="top", y=0.95, xanchor="left", x=0.02),
+                margin=dict(t=50, b=10, l=10, r=10)
+            )
             st.plotly_chart(fig_pie, use_container_width=True)
 
-            # --- Persentase digabung ke kartu yang sama ---
+            # --- 2. Teks persentase otomatis menyatu di dalam container putih yang sama ---
             total_app_review = len(df_app_sent)
             if total_app_review > 0:
                 pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
@@ -472,14 +477,14 @@ for idx, app_name in enumerate(selected_apps):
                 col_neg, col_pos = st.columns(2)
                 with col_neg:
                     st.markdown(f'''
-                    <div style="text-align:center;">
+                    <div style="text-align:center; padding-bottom: 10px;">
                         <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{neg_pct:.1f}%</h2>
                         <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Negatif</p>
                     </div>
                     ''', unsafe_allow_html=True)
                 with col_pos:
                     st.markdown(f'''
-                    <div style="text-align:center;">
+                    <div style="text-align:center; padding-bottom: 10px;">
                         <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{pos_pct:.1f}%</h2>
                         <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Positif</p>
                     </div>
