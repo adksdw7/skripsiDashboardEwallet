@@ -41,6 +41,14 @@ st.markdown("""
 
 st.markdown("""
 <style>
+    hr {
+        border: none;
+        height: 4px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #2377ca, #01aed6, #ff773c);
+        margin: 2.5rem 0;
+        opacity: 0.85;
+    }
     /* ====== 1. FONT: Plus Jakarta Sans ====== */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
