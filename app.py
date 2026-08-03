@@ -453,9 +453,7 @@ for idx, app_name in enumerate(selected_apps):
                 df_chart_pie, values='count', names='sentimen', hole=0.4,
                 title=f"Distribusi Sentimen: {app_name}",
                 color='sentimen',
-                color_discrete_map={'Positif': '
-#1ccc0d', 'Negatif': '
-#cc0000'}
+                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}            
             )
             fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
             st.plotly_chart(fig_pie, use_container_width=True)
@@ -472,8 +470,7 @@ for idx, app_name in enumerate(selected_apps):
                 neg_count = len(df_app_sent[df_app_sent['sentimen'] == 'Negatif'])
                 pos_pct = (pos_count / total_app_review) * 100
                 neg_pct = (neg_count / total_app_review) * 100
-                color_code = APP_COLOR_MAP.get(app_name, "
-#2377ca")
+                color_code = APP_COLOR_MAP.get(app_name, "#2377ca")
                 st.markdown(f"<p style='text-align:center; font-weight:bold; font-size: 18px; margin-bottom: 15px;'>{app_name}</p>", unsafe_allow_html=True)
                 st.markdown(f'''
                 <div class="metric-card" style="padding: 35px 20px; margin-bottom: 20px; min-height: 100px;">
