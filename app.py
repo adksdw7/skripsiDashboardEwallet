@@ -62,7 +62,7 @@ st.markdown("""
     /* ====== 3. BORDER TEGAS + SHADOW di semua kartu & container ====== */
     .metric-card {
         border: 2px solid #d7dce2 !important;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 8px 16px rgba(0,0,0,0.04), 0 16px 32px rgba(0,0,0,0.06) !important;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .metric-card:hover {
