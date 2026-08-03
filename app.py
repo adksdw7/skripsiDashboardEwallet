@@ -39,6 +39,54 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    /* ====== 1. FONT: Plus Jakarta Sans ====== */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    html, body, [data-testid="stAppViewContainer"],
+    p, span, div, h1, h2, h3, h4, h5, h6, label {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    /* ====== 2. BACKGROUND: blur pastel perpaduan 3 warna aplikasi ====== */
+    .stApp {
+        background:
+            radial-gradient(circle at 8% 12%, rgba(35, 119, 202, 0.16) 0%, transparent 42%),
+            radial-gradient(circle at 92% 18%, rgba(1, 174, 214, 0.14) 0%, transparent 42%),
+            radial-gradient(circle at 50% 100%, rgba(255, 119, 60, 0.13) 0%, transparent 48%),
+            #fafbfc;
+        background-attachment: fixed;
+    }
+
+    /* ====== 3. BORDER TEGAS + SHADOW di semua kartu & container ====== */
+    .metric-card {
+        border: 2px solid #d7dce2 !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.12) !important;
+    }
+
+    .landing-card {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #ffffff !important;
+        border: 2px solid #d7dce2 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+    }
+
+    [data-testid="stAlertContainer"] {
+        border-radius: 12px !important;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.06) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # =====================================================================
 # 2. FUNGSI MEMUAT SELURUH DATA (SUMBER TUNGGAL)
