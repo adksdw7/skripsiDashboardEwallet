@@ -492,45 +492,53 @@ for idx, app_name in enumerate(selected_apps):
                     <p style="margin:5px 0 0 0; color: gray; font-size: 14px;">Distribusi Sentimen Negatif</p>
                 </div>
                 ''', unsafe_allow_html=True)
+
 # ------------------------------------------------------------
-# URUTAN 2c: PERBANDINGAN LANGSUNG ANTAR APLIKASI (2+ aplikasi)
+# URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN + PERSENTASE
 # ------------------------------------------------------------
-if len(selected_apps) >= 2:
-    st.markdown("---")
-    st.markdown("### ⚖️ Perbandingan Langsung Distribusi Sentimen")
+st.markdown("---")
+st.markdown("### Proporsi Distribusi Sentimen Pengguna")
 
-    compare_rows = []
-    for app_name in selected_apps:
-        df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
-        total_app_review = len(df_app_sent)
-        if total_app_review > 0:
-            pos_pct = (len(df_app_sent[df_app_sent['sentimen'] == 'Positif']) / total_app_review) * 100
-            neg_pct = (len(df_app_sent[df_app_sent['sentimen'] == 'Negatif']) / total_app_review) * 100
-            compare_rows.append({'appName': app_name, 'sentimen': 'Positif', 'Persentase': pos_pct})
-            compare_rows.append({'appName': app_name, 'sentimen': 'Negatif', 'Persentase': neg_pct})
+col_pie = st.columns(len(selected_apps))
+for idx, app_name in enumerate(selected_apps):
+    with col_pie[idx]:
+        with st.container(border=True):
+            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
+            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
 
-    df_compare = pd.DataFrame(compare_rows)
-    urutan_app = (
-        df_compare[df_compare['sentimen'] == 'Positif']
-        .sort_values('Persentase', ascending=False)['appName']
-        .tolist()
-    )
+            fig_pie = px.pie(
+                df_chart_pie, values='count', names='sentimen', hole=0.4,
+                title=f"Distribusi Sentimen: {app_name}",
+                color='sentimen',
+                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
+            )
+            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
+            st.plotly_chart(fig_pie, use_container_width=True)
 
-    with st.container(border=True):
-        fig_compare = px.bar(
-            df_compare, x='Persentase', y='appName', color='sentimen',
-            orientation='h', text='Persentase',
-            category_orders={'appName': urutan_app, 'sentimen': ['Positif', 'Negatif']},
-            color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'},
-            title="Ranking Sentimen Positif vs Negatif Antar Aplikasi"
-        )
-        fig_compare.update_traces(texttemplate='%{text:.1f}%', textposition='inside')
-        fig_compare.update_layout(
-            barmode='stack', height=280,
-            xaxis_title="Persentase (%)", yaxis_title="",
-            legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
-        )
-        st.plotly_chart(fig_compare, use_container_width=True)
+            # --- Persentase digabung ke kartu yang sama ---
+            total_app_review = len(df_app_sent)
+            if total_app_review > 0:
+                pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
+                neg_count = len(df_app_sent[df_app_sent['sentimen'] == 'Negatif'])
+                pos_pct = (pos_count / total_app_review) * 100
+                neg_pct = (neg_count / total_app_review) * 100
+                color_code = APP_COLOR_MAP.get(app_name, "#2377ca")
+
+                col_neg, col_pos = st.columns(2)
+                with col_neg:
+                    st.markdown(f'''
+                    <div style="text-align:center;">
+                        <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{neg_pct:.1f}%</h2>
+                        <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Negatif</p>
+                    </div>
+                    ''', unsafe_allow_html=True)
+                with col_pos:
+                    st.markdown(f'''
+                    <div style="text-align:center;">
+                        <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{pos_pct:.1f}%</h2>
+                        <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Positif</p>
+                    </div>
+                    ''', unsafe_allow_html=True)
         
 # ------------------------------------------------------------
 # URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
