@@ -458,11 +458,7 @@ for idx, app_name in enumerate(selected_apps):
                 color='sentimen',
                 color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
             )
-            # 1. Mengubah legenda menjadi vertikal di atas-kiri dan memotong margin bawah chart
-            fig_pie.update_layout(
-                legend=dict(orientation="v", yanchor="top", y=0.95, xanchor="left", x=0.02),
-                margin=dict(t=50, b=10, l=10, r=10)
-            )
+            
             st.plotly_chart(fig_pie, use_container_width=True)
 
             # --- 2. Teks persentase otomatis menyatu di dalam container putih yang sama ---
