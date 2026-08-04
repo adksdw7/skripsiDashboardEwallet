@@ -515,22 +515,20 @@ with st.container(border=True):
         df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
         title="📈 Tren Perkembangan Sentimen Positif Bulanan",
         color_discrete_map=APP_COLOR_MAP
-        
-        fig_trend_pos.update_layout(
-            legend=dict(
-                orientation="h",
-                yanchor="top",
-                y=-0.28,
-                xanchor="center",
-                x=0.5
-            ),
-            xaxis_title="Periode Bulan",
-            yaxis_title="Jumlah Ulasan",
-            margin=dict(t=60, b=110, l=60, r=30)
-        )
-        
-fig_trend_pos.update_xaxes(title_standoff=25)
-    
+    )
+    fig_trend_pos.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.28,
+            xanchor="center",
+            x=0.5
+        ),
+        xaxis_title="Periode Bulan",
+        yaxis_title="Jumlah Ulasan",
+        margin=dict(t=60, b=110, l=60, r=30)
+    )
+    fig_trend_pos.update_xaxes(title_standoff=25)
     st.plotly_chart(fig_trend_pos, use_container_width=True)
 
 with st.container(border=True):
@@ -540,7 +538,7 @@ with st.container(border=True):
         title="📉 Tren Perkembangan Sentimen Negatif Bulanan",
         color_discrete_map=APP_COLOR_MAP
     )
-        fig_trend_neg.update_layout(
+    fig_trend_neg.update_layout(
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -553,6 +551,7 @@ with st.container(border=True):
         margin=dict(t=60, b=110, l=60, r=30)
     )
     fig_trend_neg.update_xaxes(title_standoff=25)
+    st.plotly_chart(fig_trend_neg, use_container_width=True)
 
 # ------------------------------------------------------------
 # URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
@@ -576,26 +575,29 @@ if len(selected_apps) == 1:
         st.plotly_chart(fig_rate, use_container_width=True)
 else:
     df_rating_group = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
-    df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
+df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
 
-    fig_rate_group = px.bar(
-        df_rating_group, x='score', y='Total', color='appName', barmode='group',
-        title="Komparasi Distribusi Rating Bintang E-Wallet",
-        labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
-        color_discrete_map=APP_COLOR_MAP
-    )
-        fig_rate_group.update_layout(
-        xaxis=dict(dtick=1),
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.28,
-            xanchor="center",
-            x=0.5
-        ),
-        margin=dict(t=60, b=110, l=60, r=30)
-        )
-        fig_rate_group.update_xaxes(title_standoff=25)
+fig_rate_group = px.bar(
+    df_rating_group, x='score', y='Total', color='appName', barmode='group',
+    title="Komparasi Distribusi Rating Bintang E-Wallet",
+    labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
+    color_discrete_map=APP_COLOR_MAP
+)
+
+fig_rate_group.update_layout(
+    xaxis=dict(dtick=1),
+    legend=dict(
+        orientation="h",
+        yanchor="top",
+        y=-0.28,
+        xanchor="center",
+        x=0.5
+    ),
+    margin=dict(t=60, b=110, l=60, r=30)
+)
+fig_rate_group.update_xaxes(title_standoff=25)
+
+st.plotly_chart(fig_rate_group, use_container_width=True)
 
 # ------------------------------------------------------------
 # URUTAN 5: WORD CLOUD SENTIMEN + TOGGLE ULASAN TERKAIT
