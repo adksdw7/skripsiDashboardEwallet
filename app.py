@@ -115,6 +115,11 @@ def load_data():
     # --- Data hasil klasifikasi sentimen & evaluasi model ---
     df_sentimen = pd.read_csv("hasilSentimen.csv")
     df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
+    
+    df_sentimen.columns = df_sentimen.columns.str.strip()
+    df_sentimen["appName"] = df_sentimen["appName"].astype(str).str.strip()
+    df_sentimen["sentimen"] = df_sentimen["predictLabel"].astype(str).str.strip().str.capitalize()
+
 
     # --- Data ulasan mentah (dipakai untuk menampilkan teks ulasan asli) ---
     df_raw_dana = pd.read_csv("rawDana.csv")
