@@ -809,9 +809,8 @@ st.caption(
     "Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), "
     "sedangkan warna lebih muda menunjukkan kesalahan klasifikasi (FP dan FN)."
 )
-
         st.markdown(
-            f"**Metrik Performa Pengujian Model NBC: {app_name}**"
+            f"**Metrik Performa Pengujian Model NBC: {app_name}**" 
         )
 
         col_m1, col_m2, col_m3, col_m4 = st.columns(4)
