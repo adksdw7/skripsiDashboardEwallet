@@ -127,12 +127,13 @@ def load_data():
     df_raw_shopee = pd.read_csv("rawShopeepay.csv")
 
     # Penamaan ulang kolom hasil evaluasi agar konsisten dipakai di dashboard
-    if len(df_evaluasi.columns) >= 12:
-        df_evaluasi.columns = [
-            'aplikasi', 'Accuracy', 'Precision', 'Recall', 'Specificity',
-            'F1-Score', 'jumlahDataTrain', 'jumlahDataTest',
-            'TN', 'FP', 'FN', 'TP'
-        ]
+    df_evaluasi.columns = df_evaluasi.columns.str.strip()
+
+    df_evaluasi = df_evaluasi.rename(columns={
+        "appName": "aplikasi",
+        "dataTrain": "jumlahDataTrain",
+        "dataTest": "jumlahDataTest"
+    })
 
     # Konversi kolom tanggal ke tipe datetime agar bisa diagregasi per bulan
     df_sentimen['date'] = pd.to_datetime(df_sentimen['date'])
@@ -651,10 +652,15 @@ for app_name in selected_apps:
         st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
         col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
+        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+        
         metric_labels = [
-            ("Accuracy", col_m1), ("Precision", col_m2), ("Recall", col_m3),
-            ("Specificity", col_m4), ("F1-Score", col_m5)
+            ("Accuracy", col_m1),
+            ("Precision", col_m2),
+            ("Recall", col_m3),
+            ("F1-Score", col_m4)
         ]
+        
         for label, col in metric_labels:
             col.markdown(
                 f'''
