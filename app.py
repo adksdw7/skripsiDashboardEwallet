@@ -588,6 +588,8 @@ fig_rate_group = px.bar(
 
 fig_rate_group.update_layout(
     legend_title_text="",
+    bargap=0.03,
+    bargroupgap=0.0,
     xaxis=dict(dtick=1),
     legend=dict(
         orientation="h",
@@ -598,6 +600,7 @@ fig_rate_group.update_layout(
     ),
     margin=dict(t=60, b=110, l=60, r=30)
 )
+
 fig_rate_group.update_xaxes(title_standoff=25)
 
 st.plotly_chart(fig_rate_group, use_container_width=True)
