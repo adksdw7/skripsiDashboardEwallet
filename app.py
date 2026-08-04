@@ -491,6 +491,48 @@ for idx, app_name in enumerate(selected_apps):
                     </div>
                     ''', unsafe_allow_html=True)
 
+
+# ------------------------------------------------------------
+# URUTAN 2c: PERBANDINGAN LANGSUNG ANTAR APLIKASI (2+ aplikasi)
+# ------------------------------------------------------------
+if len(selected_apps) >= 2:
+    st.markdown("---")
+    st.markdown("### ⚖️ Perbandingan Langsung Distribusi Sentimen")
+
+    compare_rows = []
+    for app_name in selected_apps:
+        df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
+        total_app_review = len(df_app_sent)
+        if total_app_review > 0:
+            pos_pct = (len(df_app_sent[df_app_sent['sentimen'] == 'Positif']) / total_app_review) * 100
+            neg_pct = (len(df_app_sent[df_app_sent['sentimen'] == 'Negatif']) / total_app_review) * 100
+            compare_rows.append({'appName': app_name, 'sentimen': 'Positif', 'Persentase': pos_pct})
+            compare_rows.append({'appName': app_name, 'sentimen': 'Negatif', 'Persentase': neg_pct})
+
+    df_compare = pd.DataFrame(compare_rows)
+    urutan_app = (
+        df_compare[df_compare['sentimen'] == 'Positif']
+        .sort_values('Persentase', ascending=False)['appName']
+        .tolist()
+    )
+
+    with st.container(border=True):
+        fig_compare = px.bar(
+            df_compare, x='Persentase', y='appName', color='sentimen',
+            orientation='h', text='Persentase',
+            category_orders={'appName': urutan_app, 'sentimen': ['Positif', 'Negatif']},
+            color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'},
+            title="Ranking Sentimen Positif vs Negatif Antar Aplikasi"
+        )
+        fig_compare.update_traces(texttemplate='%{text:.1f}%', textposition='inside')
+        fig_compare.update_layout(
+            barmode='stack', height=280,
+            xaxis_title="Persentase (%)", yaxis_title="",
+            legend=dict(orientation="h", yanchor="bottom", y=-0.3, xanchor="center", x=0.5)
+        )
+        st.plotly_chart(fig_compare, use_container_width=True)
+
+
 # ------------------------------------------------------------
 # URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
 # (positif & negatif ditampilkan terpisah — ini yang menggantikan
