@@ -666,8 +666,7 @@ for app_name in selected_apps:
                 f'''
                 <div class="metric-card">
                     <p style="margin:0;color:gray;font-size:14px;">{label}</p>
-                    <h3 style="margin:0;color:{app_color};">{str(row_eval[label])}</h3>
-                </div>
+                    <h3 style="margin:0;color:{app_color};">{float(row_eval[label]) * 100:.2f}%</h3>                </div>
                 ''',
                 unsafe_allow_html=True
             )
