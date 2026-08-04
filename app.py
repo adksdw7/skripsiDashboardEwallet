@@ -185,34 +185,44 @@ def get_img_html(file_path, alt_text):
 #          ditimpa definisi kedua. Duplikasi itu sudah dihapus di sini,
 #          hanya menyisakan satu implementasi yang benar-benar dipakai.
 # =====================================================================
+
 def get_top_reviews(app_name, sentiment):
-    if app_name == "DANA":
-        df_raw = df_raw_dana.copy()
-    elif app_name == "GoPay":
-        df_raw = df_raw_gopay.copy()
-    elif app_name == "ShopeePay":
-        df_raw = df_raw_shopee.copy()
-    else:
-        return []
+    raw = {
+        "DANA": df_raw_dana,
+        "GoPay": df_raw_gopay,
+        "ShopeePay": df_raw_shopee
+    }[app_name]
 
-    df_sent = df_sentimen[
-        (df_sentimen['appName'] == app_name) &
-        (df_sentimen['sentimen'] == sentiment)
-    ][['content']]
+    label = sentiment.lower()
 
-    if df_sent.empty:
-        return []
+    hasil = df_sentimen[
+        (df_sentimen["appName"] == app_name) &
+        (df_sentimen["actualLabel"].str.lower() == label) &
+        (df_sentimen["predictLabel"].str.lower() == label)
+    ][["reviewId", "score"]]
 
-    df_sent['content'] = df_sent['content'].astype(str).str.lower().str.strip()
-    df_raw['content'] = df_raw['content'].astype(str).str.lower().str.strip()
+    hasil = hasil.merge(
+        raw[["reviewId", "content"]],
+        on="reviewId",
+        how="inner"
+    )
 
-    hasil = df_raw[df_raw['content'].isin(df_sent['content'])]
+    hasil["content"] = hasil["content"].astype(str).str.strip()
+    hasil = hasil[hasil["content"].str.split().str.len() >= 3]
+    hasil = hasil.drop_duplicates("content")
 
     if hasil.empty:
         return []
 
-    return hasil['content'].drop_duplicates().head(10).tolist()
+    hasil = hasil.sample(
+        n=min(10, len(hasil)),
+        random_state=42
+    )
 
+    return [
+        f"{row.content} — Rating {int(row.score)}"
+        for row in hasil.itertuples()
+    ]
 
 # Fungsi pewarna khusus wordcloud negatif (selalu merah, tidak memakai colormap)
 def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
