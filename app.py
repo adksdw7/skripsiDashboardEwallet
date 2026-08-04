@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -688,53 +689,126 @@ st.markdown("---")
 st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 
 for app_name in selected_apps:
-    row_eval = df_evaluasi[df_evaluasi['aplikasi'] == app_name]
+    row_eval = df_evaluasi[df_evaluasi["aplikasi"] == app_name]
+
     if not row_eval.empty:
         row_eval = row_eval.iloc[0]
-        app_color = APP_COLOR_MAP.get(app_name, "#2377ca")
+        app_color = APP_COLOR_MAP[app_name]
 
-        st.markdown(f"**Metrik Performa Pengujian Model NBC: {app_name}**")
-        col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
+        tp = int(row_eval["TP"])
+        fn = int(row_eval["FN"])
+        fp = int(row_eval["FP"])
+        tn = int(row_eval["TN"])
+
+        st.markdown(f"**Confusion Matrix: {app_name}**")
+
+        fig_cm = go.Figure(
+            go.Heatmap(
+                z=[
+                    [1, 0],
+                    [0, 1]
+                ],
+                x=[
+                    "Prediksi Positif",
+                    "Prediksi Negatif"
+                ],
+                y=[
+                    "Aktual Positif",
+                    "Aktual Negatif"
+                ],
+                text=[
+                    [f"{tp} (TP)", f"{fn} (FN)"],
+                    [f"{fp} (FP)", f"{tn} (TN)"]
+                ],
+                customdata=[
+                    [
+                        [tp, "True Positive"],
+                        [fn, "False Negative"]
+                    ],
+                    [
+                        [fp, "False Positive"],
+                        [tn, "True Negative"]
+                    ]
+                ],
+                texttemplate="%{text}",
+                textfont=dict(size=18),
+                hovertemplate=(
+                    "<b>%{y}</b><br>"
+                    "%{x}<br>"
+                    "Jumlah: %{customdata[0]}<br>"
+                    "%{customdata[1]}"
+                    "<extra></extra>"
+                ),
+                colorscale=[
+                    [0, "#fdeaea"],
+                    [0.49, "#fdeaea"],
+                    [0.50, "#eafbe7"],
+                    [1, "#eafbe7"]
+                ],
+                showscale=False,
+                xgap=2,
+                ygap=2
+            )
+        )
+
+        fig_cm.update_layout(
+            height=350,
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            xaxis=dict(
+                side="top",
+                fixedrange=True
+            ),
+            yaxis=dict(
+                autorange="reversed",
+                fixedrange=True
+            )
+        )
+
+        st.plotly_chart(
+            fig_cm,
+            use_container_width=True,
+            config={
+                "displaylogo": False,
+                "modeBarButtonsToRemove": [
+                    "lasso2d",
+                    "select2d"
+                ]
+            }
+        )
+
+        st.markdown(
+            f"**Metrik Performa Pengujian Model NBC: {app_name}**"
+        )
 
         col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-        
+
         metric_labels = [
             ("Accuracy", col_m1),
             ("Precision", col_m2),
             ("Recall", col_m3),
             ("F1-Score", col_m4)
         ]
-        
+
         for label, col in metric_labels:
+            nilai = float(row_eval[label]) * 100
+
             col.markdown(
                 f'''
                 <div class="metric-card">
-                    <p style="margin:0;color:gray;font-size:14px;">{label}</p>
-                    <h3 style="margin:0;color:{app_color};">{float(row_eval[label]) * 100:.2f}%</h3>                </div>
+                    <p style="margin:0;color:gray;font-size:14px;">
+                        {label}
+                    </p>
+                    <h3 style="margin:0;color:{app_color};">
+                        {nilai:.2f}%
+                    </h3>
+                </div>
                 ''',
                 unsafe_allow_html=True
             )
-            
-            # Confusion Matrix
-        st.markdown(f"<p style='text-align:center;font-weight:bold;margin-top:10px;'>Confusion Matrix: {app_name}</p>", unsafe_allow_html=True)
-        st.markdown(f'''
-        <table style="width:100%;text-align:center;border-collapse:collapse;">
-            <tr>
-                <td></td>
-                <td style="font-weight:bold;padding:6px;">Prediksi Positif</td>
-                <td style="font-weight:bold;padding:6px;">Prediksi Negatif</td>
-            </tr>
-            <tr>
-                <td style="font-weight:bold;padding:6px;">Aktual Positif</td>
-                <td style="background:#eafbe7;padding:10px;border:1px solid #ddd;">{int(row_eval['TP'])} (TP)</td>
-                <td style="background:#fdeaea;padding:10px;border:1px solid #ddd;">{int(row_eval['FN'])} (FN)</td>
-            </tr>
-            <tr>
-                <td style="font-weight:bold;padding:6px;">Aktual Negatif</td>
-                <td style="background:#fdeaea;padding:10px;border:1px solid #ddd;">{int(row_eval['FP'])} (FP)</td>
-                <td style="background:#eafbe7;padding:10px;border:1px solid #ddd;">{int(row_eval['TN'])} (TN)</td>
-            </tr>
-        </table>
-        ''', unsafe_allow_html=True)
-        
-        st.markdown('<div style="margin-bottom:15px;"></div>', unsafe_allow_html=True)
+
+        st.markdown(
+            '<div style="margin-bottom:25px;"></div>',
+            unsafe_allow_html=True
+        )
