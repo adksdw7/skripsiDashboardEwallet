@@ -515,11 +515,22 @@ with st.container(border=True):
         df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
         title="📈 Tren Perkembangan Sentimen Positif Bulanan",
         color_discrete_map=APP_COLOR_MAP
-    )
-    fig_trend_pos.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
-        xaxis_title="Periode Bulan", yaxis_title="Jumlah Ulasan"
-    )
+        
+        fig_trend_pos.update_layout(
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.28,
+                xanchor="center",
+                x=0.5
+            ),
+            xaxis_title="Periode Bulan",
+            yaxis_title="Jumlah Ulasan",
+            margin=dict(t=60, b=110, l=60, r=30)
+        )
+        
+fig_trend_pos.update_xaxes(title_standoff=25)
+    
     st.plotly_chart(fig_trend_pos, use_container_width=True)
 
 with st.container(border=True):
@@ -529,11 +540,19 @@ with st.container(border=True):
         title="📉 Tren Perkembangan Sentimen Negatif Bulanan",
         color_discrete_map=APP_COLOR_MAP
     )
-    fig_trend_neg.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5),
-        xaxis_title="Periode Bulan", yaxis_title="Jumlah Ulasan"
+        fig_trend_neg.update_layout(
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.28,
+            xanchor="center",
+            x=0.5
+        ),
+        xaxis_title="Periode Bulan",
+        yaxis_title="Jumlah Ulasan",
+        margin=dict(t=60, b=110, l=60, r=30)
     )
-    st.plotly_chart(fig_trend_neg, use_container_width=True)
+    fig_trend_neg.update_xaxes(title_standoff=25)
 
 # ------------------------------------------------------------
 # URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
@@ -565,11 +584,18 @@ else:
         labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
         color_discrete_map=APP_COLOR_MAP
     )
-    fig_rate_group.update_layout(
+        fig_rate_group.update_layout(
         xaxis=dict(dtick=1),
-        legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
-    )
-    st.plotly_chart(fig_rate_group, use_container_width=True)
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.28,
+            xanchor="center",
+            x=0.5
+        ),
+        margin=dict(t=60, b=110, l=60, r=30)
+        )
+        fig_rate_group.update_xaxes(title_standoff=25)
 
 # ------------------------------------------------------------
 # URUTAN 5: WORD CLOUD SENTIMEN + TOGGLE ULASAN TERKAIT
