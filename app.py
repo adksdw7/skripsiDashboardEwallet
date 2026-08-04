@@ -697,149 +697,163 @@ st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 for app_name in selected_apps:
     row_eval = df_evaluasi[df_evaluasi["aplikasi"] == app_name]
 
-    if not row_eval.empty:
-        row_eval = row_eval.iloc[0]
-        app_color = APP_COLOR_MAP[app_name]
+    if row_eval.empty:
+        continue
 
-        tp = int(row_eval["TP"])
-        fn = int(row_eval["FN"])
-        fp = int(row_eval["FP"])
-        tn = int(row_eval["TN"])
+    row_eval = row_eval.iloc[0]
+    app_color = APP_COLOR_MAP[app_name]
 
-        st.markdown(f"**Confusion Matrix: {app_name}**")
+    tp = int(row_eval["TP"])
+    fn = int(row_eval["FN"])
+    fp = int(row_eval["FP"])
+    tn = int(row_eval["TN"])
 
-        fig_cm = go.Figure(
-    go.Heatmap(
-        z=[
-            [1, 0],
-            [0, 1]
-        ],
-        x=[
-            "Prediksi Positif",
-            "Prediksi Negatif"
-        ],
-        y=[
-            "Aktual Positif",
-            "Aktual Negatif"
-        ],
-        text=[
-            [f"{tp} (TP)", f"{fn} (FN)"],
-            [f"{fp} (FP)", f"{tn} (TN)"]
-        ],
-        customdata=[
-            [
-                [tp, "True Positive"],
-                [fn, "False Negative"]
+    st.markdown(f"**Confusion Matrix: {app_name}**")
+
+    fig_cm = go.Figure(
+        go.Heatmap(
+            z=[
+                [1, 0],
+                [0, 1]
             ],
-            [
-                [fp, "False Positive"],
-                [tn, "True Negative"]
-            ]
-        ],
-        texttemplate="<b>%{text}</b>",
-        textfont=dict(
-            size=19,
-            color="#111111"
-        ),
-        hovertemplate=(
-            "<b>%{customdata[1]}</b><br>"
-            "%{y}<br>"
-            "%{x}<br>"
-            "Jumlah: %{customdata[0]}"
-            "<extra></extra>"
-        ),
-        hoverlabel=dict(
-            bgcolor="white",
-            bordercolor=app_color,
-            font=dict(color="#111111", size=14)
-        ),
-        colorscale=[
-            [0, rgba(app_color, 0.12)],
-            [0.49, rgba(app_color, 0.12)],
-            [0.50, rgba(app_color, 0.48)],
-            [1, rgba(app_color, 0.48)]
-        ],
-        showscale=False,
-        xgap=4,
-        ygap=4
-    )
-)
-
-fig_cm.update_layout(
-    height=350,
-    margin=dict(l=25, r=25, t=25, b=25),
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(
-        color="#111111",
-        size=15
-    ),
-    xaxis=dict(
-        side="top",
-        fixedrange=True,
-        tickfont=dict(
-            color="#111111",
-            size=15
-        )
-    ),
-    yaxis=dict(
-        autorange="reversed",
-        fixedrange=True,
-        tickfont=dict(
-            color="#111111",
-            size=15
+            x=[
+                "Prediksi Positif",
+                "Prediksi Negatif"
+            ],
+            y=[
+                "Aktual Positif",
+                "Aktual Negatif"
+            ],
+            text=[
+                [f"{tp} (TP)", f"{fn} (FN)"],
+                [f"{fp} (FP)", f"{tn} (TN)"]
+            ],
+            customdata=[
+                [
+                    [tp, "True Positive"],
+                    [fn, "False Negative"]
+                ],
+                [
+                    [fp, "False Positive"],
+                    [tn, "True Negative"]
+                ]
+            ],
+            texttemplate="<b>%{text}</b>",
+            textfont=dict(
+                size=19,
+                color="#111111"
+            ),
+            hovertemplate=(
+                "<b>%{customdata[1]}</b><br>"
+                "%{y}<br>"
+                "%{x}<br>"
+                "Jumlah: %{customdata[0]}"
+                "<extra></extra>"
+            ),
+            hoverlabel=dict(
+                bgcolor="white",
+                bordercolor=app_color,
+                font=dict(
+                    color="#111111",
+                    size=14
+                )
+            ),
+            colorscale=[
+                [0, rgba(app_color, 0.12)],
+                [0.49, rgba(app_color, 0.12)],
+                [0.50, rgba(app_color, 0.48)],
+                [1, rgba(app_color, 0.48)]
+            ],
+            zmin=0,
+            zmax=1,
+            showscale=False,
+            xgap=4,
+            ygap=4
         )
     )
-)
 
-st.plotly_chart(
-    fig_cm,
-    use_container_width=True,
-    config={
-        "displaylogo": False,
-        "responsive": True,
-        "modeBarButtonsToRemove": [
-            "lasso2d",
-            "select2d"
-        ]
-    }
-)
-
-st.caption(
-    "Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), "
-    "sedangkan warna lebih muda menunjukkan kesalahan klasifikasi (FP dan FN)."
-)
-        st.markdown(
-            f"**Metrik Performa Pengujian Model NBC: {app_name}**" 
-        )
-
-        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-
-        metric_labels = [
-            ("Accuracy", col_m1),
-            ("Precision", col_m2),
-            ("Recall", col_m3),
-            ("F1-Score", col_m4)
-        ]
-
-        for label, col in metric_labels:
-            nilai = float(row_eval[label]) * 100
-
-            col.markdown(
-                f'''
-                <div class="metric-card">
-                    <p style="margin:0;color:gray;font-size:14px;">
-                        {label}
-                    </p>
-                    <h3 style="margin:0;color:{app_color};">
-                        {nilai:.2f}%
-                    </h3>
-                </div>
-                ''',
-                unsafe_allow_html=True
+    fig_cm.update_layout(
+        height=350,
+        margin=dict(l=25, r=25, t=25, b=25),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(
+            color="#111111",
+            size=15
+        ),
+        xaxis=dict(
+            side="top",
+            fixedrange=True,
+            tickfont=dict(
+                color="#111111",
+                size=15
             )
+        ),
+        yaxis=dict(
+            autorange="reversed",
+            fixedrange=True,
+            tickfont=dict(
+                color="#111111",
+                size=15
+            )
+        )
+    )
 
-        st.markdown(
-            '<div style="margin-bottom:25px;"></div>',
+    st.plotly_chart(
+        fig_cm,
+        use_container_width=True,
+        config={
+            "displaylogo": False,
+            "responsive": True,
+            "modeBarButtonsToRemove": [
+                "lasso2d",
+                "select2d"
+            ]
+        }
+    )
+
+    st.markdown(
+        """
+        <p style="color:#111111; font-size:14px; margin-top:-10px;">
+            Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN),
+            sedangkan warna lebih muda menunjukkan kesalahan klasifikasi
+            (FP dan FN).
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"**Metrik Performa Pengujian Model NBC: {app_name}**"
+    )
+
+    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+
+    metric_labels = [
+        ("Accuracy", col_m1),
+        ("Precision", col_m2),
+        ("Recall", col_m3),
+        ("F1-Score", col_m4)
+    ]
+
+    for label, col in metric_labels:
+        nilai = float(row_eval[label]) * 100
+
+        col.markdown(
+            f"""
+            <div class="metric-card">
+                <p style="margin:0;color:#111111;font-size:14px;">
+                    {label}
+                </p>
+                <h3 style="margin:0;color:{app_color};">
+                    {nilai:.2f}%
+                </h3>
+            </div>
+            """,
             unsafe_allow_html=True
         )
+
+    st.markdown(
+        '<div style="margin-bottom:25px;"></div>',
+        unsafe_allow_html=True
+    )
