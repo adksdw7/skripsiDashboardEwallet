@@ -512,11 +512,12 @@ df_chart_trend_global = (
 with st.container(border=True):
     df_pos_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Positif']
     fig_trend_pos = px.line(
-        df_pos_trend, x='Bulan', y='Jumlah', markers=True,
+        df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
         title="📈 Tren Perkembangan Sentimen Positif Bulanan",
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_pos.update_layout(
+        legend_title_text="",
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -539,6 +540,7 @@ with st.container(border=True):
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_neg.update_layout(
+        legend_title_text="",
         legend=dict(
             orientation="h",
             yanchor="top",
@@ -585,6 +587,7 @@ fig_rate_group = px.bar(
 )
 
 fig_rate_group.update_layout(
+    legend_title_text="",
     xaxis=dict(dtick=1),
     legend=dict(
         orientation="h",
