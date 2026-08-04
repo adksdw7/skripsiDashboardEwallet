@@ -158,6 +158,12 @@ APP_COLOR_MAP = {
 }
 
 
+def rgba(hex_color, alpha):
+    hex_color = hex_color.lstrip("#")
+    r, g, b = [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]
+    return f"rgba({r}, {g}, {b}, {alpha})"
+
+
 # =====================================================================
 # FUNGSI BANTUAN: MENAMPILKAN LOGO SEBAGAI GAMBAR BASE64
 # Tujuan : mengubah file logo lokal (png) menjadi tag <img> yang bisa
@@ -703,80 +709,106 @@ for app_name in selected_apps:
         st.markdown(f"**Confusion Matrix: {app_name}**")
 
         fig_cm = go.Figure(
-            go.Heatmap(
-                z=[
-                    [1, 0],
-                    [0, 1]
-                ],
-                x=[
-                    "Prediksi Positif",
-                    "Prediksi Negatif"
-                ],
-                y=[
-                    "Aktual Positif",
-                    "Aktual Negatif"
-                ],
-                text=[
-                    [f"{tp} (TP)", f"{fn} (FN)"],
-                    [f"{fp} (FP)", f"{tn} (TN)"]
-                ],
-                customdata=[
-                    [
-                        [tp, "True Positive"],
-                        [fn, "False Negative"]
-                    ],
-                    [
-                        [fp, "False Positive"],
-                        [tn, "True Negative"]
-                    ]
-                ],
-                texttemplate="%{text}",
-                textfont=dict(size=18),
-                hovertemplate=(
-                    "<b>%{y}</b><br>"
-                    "%{x}<br>"
-                    "Jumlah: %{customdata[0]}<br>"
-                    "%{customdata[1]}"
-                    "<extra></extra>"
-                ),
-                colorscale=[
-                    [0, "#fdeaea"],
-                    [0.49, "#fdeaea"],
-                    [0.50, "#eafbe7"],
-                    [1, "#eafbe7"]
-                ],
-                showscale=False,
-                xgap=2,
-                ygap=2
-            )
-        )
+    go.Heatmap(
+        z=[
+            [1, 0],
+            [0, 1]
+        ],
+        x=[
+            "Prediksi Positif",
+            "Prediksi Negatif"
+        ],
+        y=[
+            "Aktual Positif",
+            "Aktual Negatif"
+        ],
+        text=[
+            [f"{tp} (TP)", f"{fn} (FN)"],
+            [f"{fp} (FP)", f"{tn} (TN)"]
+        ],
+        customdata=[
+            [
+                [tp, "True Positive"],
+                [fn, "False Negative"]
+            ],
+            [
+                [fp, "False Positive"],
+                [tn, "True Negative"]
+            ]
+        ],
+        texttemplate="<b>%{text}</b>",
+        textfont=dict(
+            size=19,
+            color="#111111"
+        ),
+        hovertemplate=(
+            "<b>%{customdata[1]}</b><br>"
+            "%{y}<br>"
+            "%{x}<br>"
+            "Jumlah: %{customdata[0]}"
+            "<extra></extra>"
+        ),
+        hoverlabel=dict(
+            bgcolor="white",
+            bordercolor=app_color,
+            font=dict(color="#111111", size=14)
+        ),
+        colorscale=[
+            [0, rgba(app_color, 0.12)],
+            [0.49, rgba(app_color, 0.12)],
+            [0.50, rgba(app_color, 0.48)],
+            [1, rgba(app_color, 0.48)]
+        ],
+        showscale=False,
+        xgap=4,
+        ygap=4
+    )
+)
 
-        fig_cm.update_layout(
-            height=350,
-            margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(
-                side="top",
-                fixedrange=True
-            ),
-            yaxis=dict(
-                autorange="reversed",
-                fixedrange=True
-            )
+fig_cm.update_layout(
+    height=350,
+    margin=dict(l=25, r=25, t=25, b=25),
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    font=dict(
+        color="#111111",
+        size=15
+    ),
+    xaxis=dict(
+        side="top",
+        fixedrange=True,
+        tickfont=dict(
+            color="#111111",
+            size=15
         )
+    ),
+    yaxis=dict(
+        autorange="reversed",
+        fixedrange=True,
+        tickfont=dict(
+            color="#111111",
+            size=15
+        )
+    )
+)
 
-        st.plotly_chart(
-            fig_cm,
-            use_container_width=True,
-            config={
-                "displaylogo": False,
-                "modeBarButtonsToRemove": [
-                    "lasso2d",
-                    "select2d"
-                ]
-            }
-        )
+st.plotly_chart(
+    fig_cm,
+    use_container_width=True,
+    config={
+        "displaylogo": False,
+        "responsive": True,
+        "modeBarButtonsToRemove": [
+            "lasso2d",
+            "select2d"
+        ]
+    }
+)
+
+st.caption(
+    "Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), "
+    "sedangkan warna lebih muda menunjukkan kesalahan klasifikasi (FP dan FN)."
+)
 
         st.markdown(
             f"**Metrik Performa Pengujian Model NBC: {app_name}**"
