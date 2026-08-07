@@ -331,6 +331,54 @@ def red_color_func(word, font_size, position, orientation, random_state=None, **
 # Sidebar navigasi
 st.markdown("""
 <style>
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"] {
+        background: #fff1ea !important;
+        border-bottom: 1px solid rgba(255, 119, 60, 0.16) !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        background: transparent !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] {
+        min-width: 42px !important;
+        min-height: 42px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        font-size: 0 !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button > *,
+    [data-testid="collapsedControl"] button > *,
+    [data-testid="stSidebarCollapseButton"] button > *,
+    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] > * {
+        display: none !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button::before,
+    [data-testid="collapsedControl"] button::before,
+    [data-testid="stSidebarCollapseButton"] button::before,
+    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"]::before {
+        content: ":::";
+        display: block;
+        color: #555555;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        line-height: 1;
+    }
+
     [data-testid="stSidebar"] {
         background-color: #ffffff !important;
         border-right: 1px solid #e5e7eb !important;
