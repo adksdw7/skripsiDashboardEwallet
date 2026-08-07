@@ -463,9 +463,9 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
 st.markdown("---")
 st.markdown(
     """
-    <h3 style="text-align:center; width:100%; margin-bottom:10px;">
-        📱 Pilih E-Wallet
-    </h3>
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Pilih E-Wallet
+    </h1>
     """,
     unsafe_allow_html=True
 )
@@ -500,7 +500,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis 🔄
+         Hasil Analisis 
     </h1>
     """,
     unsafe_allow_html=True
@@ -524,7 +524,10 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Diagram donat
-st.markdown("### Proporsi Distribusi Sentimen Pengguna")
+
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Proporsi Distribusi Sentimen Pengguna 
+    </h1>
 
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
@@ -576,7 +579,10 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Tren sentimen
-st.markdown("### 📈 Grafik Tren Perkembangan Sentimen Bulanan")
+
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Grafik Tren Perkembangan Sentimen Bulanan 
+    </h1>
 
 filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
 filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
@@ -643,7 +649,10 @@ with st.container(border=True):
 
 st.markdown("---")
 # Distribusi rating
-st.markdown("### 📊 Penyebaran Distribusi Rating Bintang Pengguna")
+
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Penyebaran Distribusi Rating Bintang Pengguna 
+    </h1>
 
 # Ukuran responsif diagram rating
 st.markdown("""
@@ -790,7 +799,9 @@ with st.container(key="rating_chart"):
         )
 
 # Word cloud
-st.markdown("### ☁️ Word Cloud Sentimen")
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Word Cloud Sentimen 
+    </h1>
 
 wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
@@ -855,7 +866,9 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Evaluasi model
-st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
+    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+         Nilai Metrik Kinerja Klasifikasi NBC 
+    </h1>
 
 # Ukuran responsif confusion matrix
 st.markdown("""
