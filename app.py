@@ -151,7 +151,7 @@ def get_img_html(file_path, alt_text):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        return f'<img src="data:image/png;base64,{data}" style="width: 80px; height: 80px; object-fit: contain;">'
+        return f'<img src="data:image/png;base64,{data}" style="width: 100%; max-width: 80px; height: auto; object-fit: contain;">'
     return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
 
 
@@ -256,9 +256,9 @@ st.markdown("""
         gap: 24px;
     }
     .landing-logo-wrap {
-        flex: 0 0 auto;
-        width: 100px;
-        height: 100px;
+        flex: 0 1 100px;
+        width: clamp(48px, 10vw, 100px);
+        aspect-ratio: 1 / 1;
         border-radius: 16px;
         overflow: hidden;
         display: flex;
@@ -267,7 +267,8 @@ st.markdown("""
     }
     .landing-logo-wrap img {
         width: 100%;
-        height: 100%;
+        max-width: 100%;
+        height: auto;
         object-fit: contain;
     }
     .landing-text-wrap {
@@ -308,6 +309,20 @@ st.markdown("""
     }
     .landing-download-btn:hover {
         background-color: rgba(0,0,0,0.04);
+    }
+
+    @media (max-width: 600px) {
+        .landing-card {
+            padding: 18px;
+            gap: 14px;
+        }
+        .landing-logo-wrap {
+            width: clamp(48px, 18vw, 75px);
+            flex-basis: clamp(48px, 18vw, 75px);
+        }
+        .landing-text-wrap h2 {
+            font-size: 22px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
