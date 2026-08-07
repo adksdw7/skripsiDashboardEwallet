@@ -986,12 +986,20 @@ judul_bagian("Word Cloud Sentimen", "word-cloud")
 
 wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
-col_wc = st.columns(len(selected_apps))
+# Posisi word cloud menyesuaikan jumlah aplikasi yang dipilih
+if len(selected_apps) == 1:
+    _, col_wc_center, _ = st.columns([1, 1, 1])
+    col_wc = [col_wc_center]
+elif len(selected_apps) == 2:
+    _, col_wc_1, col_wc_2, _ = st.columns([0.5, 1, 1, 0.5])
+    col_wc = [col_wc_1, col_wc_2]
+else:
+    col_wc = st.columns(3)
+
 for idx, app_name in enumerate(selected_apps):
     with col_wc[idx]:
         with st.container(border=True):
             df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
-
 
             st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Positif {app_name}</p>", unsafe_allow_html=True)
 
@@ -1017,7 +1025,6 @@ for idx, app_name in enumerate(selected_apps):
                         st.write(f"{i}. {review}")
                 else:
                     st.info("Data ulasan positif tidak ditemukan.")
-
 
             st.markdown(f"<p style='text-align:center; font-weight:bold; margin-top:15px; margin-bottom:5px;'>Word Cloud Negatif {app_name}</p>", unsafe_allow_html=True)
 
@@ -1114,18 +1121,7 @@ for app_name in selected_apps:
     fp = int(row_eval["FP"])
     tn = int(row_eval["TN"])
 
-    st.markdown(
-    f"""
-    <div style="
-        width:100%;
-        text-align:center;
-        margin:0 auto 10px auto;
-    ">
-        <strong>Confusion Matrix: {app_name}</strong>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    st.markdown(f"**Confusion Matrix: {app_name}**")
 
     fig_cm = go.Figure(
         go.Heatmap(
@@ -1231,41 +1227,20 @@ for app_name in selected_apps:
         )
 
     st.markdown(
-    """
-    <div style="
-        width:100%;
-        text-align:center;
-        margin:-10px auto 18px auto;
-        padding:0 12px;
-        box-sizing:border-box;
-    ">
-        <p style="
-            color:#111111;
-            font-size:clamp(11px, 1vw, 14px);
-            margin:0;
-        ">
+        """
+        <p style="color:#111111; font-size:clamp(11px, 1vw, 14px); margin-top:-10px;">
             Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN),
             sedangkan warna lebih muda menunjukkan kesalahan klasifikasi
             (FP dan FN).
         </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True
+    )
 
     st.markdown(
-    f"""
-    <div style="
-        width:100%;
-        text-align:center;
-        margin:0 auto 12px auto;
-    ">
-        <strong>Metrik Performa Pengujian Model NBC: {app_name}</strong>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-    
+        f"**Metrik Performa Pengujian Model NBC: {app_name}**"
+    )
+
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
     metric_labels = [
