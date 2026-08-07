@@ -256,6 +256,18 @@ def rgba(hex_color, alpha):
     return f"rgba({r}, {g}, {b}, {alpha})"
 
 
+# Judul bagian
+def judul_bagian(teks):
+    st.markdown(
+        f"""
+        <h1 style="text-align:center; width:100%; margin-bottom:20px;">
+            {teks}
+        </h1>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 # Logo aplikasi
 def get_img_html(file_path, alt_text):
     if os.path.exists(file_path):
@@ -461,14 +473,7 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
 
 
 st.markdown("---")
-st.markdown(
-    """
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Pilih E-Wallet
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
+judul_bagian("Pilih E-Wallet")
 
 # Pilih E-Wallet
 col_btn1, col_btn2, col_btn3 = st.columns(3)
@@ -497,14 +502,7 @@ if not selected_apps:
 
 
 st.markdown("---")
-st.markdown(
-    """
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Hasil Analisis 
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
+judul_bagian("Hasil Analisis")
 with st.container(key="info_periode"):
     st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 31 Mei 2026")
 
@@ -524,10 +522,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Diagram donat
-
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Proporsi Distribusi Sentimen Pengguna 
-    </h1>
+judul_bagian("Proporsi Distribusi Sentimen Pengguna")
 
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
@@ -579,10 +574,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Tren sentimen
-
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Grafik Tren Perkembangan Sentimen Bulanan 
-    </h1>
+judul_bagian("Grafik Tren Perkembangan Sentimen Bulanan")
 
 filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
 filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
@@ -649,10 +641,7 @@ with st.container(border=True):
 
 st.markdown("---")
 # Distribusi rating
-
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Penyebaran Distribusi Rating Bintang Pengguna 
-    </h1>
+judul_bagian("Penyebaran Distribusi Rating Bintang Pengguna")
 
 # Ukuran responsif diagram rating
 st.markdown("""
@@ -688,16 +677,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 with st.container(key="rating_chart"):
-
     if len(selected_apps) == 1:
         app_name = selected_apps[0]
-
-        df_app_rate = df_sentimen[
-            df_sentimen["appName"] == app_name
-        ]
-
+        df_app_rate = df_sentimen[df_sentimen["appName"] == app_name]
         df_chart_rate = (
             df_app_rate
             .groupby("score")
@@ -714,21 +697,14 @@ with st.container(key="rating_chart"):
                 "score": "Rating Bintang",
                 "Total": "Jumlah Ulasan"
             },
-            color_discrete_sequence=[
-                APP_COLOR_MAP[app_name]
-            ]
+            color_discrete_sequence=[APP_COLOR_MAP[app_name]]
         )
 
         fig_rate.update_layout(
             autosize=True,
             height=600,
             font=dict(size=12),
-            margin=dict(
-                t=60,
-                b=70,
-                l=65,
-                r=30
-            ),
+            margin=dict(t=60, b=70, l=65, r=30),
             xaxis=dict(dtick=1)
         )
 
@@ -742,7 +718,6 @@ with st.container(key="rating_chart"):
         df_rating_group = df_sentimen[
             df_sentimen["appName"].isin(selected_apps)
         ]
-
         df_rating_group = (
             df_rating_group
             .groupby(["score", "appName"])
@@ -780,17 +755,10 @@ with st.container(key="rating_chart"):
                 xanchor="center",
                 x=0.5
             ),
-            margin=dict(
-                t=60,
-                b=90,
-                l=65,
-                r=30
-            )
+            margin=dict(t=60, b=90, l=65, r=30)
         )
 
-        fig_rate_group.update_xaxes(
-            title_standoff=20
-        )
+        fig_rate_group.update_xaxes(title_standoff=20)
 
         st.plotly_chart(
             fig_rate_group,
@@ -798,10 +766,10 @@ with st.container(key="rating_chart"):
             config=PLOTLY_CONFIG
         )
 
+
+st.markdown("---")
 # Word cloud
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Word Cloud Sentimen 
-    </h1>
+judul_bagian("Word Cloud Sentimen")
 
 wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
@@ -866,9 +834,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Evaluasi model
-    <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Nilai Metrik Kinerja Klasifikasi NBC 
-    </h1>
+judul_bagian("Nilai Metrik Kinerja Klasifikasi NBC")
 
 # Ukuran responsif confusion matrix
 st.markdown("""
@@ -877,6 +843,7 @@ st.markdown("""
     .st-key-confusion_matrix_gopay,
     .st-key-confusion_matrix_shopeepay {
         width: min(80vw, 650px);
+        max-width: 650px;
         margin-left: auto;
         margin-right: auto;
     }
@@ -885,7 +852,8 @@ st.markdown("""
     .st-key-confusion_matrix_gopay [data-testid="stPlotlyChart"],
     .st-key-confusion_matrix_shopeepay [data-testid="stPlotlyChart"] {
         width: 100% !important;
-        aspect-ratio: 1 / 1;
+        max-width: 100% !important;
+        aspect-ratio: 1 / 1 !important;
     }
 
     .st-key-confusion_matrix_dana [data-testid="stPlotlyChart"] > div,
@@ -906,6 +874,7 @@ st.markdown("""
     .st-key-confusion_matrix_shopeepay .svg-container {
         width: 100% !important;
         height: 100% !important;
+        max-width: 100% !important;
     }
 
     @media (max-width: 700px) {
@@ -999,7 +968,7 @@ for app_name in selected_apps:
     fig_cm.update_layout(
         autosize=True,
         height=600,
-        margin=dict(l=55, r=35, t=55, b=35),
+        margin=dict(l=70, r=40, t=70, b=50),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(
