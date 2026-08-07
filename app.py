@@ -53,8 +53,24 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
     html, body, [data-testid="stAppViewContainer"],
-    p, span, div, h1, h2, h3, h4, h5, h6, label {
+    p, div, h1, h2, h3, h4, h5, h6, label {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    /* Jangan timpa font ikon bawaan Streamlit. Jika font ikon berubah,
+       nama ikon seperti keyboard_double_arrow_right tampil sebagai teks. */
+    [data-testid="stIconMaterial"] {
+        font-family: 'Material Symbols Rounded' !important;
+        font-weight: normal !important;
+        font-style: normal !important;
+        letter-spacing: normal !important;
+        text-transform: none !important;
+        white-space: nowrap !important;
+        word-wrap: normal !important;
+        direction: ltr !important;
+        -webkit-font-feature-settings: 'liga' !important;
+        font-feature-settings: 'liga' !important;
+        -webkit-font-smoothing: antialiased !important;
     }
 
 
@@ -337,18 +353,29 @@ st.markdown("""
         border-bottom: 1px solid rgba(255, 119, 60, 0.16) !important;
     }
 
-    /* Tombol buka/tutup sidebar: dukung struktur Streamlit lama dan baru */
+    /* Tombol buka/tutup sidebar */
     [data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"] {
+    [data-testid="collapsedControl"],
+    [data-testid="stSidebarCollapseButton"] {
         background: transparent !important;
     }
 
-    button[data-testid="stSidebarCollapsedControl"],
-    button[data-testid="collapsedControl"],
-    button[data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapsedControl"] > button,
-    [data-testid="collapsedControl"] > button,
-    [data-testid="stSidebarCollapseButton"] > button,
+    /* Sembunyikan ikon Material khusus tombol sidebar. */
+    [data-testid="stSidebarCollapsedControl"] [data-testid="stIconMaterial"],
+    [data-testid="collapsedControl"] [data-testid="stIconMaterial"],
+    [data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"],
+    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] [data-testid="stIconMaterial"] {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
+
+    /* Hilangkan teks/nama ikon yang mungkin tersisa pada child tombol. */
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="stSidebarCollapseButton"] button,
     [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] {
         min-width: 42px !important;
         min-height: 42px !important;
@@ -359,49 +386,58 @@ st.markdown("""
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
+        color: transparent !important;
+        font-size: 0 !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"] button > *,
+    [data-testid="collapsedControl"] button > *,
+    [data-testid="stSidebarCollapseButton"] button > *,
+    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] > * {
         font-size: 0 !important;
         color: transparent !important;
-        position: relative !important;
+        text-indent: -9999px !important;
+        overflow: hidden !important;
+        max-width: 0 !important;
     }
 
-    button[data-testid="stSidebarCollapsedControl"] > *,
-    button[data-testid="collapsedControl"] > *,
-    button[data-testid="stSidebarCollapseButton"] > *,
-    [data-testid="stSidebarCollapsedControl"] > button > *,
-    [data-testid="collapsedControl"] > button > *,
-    [data-testid="stSidebarCollapseButton"] > button > *,
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] > * {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
-    button[data-testid="stSidebarCollapsedControl"]::before,
-    button[data-testid="collapsedControl"]::before,
-    button[data-testid="stSidebarCollapseButton"]::before,
-    [data-testid="stSidebarCollapsedControl"] > button::before,
-    [data-testid="collapsedControl"] > button::before,
-    [data-testid="stSidebarCollapseButton"] > button::before,
+    /* Simbol pengganti tanpa gambar tambahan. */
+    [data-testid="stSidebarCollapsedControl"] button::before,
+    [data-testid="collapsedControl"] button::before,
+    [data-testid="stSidebarCollapseButton"] button::before,
     [data-testid="stSidebar"] button[aria-label="Collapse sidebar"]::before {
         content: ":::" !important;
         display: block !important;
-        visibility: visible !important;
         color: #555555 !important;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-size: 22px !important;
         font-weight: 700 !important;
         letter-spacing: 2px !important;
         line-height: 1 !important;
+        text-indent: 0 !important;
     }
 
-    /* Cegah nama ikon Material tampil sebagai teks seperti keyboard_double_arrow_right */
-    [data-testid="stSidebarCollapsedControl"] [class*="material-symbol"],
-    [data-testid="collapsedControl"] [class*="material-symbol"],
-    [data-testid="stSidebarCollapseButton"] [class*="material-symbol"],
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] [class*="material-symbol"] {
-        display: none !important;
-        visibility: hidden !important;
-        font-size: 0 !important;
+    /* Fallback jika versi Streamlit menaruh kontrol tanpa elemen button. */
+    [data-testid="stSidebarCollapsedControl"]:not(:has(button)),
+    [data-testid="collapsedControl"]:not(:has(button)),
+    [data-testid="stSidebarCollapseButton"]:not(:has(button)) {
         color: transparent !important;
+        font-size: 0 !important;
+        position: relative !important;
+    }
+
+    [data-testid="stSidebarCollapsedControl"]:not(:has(button))::before,
+    [data-testid="collapsedControl"]:not(:has(button))::before,
+    [data-testid="stSidebarCollapseButton"]:not(:has(button))::before {
+        content: ":::" !important;
+        color: #555555 !important;
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        letter-spacing: 2px !important;
+        line-height: 1 !important;
     }
 
     [data-testid="stSidebar"] {
