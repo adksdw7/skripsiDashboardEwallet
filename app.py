@@ -857,6 +857,54 @@ st.markdown("---")
 # Evaluasi model
 st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 
+# Ukuran responsif confusion matrix
+st.markdown("""
+<style>
+    .st-key-confusion_matrix_dana,
+    .st-key-confusion_matrix_gopay,
+    .st-key-confusion_matrix_shopeepay {
+        width: min(80vw, 650px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .st-key-confusion_matrix_dana [data-testid="stPlotlyChart"],
+    .st-key-confusion_matrix_gopay [data-testid="stPlotlyChart"],
+    .st-key-confusion_matrix_shopeepay [data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    .st-key-confusion_matrix_dana [data-testid="stPlotlyChart"] > div,
+    .st-key-confusion_matrix_gopay [data-testid="stPlotlyChart"] > div,
+    .st-key-confusion_matrix_shopeepay [data-testid="stPlotlyChart"] > div {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .st-key-confusion_matrix_dana .js-plotly-plot,
+    .st-key-confusion_matrix_dana .plot-container,
+    .st-key-confusion_matrix_dana .svg-container,
+    .st-key-confusion_matrix_gopay .js-plotly-plot,
+    .st-key-confusion_matrix_gopay .plot-container,
+    .st-key-confusion_matrix_gopay .svg-container,
+    .st-key-confusion_matrix_shopeepay .js-plotly-plot,
+    .st-key-confusion_matrix_shopeepay .plot-container,
+    .st-key-confusion_matrix_shopeepay .svg-container {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    @media (max-width: 700px) {
+        .st-key-confusion_matrix_dana,
+        .st-key-confusion_matrix_gopay,
+        .st-key-confusion_matrix_shopeepay {
+            width: 90vw;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
 for app_name in selected_apps:
     row_eval = df_evaluasi[df_evaluasi["aplikasi"] == app_name]
 
@@ -936,8 +984,9 @@ for app_name in selected_apps:
     )
 
     fig_cm.update_layout(
-        height=280,
-        margin=dict(l=25, r=25, t=25, b=25),
+        autosize=True,
+        height=600,
+        margin=dict(l=55, r=35, t=55, b=35),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(
@@ -962,17 +1011,18 @@ for app_name in selected_apps:
         )
     )
 
-    st.plotly_chart(
-        fig_cm,
-        use_container_width=True,
-        config={
-            **PLOTLY_CONFIG,
-            "modeBarButtonsToRemove": [
-                "lasso2d",
-                "select2d"
-            ]
-        }
-    )
+    with st.container(key=f"confusion_matrix_{app_name.lower()}"):
+        st.plotly_chart(
+            fig_cm,
+            use_container_width=True,
+            config={
+                **PLOTLY_CONFIG,
+                "modeBarButtonsToRemove": [
+                    "lasso2d",
+                    "select2d"
+                ]
+            }
+        )
 
     st.markdown(
         """
