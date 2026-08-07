@@ -125,35 +125,17 @@ st.markdown("""
         font-size: clamp(10px, 0.9vw, 14px) !important;
     }
 
-    /* FIX RESPONSIF: sebelumnya height dipaksa pakai clamp(...vw) yang
-       dihitung dari lebar viewport, bukan dari tinggi chart aslinya
-       (height=320/340/300 yang sudah diatur di Python). Di HP nilai vw itu
-       jadi lebih kecil dari tinggi asli chart, dan karena overflow:hidden,
-       sisa chart yang tak muat langsung terpotong. Sekarang lebar tetap
-       fleksibel 100% mengikuti device/kolom, tapi tinggi dibiarkan "auto"
-       supaya ikut proporsi asli dari Plotly sendiri -> tidak ada lagi yang
-       kepotong, baik di HP, tablet, maupun saat window di-resize kecil. */
     [data-testid="stPlotlyChart"] {
         width: 100% !important;
         max-width: 100% !important;
         overflow: visible !important;
     }
 
-    [data-testid="stPlotlyChart"] > div {
-        width: 100% !important;
-    }
-
+    [data-testid="stPlotlyChart"] > div,
     [data-testid="stPlotlyChart"] .js-plotly-plot,
-    [data-testid="stPlotlyChart"] .plot-container,
-    [data-testid="stPlotlyChart"] .svg-container {
+    [data-testid="stPlotlyChart"] .plot-container {
         width: 100% !important;
         max-width: 100% !important;
-        height: auto !important;
-    }
-
-    [data-testid="stPlotlyChart"] .main-svg {
-        width: 100% !important;
-        height: auto !important;
     }
 
     [data-testid="stImage"] {
@@ -175,7 +157,7 @@ st.markdown("""
         }
     }
 
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
         .block-container {
             padding-left: 0.65rem;
             padding-right: 0.65rem;
@@ -198,6 +180,18 @@ st.markdown("""
 
         .metric-card {
             padding: 10px !important;
+        }
+
+        h1 {
+            font-size: clamp(24px, 6vw, 36px) !important;
+        }
+
+        h2 {
+            font-size: clamp(20px, 5vw, 30px) !important;
+        }
+
+        h3 {
+            font-size: clamp(17px, 4vw, 24px) !important;
         }
     }
 </style>
@@ -506,7 +500,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-         Hasil Analisis 
+        🔄 Hasil Analisis 🔄
     </h1>
     """,
     unsafe_allow_html=True
@@ -547,7 +541,7 @@ for idx, app_name in enumerate(selected_apps):
             )
             fig_pie.update_layout(
                 autosize=True,
-                height=320,
+                height=280,
                 margin=dict(t=55, b=70, l=20, r=20),
                 font=dict(size=12),
                 legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
@@ -603,7 +597,7 @@ with st.container(border=True):
     )
     fig_trend_pos.update_layout(
         autosize=True,
-        height=340,
+        height=300,
         font=dict(size=12),
         legend_title_text="",
         legend=dict(
@@ -629,7 +623,7 @@ with st.container(border=True):
     )
     fig_trend_neg.update_layout(
         autosize=True,
-        height=340,
+        height=300,
         font=dict(size=12),
         legend_title_text="",
         legend=dict(
@@ -665,7 +659,7 @@ if len(selected_apps) == 1:
         )
         fig_rate.update_layout(
             autosize=True,
-            height=340,
+            height=300,
             font=dict(size=12),
             margin=dict(t=55, b=65, l=55, r=25),
             xaxis=dict(dtick=1)
@@ -684,7 +678,7 @@ else:
 
     fig_rate_group.update_layout(
         autosize=True,
-        height=340,
+        height=300,
         font=dict(size=12),
         legend_title_text="",
         bargap=0.03,
@@ -723,10 +717,10 @@ for idx, app_name in enumerate(selected_apps):
             if text_positive.strip():
                 wc_positive = WordCloud(
                     background_color="white", max_words=50,
-                    colormap=wc_positive_color[app_name], width=400, height=250
+                    colormap=wc_positive_color[app_name], width=360, height=225
                 ).generate(text_positive)
 
-                fig, ax = plt.subplots(figsize=(4, 2.2))
+                fig, ax = plt.subplots(figsize=(3.6, 2.25))
                 ax.imshow(wc_positive, interpolation="bilinear")
                 ax.axis("off")
                 st.pyplot(fig, use_container_width=True)
@@ -748,11 +742,11 @@ for idx, app_name in enumerate(selected_apps):
             text_negative = " ".join(df_app_text[df_app_text['sentimen'] == "Negatif"]['content'].astype(str))
             if text_negative.strip():
                 wc_negative = WordCloud(
-                    background_color="white", max_words=50, width=400, height=250
+                    background_color="white", max_words=50, width=360, height=225
                 ).generate(text_negative)
                 wc_negative.recolor(color_func=red_color_func)
 
-                fig, ax = plt.subplots(figsize=(4, 2.2))
+                fig, ax = plt.subplots(figsize=(3.6, 2.25))
                 ax.imshow(wc_negative, interpolation="bilinear")
                 ax.axis("off")
                 st.pyplot(fig, use_container_width=True)
@@ -852,7 +846,7 @@ for app_name in selected_apps:
     )
 
     fig_cm.update_layout(
-        height=300,
+        height=280,
         margin=dict(l=25, r=25, t=25, b=25),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
