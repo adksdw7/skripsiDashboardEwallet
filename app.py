@@ -11,7 +11,11 @@ import base64
 
 
 # Konfigurasi halaman
-st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
+st.set_page_config(
+    page_title="Komparasi Sentimen E-Wallet",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # Style dashboard
 st.markdown("""
@@ -257,9 +261,10 @@ def rgba(hex_color, alpha):
 
 
 # Judul bagian
-def judul_bagian(teks):
+def judul_bagian(teks, anchor):
     st.markdown(
         f"""
+        <div id="{anchor}" class="section-anchor"></div>
         <h1 style="text-align:center; width:100%; margin-bottom:20px;">
             {teks}
         </h1>
@@ -321,6 +326,105 @@ def get_top_reviews(app_name, sentiment):
 def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
     return "#cc0000"
 
+
+
+# Sidebar navigasi
+st.markdown("""
+<style>
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e5e7eb !important;
+    }
+
+    [data-testid="stSidebar"] > div:first-child {
+        background-color: #ffffff !important;
+    }
+
+    [data-testid="stSidebarContent"] {
+        background-color: #ffffff !important;
+    }
+
+    .sidebar-nav-wrap {
+        position: sticky;
+        top: 0;
+        background: #ffffff;
+        z-index: 10;
+        padding-top: 0.25rem;
+    }
+
+    .sidebar-nav-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 2px 2px 10px 2px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .sidebar-nav-title strong {
+        color: #111111;
+        font-size: 18px;
+    }
+
+    .sidebar-nav-dots {
+        color: #666666;
+        font-size: 24px;
+        line-height: 1;
+    }
+
+    .sidebar-nav-link {
+        display: block;
+        padding: 10px 12px;
+        margin: 4px 0;
+        border-radius: 9px;
+        color: #222222 !important;
+        text-decoration: none !important;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.35;
+        transition: background-color 0.15s ease;
+    }
+
+    .sidebar-nav-link:hover {
+        background-color: #f3f4f6;
+        color: #111111 !important;
+    }
+
+    .section-anchor {
+        scroll-margin-top: 20px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+NAV_ITEMS = [
+    ("Pilih E-Wallet", "pilih-e-wallet"),
+    ("Hasil Analisis", "hasil-analisis"),
+    ("Proporsi Distribusi Sentimen Pengguna", "proporsi-sentimen"),
+    ("Grafik Tren Perkembangan Sentimen Bulanan", "tren-sentimen"),
+    ("Penyebaran Distribusi Rating Bintang Pengguna", "distribusi-rating"),
+    ("Word Cloud Sentimen", "word-cloud"),
+    ("Nilai Metrik Kinerja Klasifikasi NBC", "evaluasi-model")
+]
+
+with st.sidebar:
+    nav_links = "".join(
+        f'<a class="sidebar-nav-link" href="#{anchor}" target="_self">{label}</a>'
+        for label, anchor in NAV_ITEMS
+    )
+
+    st.markdown(
+        f"""
+        <div class="sidebar-nav-wrap">
+            <div class="sidebar-nav-title">
+                <strong>Navigasi</strong>
+                <span class="sidebar-nav-dots">⋮</span>
+            </div>
+            {nav_links}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # Judul
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
@@ -473,7 +577,7 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
 
 
 st.markdown("---")
-judul_bagian("Pilih E-Wallet")
+judul_bagian("Pilih E-Wallet", "pilih-e-wallet")
 
 # Pilih E-Wallet
 col_btn1, col_btn2, col_btn3 = st.columns(3)
@@ -502,7 +606,7 @@ if not selected_apps:
 
 
 st.markdown("---")
-judul_bagian("Hasil Analisis")
+judul_bagian("Hasil Analisis", "hasil-analisis")
 with st.container(key="info_periode"):
     st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 31 Mei 2026")
 
@@ -522,7 +626,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Diagram donat
-judul_bagian("Proporsi Distribusi Sentimen Pengguna")
+judul_bagian("Proporsi Distribusi Sentimen Pengguna", "proporsi-sentimen")
 
 col_pie = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
@@ -574,7 +678,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Tren sentimen
-judul_bagian("Grafik Tren Perkembangan Sentimen Bulanan")
+judul_bagian("Grafik Tren Perkembangan Sentimen Bulanan", "tren-sentimen")
 
 filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
 filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
@@ -641,7 +745,7 @@ with st.container(border=True):
 
 st.markdown("---")
 # Distribusi rating
-judul_bagian("Penyebaran Distribusi Rating Bintang Pengguna")
+judul_bagian("Penyebaran Distribusi Rating Bintang Pengguna", "distribusi-rating")
 
 # Ukuran responsif diagram rating
 st.markdown("""
@@ -769,7 +873,7 @@ with st.container(key="rating_chart"):
 
 st.markdown("---")
 # Word cloud
-judul_bagian("Word Cloud Sentimen")
+judul_bagian("Word Cloud Sentimen", "word-cloud")
 
 wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
 
@@ -834,7 +938,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Evaluasi model
-judul_bagian("Nilai Metrik Kinerja Klasifikasi NBC")
+judul_bagian("Nilai Metrik Kinerja Klasifikasi NBC", "evaluasi-model")
 
 # Ukuran responsif confusion matrix
 st.markdown("""
