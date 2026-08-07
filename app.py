@@ -93,6 +93,105 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# Responsive dashboard
+st.markdown("""
+<style>
+    .block-container {
+        width: 100%;
+        max-width: 1500px;
+        padding-left: clamp(0.75rem, 2vw, 2.5rem);
+        padding-right: clamp(0.75rem, 2vw, 2.5rem);
+    }
+
+    [data-testid="stHorizontalBlock"] {
+        gap: clamp(0.5rem, 1vw, 1rem) !important;
+    }
+
+    [data-testid="column"],
+    [data-testid="stColumn"] {
+        min-width: 0 !important;
+    }
+
+    .metric-card {
+        padding: clamp(10px, 1.2vw, 20px) !important;
+    }
+
+    .metric-card h2,
+    .metric-card h3 {
+        font-size: clamp(17px, 1.8vw, 30px) !important;
+    }
+
+    .metric-card p {
+        font-size: clamp(10px, 0.9vw, 14px) !important;
+    }
+
+    [data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+
+    [data-testid="stPlotlyChart"] .js-plotly-plot,
+    [data-testid="stPlotlyChart"] .plot-container,
+    [data-testid="stPlotlyChart"] .svg-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: clamp(230px, 22vw, 340px) !important;
+    }
+
+    [data-testid="stPlotlyChart"] .main-svg {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    [data-testid="stImage"] {
+        display: flex;
+        justify-content: center;
+        width: 100% !important;
+    }
+
+    [data-testid="stImage"] img {
+        width: min(100%, 460px) !important;
+        max-width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    @media (max-width: 1100px) {
+        [data-testid="stImage"] img {
+            width: min(100%, 380px) !important;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .block-container {
+            padding-left: 0.65rem;
+            padding-right: 0.65rem;
+        }
+
+        [data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+        }
+
+        [data-testid="stHorizontalBlock"] > [data-testid="column"],
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            flex: 1 1 100% !important;
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+
+        [data-testid="stImage"] img {
+            width: min(100%, 320px) !important;
+        }
+
+        .metric-card {
+            padding: 10px !important;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 # Load data
 @st.cache_data
 def load_data():
@@ -136,6 +235,11 @@ APP_COLOR_MAP = {
     "DANA": "#2377ca",
     "GoPay": "#01aed6",
     "ShopeePay": "#ff773c"
+}
+
+PLOTLY_CONFIG = {
+    "displaylogo": False,
+    "responsive": True
 }
 
 
@@ -429,8 +533,14 @@ for idx, app_name in enumerate(selected_apps):
                 color='sentimen',
                 color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
             )
-            fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
-            st.plotly_chart(fig_pie, use_container_width=True)
+            fig_pie.update_layout(
+                autosize=True,
+                height=320,
+                margin=dict(t=55, b=70, l=20, r=20),
+                font=dict(size=12),
+                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
+            )
+            st.plotly_chart(fig_pie, use_container_width=True, config=PLOTLY_CONFIG)
 
 
             total_app_review = len(df_app_sent)
@@ -445,14 +555,14 @@ for idx, app_name in enumerate(selected_apps):
                 with col_neg:
                     st.markdown(f'''
                     <div style="text-align:center;">
-                        <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{neg_pct:.1f}%</h2>
+                        <h2 style="margin:0; color:{color_code}; font-size: clamp(18px, 2.2vw, 30px); font-weight: bold;">{neg_pct:.1f}%</h2>
                         <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Negatif</p>
                     </div>
                     ''', unsafe_allow_html=True)
                 with col_pos:
                     st.markdown(f'''
                     <div style="text-align:center;">
-                        <h2 style="margin:0; color:{color_code}; font-size: 30px; font-weight: bold;">{pos_pct:.1f}%</h2>
+                        <h2 style="margin:0; color:{color_code}; font-size: clamp(18px, 2.2vw, 30px); font-weight: bold;">{pos_pct:.1f}%</h2>
                         <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Positif</p>
                     </div>
                     ''', unsafe_allow_html=True)
@@ -480,6 +590,9 @@ with st.container(border=True):
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_pos.update_layout(
+        autosize=True,
+        height=340,
+        font=dict(size=12),
         legend_title_text="",
         legend=dict(
             orientation="h",
@@ -490,10 +603,10 @@ with st.container(border=True):
         ),
         xaxis_title="Periode Bulan",
         yaxis_title="Jumlah Ulasan",
-        margin=dict(t=60, b=110, l=60, r=30)
+        margin=dict(t=55, b=85, l=55, r=25)
     )
     fig_trend_pos.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_trend_pos, use_container_width=True)
+    st.plotly_chart(fig_trend_pos, use_container_width=True, config=PLOTLY_CONFIG)
 
 with st.container(border=True):
     df_neg_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Negatif']
@@ -503,6 +616,9 @@ with st.container(border=True):
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_neg.update_layout(
+        autosize=True,
+        height=340,
+        font=dict(size=12),
         legend_title_text="",
         legend=dict(
             orientation="h",
@@ -513,10 +629,10 @@ with st.container(border=True):
         ),
         xaxis_title="Periode Bulan",
         yaxis_title="Jumlah Ulasan",
-        margin=dict(t=60, b=110, l=60, r=30)
+        margin=dict(t=55, b=85, l=55, r=25)
     )
     fig_trend_neg.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_trend_neg, use_container_width=True)
+    st.plotly_chart(fig_trend_neg, use_container_width=True, config=PLOTLY_CONFIG)
 
 
 st.markdown("---")
@@ -535,8 +651,14 @@ if len(selected_apps) == 1:
             labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
             color_discrete_sequence=[APP_COLOR_MAP[app_name]]
         )
-        fig_rate.update_layout(xaxis=dict(dtick=1))
-        st.plotly_chart(fig_rate, use_container_width=True)
+        fig_rate.update_layout(
+            autosize=True,
+            height=340,
+            font=dict(size=12),
+            margin=dict(t=55, b=65, l=55, r=25),
+            xaxis=dict(dtick=1)
+        )
+        st.plotly_chart(fig_rate, use_container_width=True, config=PLOTLY_CONFIG)
 else:
     df_rating_group = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
     df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
@@ -549,6 +671,9 @@ else:
     )
 
     fig_rate_group.update_layout(
+        autosize=True,
+        height=340,
+        font=dict(size=12),
         legend_title_text="",
         bargap=0.03,
         bargroupgap=0.0,
@@ -560,11 +685,11 @@ else:
             xanchor="center",
             x=0.5
         ),
-        margin=dict(t=60, b=110, l=60, r=30)
+        margin=dict(t=55, b=85, l=55, r=25)
     )
 
     fig_rate_group.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_rate_group, use_container_width=True)
+    st.plotly_chart(fig_rate_group, use_container_width=True, config=PLOTLY_CONFIG)
 
 
 st.markdown("---")
@@ -589,10 +714,10 @@ for idx, app_name in enumerate(selected_apps):
                     colormap=wc_positive_color[app_name], width=400, height=250
                 ).generate(text_positive)
 
-                fig, ax = plt.subplots(figsize=(4, 2.5))
+                fig, ax = plt.subplots(figsize=(4, 2.2))
                 ax.imshow(wc_positive, interpolation="bilinear")
                 ax.axis("off")
-                st.pyplot(fig)
+                st.pyplot(fig, use_container_width=True)
                 plt.close()
 
             show_positive = st.toggle(f"Tampilkan ulasan positif {app_name}", key=f"positive_{app_name}")
@@ -615,10 +740,10 @@ for idx, app_name in enumerate(selected_apps):
                 ).generate(text_negative)
                 wc_negative.recolor(color_func=red_color_func)
 
-                fig, ax = plt.subplots(figsize=(4, 2.5))
+                fig, ax = plt.subplots(figsize=(4, 2.2))
                 ax.imshow(wc_negative, interpolation="bilinear")
                 ax.axis("off")
-                st.pyplot(fig)
+                st.pyplot(fig, use_container_width=True)
                 plt.close()
 
             show_negative = st.toggle(f"Tampilkan ulasan negatif {app_name}", key=f"negative_{app_name}")
@@ -682,7 +807,7 @@ for app_name in selected_apps:
             ],
             texttemplate="<b>%{text}</b>",
             textfont=dict(
-                size=19,
+                size=15,
                 color="#111111"
             ),
             hovertemplate=(
@@ -697,7 +822,7 @@ for app_name in selected_apps:
                 bordercolor=app_color,
                 font=dict(
                     color="#111111",
-                    size=14
+                    size=12
                 )
             ),
             colorscale=[
@@ -715,20 +840,20 @@ for app_name in selected_apps:
     )
 
     fig_cm.update_layout(
-        height=350,
+        height=300,
         margin=dict(l=25, r=25, t=25, b=25),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         font=dict(
             color="#111111",
-            size=15
+            size=12
         ),
         xaxis=dict(
             side="top",
             fixedrange=True,
             tickfont=dict(
                 color="#111111",
-                size=15
+                size=12
             )
         ),
         yaxis=dict(
@@ -736,7 +861,7 @@ for app_name in selected_apps:
             fixedrange=True,
             tickfont=dict(
                 color="#111111",
-                size=15
+                size=12
             )
         )
     )
@@ -745,8 +870,7 @@ for app_name in selected_apps:
         fig_cm,
         use_container_width=True,
         config={
-            "displaylogo": False,
-            "responsive": True,
+            **PLOTLY_CONFIG,
             "modeBarButtonsToRemove": [
                 "lasso2d",
                 "select2d"
@@ -756,7 +880,7 @@ for app_name in selected_apps:
 
     st.markdown(
         """
-        <p style="color:#111111; font-size:14px; margin-top:-10px;">
+        <p style="color:#111111; font-size:clamp(11px, 1vw, 14px); margin-top:-10px;">
             Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN),
             sedangkan warna lebih muda menunjukkan kesalahan klasifikasi
             (FP dan FN).
