@@ -645,60 +645,150 @@ st.markdown("---")
 # Distribusi rating
 st.markdown("### 📊 Penyebaran Distribusi Rating Bintang Pengguna")
 
-if len(selected_apps) == 1:
-    app_name = selected_apps[0]
-    with st.container(border=True):
-        df_app_rate = df_sentimen[df_sentimen['appName'] == app_name]
-        df_chart_rate = df_app_rate.groupby('score').size().reset_index(name='Total')
+# Ukuran responsif diagram rating
+st.markdown("""
+<style>
+    .st-key-rating_chart {
+        width: min(80vw, 760px);
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .st-key-rating_chart [data-testid="stPlotlyChart"] {
+        width: 100% !important;
+        aspect-ratio: 1 / 1;
+    }
+
+    .st-key-rating_chart [data-testid="stPlotlyChart"] > div {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .st-key-rating_chart .js-plotly-plot,
+    .st-key-rating_chart .plot-container,
+    .st-key-rating_chart .svg-container {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    @media (max-width: 700px) {
+        .st-key-rating_chart {
+            width: 90vw;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+with st.container(key="rating_chart"):
+
+    if len(selected_apps) == 1:
+        app_name = selected_apps[0]
+
+        df_app_rate = df_sentimen[
+            df_sentimen["appName"] == app_name
+        ]
+
+        df_chart_rate = (
+            df_app_rate
+            .groupby("score")
+            .size()
+            .reset_index(name="Total")
+        )
 
         fig_rate = px.bar(
-            df_chart_rate, x='score', y='Total',
+            df_chart_rate,
+            x="score",
+            y="Total",
             title=f"Distribusi Rating Bintang: {app_name}",
-            labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan'},
-            color_discrete_sequence=[APP_COLOR_MAP[app_name]]
+            labels={
+                "score": "Rating Bintang",
+                "Total": "Jumlah Ulasan"
+            },
+            color_discrete_sequence=[
+                APP_COLOR_MAP[app_name]
+            ]
         )
+
         fig_rate.update_layout(
             autosize=True,
-            height=300,
+            height=600,
             font=dict(size=12),
-            margin=dict(t=55, b=65, l=55, r=25),
+            margin=dict(
+                t=60,
+                b=70,
+                l=65,
+                r=30
+            ),
             xaxis=dict(dtick=1)
         )
-        st.plotly_chart(fig_rate, use_container_width=True, config=PLOTLY_CONFIG)
-else:
-    df_rating_group = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
-    df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
 
-    fig_rate_group = px.bar(
-        df_rating_group, x='score', y='Total', color='appName', barmode='group',
-        title="Komparasi Distribusi Rating Bintang E-Wallet",
-        labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
-        color_discrete_map=APP_COLOR_MAP
-    )
+        st.plotly_chart(
+            fig_rate,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
 
-    fig_rate_group.update_layout(
-        autosize=True,
-        height=300,
-        font=dict(size=12),
-        legend_title_text="",
-        bargap=0.03,
-        bargroupgap=0.0,
-        xaxis=dict(dtick=1),
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.28,
-            xanchor="center",
-            x=0.5
-        ),
-        margin=dict(t=55, b=85, l=55, r=25)
-    )
+    else:
+        df_rating_group = df_sentimen[
+            df_sentimen["appName"].isin(selected_apps)
+        ]
 
-    fig_rate_group.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_rate_group, use_container_width=True, config=PLOTLY_CONFIG)
+        df_rating_group = (
+            df_rating_group
+            .groupby(["score", "appName"])
+            .size()
+            .reset_index(name="Total")
+        )
 
+        fig_rate_group = px.bar(
+            df_rating_group,
+            x="score",
+            y="Total",
+            color="appName",
+            barmode="group",
+            title="Komparasi Distribusi Rating Bintang E-Wallet",
+            labels={
+                "score": "Rating Bintang",
+                "Total": "Jumlah Ulasan",
+                "appName": "Aplikasi"
+            },
+            color_discrete_map=APP_COLOR_MAP
+        )
 
-st.markdown("---")
+        fig_rate_group.update_layout(
+            autosize=True,
+            height=600,
+            font=dict(size=12),
+            legend_title_text="",
+            bargap=0.03,
+            bargroupgap=0,
+            xaxis=dict(dtick=1),
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.18,
+                xanchor="center",
+                x=0.5
+            ),
+            margin=dict(
+                t=60,
+                b=90,
+                l=65,
+                r=30
+            )
+        )
+
+        fig_rate_group.update_xaxes(
+            title_standoff=20
+        )
+
+        st.plotly_chart(
+            fig_rate_group,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
+
 # Word cloud
 st.markdown("### ☁️ Word Cloud Sentimen")
 
