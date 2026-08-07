@@ -1114,7 +1114,18 @@ for app_name in selected_apps:
     fp = int(row_eval["FP"])
     tn = int(row_eval["TN"])
 
-    st.markdown(f"**Confusion Matrix: {app_name}**")
+    st.markdown(
+    f"""
+    <div style="
+        width:100%;
+        text-align:center;
+        margin:0 auto 10px auto;
+    ">
+        <strong>Confusion Matrix: {app_name}</strong>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     fig_cm = go.Figure(
         go.Heatmap(
@@ -1220,20 +1231,41 @@ for app_name in selected_apps:
         )
 
     st.markdown(
-        """
-        <p style="color:#111111; font-size:clamp(11px, 1vw, 14px); margin-top:-10px;">
+    """
+    <div style="
+        width:100%;
+        text-align:center;
+        margin:-10px auto 18px auto;
+        padding:0 12px;
+        box-sizing:border-box;
+    ">
+        <p style="
+            color:#111111;
+            font-size:clamp(11px, 1vw, 14px);
+            margin:0;
+        ">
             Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN),
             sedangkan warna lebih muda menunjukkan kesalahan klasifikasi
             (FP dan FN).
         </p>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
     st.markdown(
-        f"**Metrik Performa Pengujian Model NBC: {app_name}**"
-    )
-
+    f"""
+    <div style="
+        width:100%;
+        text-align:center;
+        margin:0 auto 12px auto;
+    ">
+        <strong>Metrik Performa Pengujian Model NBC: {app_name}</strong>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+    
     col_m1, col_m2, col_m3, col_m4 = st.columns(4)
 
     metric_labels = [
