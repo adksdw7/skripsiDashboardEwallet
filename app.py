@@ -1265,13 +1265,14 @@ for app_name in selected_apps:
         unsafe_allow_html=True
     )
 
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+    col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
 
     metric_labels = [
         ("Accuracy", col_m1),
         ("Precision", col_m2),
         ("Recall", col_m3),
-        ("F1-Score", col_m4)
+        ("Specificity", col_m4),
+        ("F1-Score", col_m5)
     ]
 
     for label, col in metric_labels:
