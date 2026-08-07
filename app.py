@@ -1,3 +1,4 @@
+# Library
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -8,15 +9,11 @@ from collections import Counter
 import os
 import base64
 
-# =====================================================================
-# 1. KONFIGURASI HALAMAN UTAMA DASHBOARD
-# Tujuan   : mengatur judul tab browser, layout lebar penuh (tanpa sidebar
-#            karena semua navigasi dilakukan dengan scrolling ke bawah),
-#            dan gaya CSS global untuk kartu metrik (.metric-card)
-# Output   : konfigurasi halaman + style yang dipakai di seluruh dashboard
-# =====================================================================
+
+# Konfigurasi halaman
 st.set_page_config(page_title="Komparasi Sentimen E-Wallet", layout="wide")
 
+# Style dashboard
 st.markdown("""
 <style>
     .metric-card {
@@ -28,9 +25,7 @@ st.markdown("""
         text-align: center;
         margin-bottom: 15px;
     }
-    /* Menengahkan teks HANYA pada dua info box tertentu (dibungkus
-       st.container(key=...) di bawah), supaya kotak info/warning lain
-       di dashboard tidak ikut berubah perataannya. */
+
     .st-key-info_kegunaan [data-testid="stAlertContainer"],
     .st-key-info_kegunaan [data-testid="stAlert"],
     .st-key-info_periode [data-testid="stAlertContainer"],
@@ -50,7 +45,7 @@ st.markdown("""
         margin: 2.5rem 0;
         opacity: 10;
     }
-    /* ====== 1. FONT: Plus Jakarta Sans ====== */
+
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
     html, body, [data-testid="stAppViewContainer"],
@@ -58,7 +53,7 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
-    /* ====== 2. BACKGROUND: blur pastel perpaduan 3 warna aplikasi ====== */
+
     .stApp {
         background:
             radial-gradient(circle at 8% 12%, rgba(35, 119, 202, 0.16) 0%, transparent 42%),
@@ -68,7 +63,7 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-    /* ====== 3. BORDER TEGAS + SHADOW di semua kartu & container ====== */
+
     .metric-card {
         border: 2px solid #d7dce2 !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.08), 0 16px 32px rgba(0,0,0,0.1) !important;
@@ -97,37 +92,24 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# =====================================================================
-# 2. FUNGSI MEMUAT SELURUH DATA (SUMBER TUNGGAL)
-# Asal    : file CSV hasil pipeline Colab (01scraping, 02preparation,
-#           03modelling) yang disimpan satu repo dengan app.py
-# Tujuan  : membaca semua CSV yang dibutuhkan dashboard HANYA SEKALI,
-#           lalu men-cache-nya (@st.cache_data) supaya tidak dibaca
-#           ulang setiap kali user berinteraksi dengan toggle/tombol.
-#           Ini menggantikan versi lama yang membaca rawDana.csv,
-#           rawGopay.csv, rawShopeepay.csv DUA KALI (di dalam dan di
-#           luar fungsi load_data) — bug redundansi yang sudah dihapus.
-# Output  : df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay,
-#           df_raw_shopee — lima DataFrame yang dipakai di seluruh
-#           bagian dashboard.
-# =====================================================================
+
+# Load data
 @st.cache_data
 def load_data():
-    # --- Data hasil klasifikasi sentimen & evaluasi model ---
+
     df_sentimen = pd.read_csv("hasilSentimen.csv")
     df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
-    
+
     df_sentimen.columns = df_sentimen.columns.str.strip()
     df_sentimen["appName"] = df_sentimen["appName"].astype(str).str.strip()
     df_sentimen["sentimen"] = df_sentimen["predictLabel"].astype(str).str.strip().str.capitalize()
 
 
-    # --- Data ulasan mentah (dipakai untuk menampilkan teks ulasan asli) ---
     df_raw_dana = pd.read_csv("rawDana.csv")
     df_raw_gopay = pd.read_csv("rawGopay.csv")
     df_raw_shopee = pd.read_csv("rawShopeepay.csv")
 
-    # Penamaan ulang kolom hasil evaluasi agar konsisten dipakai di dashboard
+
     df_evaluasi.columns = df_evaluasi.columns.str.strip()
 
     df_evaluasi = df_evaluasi.rename(columns={
@@ -136,7 +118,7 @@ def load_data():
         "dataTest": "jumlahDataTest"
     })
 
-    # Konversi kolom tanggal ke tipe datetime agar bisa diagregasi per bulan
+
     df_sentimen['date'] = pd.to_datetime(df_sentimen['date'])
 
     return df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay, df_raw_shopee
@@ -149,8 +131,7 @@ except Exception as e:
     st.stop()
 
 
-# Warna identitas tiap aplikasi — dipakai berulang di banyak grafik/kartu,
-# jadi didefinisikan sekali di sini sebagai satu sumber kebenaran warna.
+# Warna aplikasi
 APP_COLOR_MAP = {
     "DANA": "#2377ca",
     "GoPay": "#01aed6",
@@ -158,19 +139,14 @@ APP_COLOR_MAP = {
 }
 
 
+# Warna transparan
 def rgba(hex_color, alpha):
     hex_color = hex_color.lstrip("#")
     r, g, b = [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]
     return f"rgba({r}, {g}, {b}, {alpha})"
 
 
-# =====================================================================
-# FUNGSI BANTUAN: MENAMPILKAN LOGO SEBAGAI GAMBAR BASE64
-# Tujuan : mengubah file logo lokal (png) menjadi tag <img> yang bisa
-#          ditempel langsung di dalam HTML markdown Streamlit.
-# Output : string HTML <img> jika file logo ditemukan, atau teks
-#          placeholder abu-abu jika file tidak ada.
-# =====================================================================
+# Logo aplikasi
 def get_img_html(file_path, alt_text):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
@@ -179,20 +155,7 @@ def get_img_html(file_path, alt_text):
     return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
 
 
-# =====================================================================
-# FUNGSI: MENGAMBIL 10 ULASAN ASLI TERKAIT KATA TERPOPULER
-# Asal   : mencocokkan konten yang sudah diklasifikasi di df_sentimen
-#          dengan teks aslinya di file raw (df_raw_dana/gopay/shopee)
-# Tujuan : menampilkan ulasan asli (belum di-preprocessing) kepada user
-#          agar lebih mudah dibaca, saat toggle "tampilkan ulasan" aktif
-# Output : list berisi maksimal 10 string ulasan asli
-# Catatan: versi lama mendefinisikan fungsi bernama sama ini DUA KALI —
-#          definisi pertama (yang mengandalkan file eksternal terpisah
-#          via load_raw_reviews) tidak pernah terpakai karena langsung
-#          ditimpa definisi kedua. Duplikasi itu sudah dihapus di sini,
-#          hanya menyisakan satu implementasi yang benar-benar dipakai.
-# =====================================================================
-
+# Ulasan pengguna
 def get_top_reviews(app_name, sentiment):
     raw = {
         "DANA": df_raw_dana,
@@ -231,42 +194,28 @@ def get_top_reviews(app_name, sentiment):
         for row in hasil.itertuples()
     ]
 
-# Fungsi pewarna khusus wordcloud negatif (selalu merah, tidak memakai colormap)
+
+# Warna word cloud negatif
 def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
     return "#cc0000"
 
 
-# =====================================================================
-# A. JUDUL DAN DESKRIPSI SINGKAT PENELITIAN
-# =====================================================================
+# Judul
 st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
 with st.container(key="info_kegunaan"):
     st.info("""**Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
 
 
-# =====================================================================
-# B. INFORMASI / TINJAUAN PUSTAKA PER APLIKASI (LANDING PAGE)
-# Asal   : logo aplikasi (logoDana.png, logoGopay.png, logoShopeepay.png)
-#          + teks tinjauan pustaka masing-masing aplikasi
-# Tujuan : menyambut user dengan kartu penuh berisi logo + penjelasan
-#          tiap aplikasi, langsung tampil tanpa perlu memilih apa pun.
-#          Logo dipaksa berukuran sama persis (lebar & tinggi tetap,
-#          object-fit: contain) supaya adil antar aplikasi meski file
-#          logo aslinya punya rasio/resolusi berbeda-beda.
-# Output : tiga kartu (DANA, GoPay, ShopeePay), masing-masing berwarna
-#          sesuai identitas aplikasi, dan responsif — pada layar sempit
-#          logo pindah ke atas teks (bertumpuk vertikal) via CSS
-#          flex-wrap, bukan ukuran diperkecil paksa oleh Streamlit.
-# =====================================================================
 st.markdown("---")
 
+# Informasi aplikasi
 LANDING_CARD_COLOR = {
     "DANA": "#2377ca",
     "GoPay": "#01aed6",
     "ShopeePay": "#ff773c"
 }
 
-# Placeholder teks tinjauan pustaka — silakan ganti isi dictionary ini
+
 APP_DESCRIPTIONS = {
     "DANA": "Aplikasi dengan penerapan sistem open platform yang mempermudah integrasi berbagai mitra bisnis dan aplikasi pihak ketiga. Fokus operasionalnya diarahkan untuk memfasilitasi ekosistem transaksi harian secara non-tunai, seperti transfer dana, pembayaran tagihan, dan pemindaian kode QRIS. Ketersediaan fitur DANA Bisnis menjadi nilai tambah penting dalam mendukung digitalisasi dan manajemen keuangan para pelaku UMKM",
     "GoPay": "Produk finansial dari GoTo Financial yang kini beroperasi sebagai aplikasi mandiri ini lebih menekankan fungsionalitasnya pada efisiensi manajemen keuangan personal. Di samping melayani kebutuhan transaksi pembayaran dan transfer dana, keunggulan utamanya berada pada sistem pencatatan pengeluaran otomatis. Aplikasi ini juga memperluas cakupan layanannya melalui integrasi perbankan digital lewat fitur GoPay Tabungan by Jago",
@@ -279,26 +228,21 @@ APP_LOGO_FILE = {
     "ShopeePay": "logoShopeepay.png"
 }
 
-# Tautan resmi Play Store tiap aplikasi — dibuka di tab baru saat tombol
-# "Download di Play Store" pada kartu masing-masing aplikasi diklik.
-# Bukan auto-download, hanya mengarahkan user ke halaman Play Store.
+
 APP_PLAYSTORE_URL = {
     "DANA": "https://play.google.com/store/apps/details?id=id.dana&hl=id",
     "GoPay": "https://play.google.com/store/apps/details?id=com.gojek.gopay&hl=id",
     "ShopeePay": "https://play.google.com/store/apps/details?id=com.shopeepay.id&hl=id"
 }
 
-# Tautan website resmi tiap aplikasi — dibuka di tab baru saat tombol
-# "Kunjungi Website Resmi" pada kartu masing-masing aplikasi diklik.
+
 APP_WEBSITE_URL = {
     "DANA": "https://www.dana.id/",
     "GoPay": "https://gopay.co.id/",
     "ShopeePay": "https://shopeepay.co.id/"
 }
 
-# CSS khusus kartu landing — ukuran logo dipatok tetap (fixed) di semua
-# breakpoint, dan layout pakai flexbox agar otomatis menyesuaikan lebar
-# layar (menciut jadi tumpukan vertikal di HP, sejajar di tablet/laptop)
+
 st.markdown("""
 <style>
     .landing-card {
@@ -391,11 +335,6 @@ for app_name in ["DANA", "GoPay", "ShopeePay"]:
     )
 
 
-# =====================================================================
-# D. INTERFASE TOMBOL SAKELAR (TOGGLE) LOGO APLIKASI
-# Tujuan : menentukan aplikasi mana yang ikut dianalisis di seluruh
-#          bagian "Hasil Analisis" di bawahnya.
-# =====================================================================
 st.markdown("---")
 st.markdown(
     """
@@ -406,6 +345,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Pilih E-Wallet
 col_btn1, col_btn2, col_btn3 = st.columns(3)
 with col_btn1:
     st.markdown(f'<div class="metric-card">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
@@ -425,16 +365,12 @@ if gopay_active:
 if shopee_active:
     selected_apps.append("ShopeePay")
 
-# Jika tidak ada toggle yang aktif, seluruh bagian "Hasil Analisis" di
-# bawah TIDAK akan ditampilkan sama sekali — dan warning tetap muncul.
+
 if not selected_apps:
     st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet")
     st.stop()
 
 
-# =====================================================================
-# 🔄 OUTPUT UTAMA HASIL ANALISIS (URUTAN SCROLLING KE BAWAH)
-# =====================================================================
 st.markdown("---")
 st.markdown(
     """
@@ -447,9 +383,8 @@ st.markdown(
 with st.container(key="info_periode"):
     st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 31 Mei 2026")
 
-# ------------------------------------------------------------
-# URUTAN 1: TOTAL DATA BERSIH ULASAN
-# ------------------------------------------------------------
+
+# Total data ulasan
 st.markdown("### 📥 Total Data Ulasan")
 
 col_u = st.columns(len(selected_apps))
@@ -461,10 +396,9 @@ for idx, app_name in enumerate(selected_apps):
             unsafe_allow_html=True
         )
 
-# ------------------------------------------------------------
-# URUTAN 2: DIAGRAM PIE/DONUT DISTRIBUSI SENTIMEN + PERSENTASE
-# ------------------------------------------------------------
+
 st.markdown("---")
+# Diagram donat
 st.markdown("### Proporsi Distribusi Sentimen Pengguna")
 
 col_pie = st.columns(len(selected_apps))
@@ -483,7 +417,7 @@ for idx, app_name in enumerate(selected_apps):
             fig_pie.update_layout(legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5))
             st.plotly_chart(fig_pie, use_container_width=True)
 
-            # --- Persentase digabung ke kartu yang sama ---
+
             total_app_review = len(df_app_sent)
             if total_app_review > 0:
                 pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
@@ -508,12 +442,9 @@ for idx, app_name in enumerate(selected_apps):
                     </div>
                     ''', unsafe_allow_html=True)
 
-# ------------------------------------------------------------
-# URUTAN 3: GRAFIK TREN PERKEMBANGAN SENTIMEN BULANAN
-# (positif & negatif ditampilkan terpisah — ini yang menggantikan
-#  fungsi filter periode yang tidak lagi diperlukan)
-# ------------------------------------------------------------
+
 st.markdown("---")
+# Tren sentimen
 st.markdown("### 📈 Grafik Tren Perkembangan Sentimen Bulanan")
 
 filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
@@ -572,10 +503,9 @@ with st.container(border=True):
     fig_trend_neg.update_xaxes(title_standoff=25)
     st.plotly_chart(fig_trend_neg, use_container_width=True)
 
-# ------------------------------------------------------------
-# URUTAN 4: PENYEBARAN DISTRIBUSI RATING BINTANG
-# ------------------------------------------------------------
+
 st.markdown("---")
+# Distribusi rating
 st.markdown("### 📊 Penyebaran Distribusi Rating Bintang Pengguna")
 
 if len(selected_apps) == 1:
@@ -594,38 +524,36 @@ if len(selected_apps) == 1:
         st.plotly_chart(fig_rate, use_container_width=True)
 else:
     df_rating_group = df_sentimen[df_sentimen['appName'].isin(selected_apps)]
-df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
+    df_rating_group = df_rating_group.groupby(['score', 'appName']).size().reset_index(name='Total')
 
-fig_rate_group = px.bar(
-    df_rating_group, x='score', y='Total', color='appName', barmode='group',
-    title="Komparasi Distribusi Rating Bintang E-Wallet",
-    labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
-    color_discrete_map=APP_COLOR_MAP
-)
+    fig_rate_group = px.bar(
+        df_rating_group, x='score', y='Total', color='appName', barmode='group',
+        title="Komparasi Distribusi Rating Bintang E-Wallet",
+        labels={'score': 'Rating Bintang', 'Total': 'Jumlah Ulasan', 'appName': 'Aplikasi'},
+        color_discrete_map=APP_COLOR_MAP
+    )
 
-fig_rate_group.update_layout(
-    legend_title_text="",
-    bargap=0.03,
-    bargroupgap=0.0,
-    xaxis=dict(dtick=1),
-    legend=dict(
-        orientation="h",
-        yanchor="top",
-        y=-0.28,
-        xanchor="center",
-        x=0.5
-    ),
-    margin=dict(t=60, b=110, l=60, r=30)
-)
+    fig_rate_group.update_layout(
+        legend_title_text="",
+        bargap=0.03,
+        bargroupgap=0.0,
+        xaxis=dict(dtick=1),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.28,
+            xanchor="center",
+            x=0.5
+        ),
+        margin=dict(t=60, b=110, l=60, r=30)
+    )
 
-fig_rate_group.update_xaxes(title_standoff=25)
+    fig_rate_group.update_xaxes(title_standoff=25)
+    st.plotly_chart(fig_rate_group, use_container_width=True)
 
-st.plotly_chart(fig_rate_group, use_container_width=True)
 
-# ------------------------------------------------------------
-# URUTAN 5: WORD CLOUD SENTIMEN + TOGGLE ULASAN TERKAIT
-# ------------------------------------------------------------
 st.markdown("---")
+# Word cloud
 st.markdown("### ☁️ Word Cloud Sentimen")
 
 wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
@@ -636,7 +564,7 @@ for idx, app_name in enumerate(selected_apps):
         with st.container(border=True):
             df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
 
-            # --- Word Cloud Positif ---
+
             st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Positif {app_name}</p>", unsafe_allow_html=True)
 
             text_positive = " ".join(df_app_text[df_app_text['sentimen'] == "Positif"]['content'].astype(str))
@@ -662,7 +590,7 @@ for idx, app_name in enumerate(selected_apps):
                 else:
                     st.info("Data ulasan positif tidak ditemukan.")
 
-            # --- Word Cloud Negatif ---
+
             st.markdown(f"<p style='text-align:center; font-weight:bold; margin-top:15px; margin-bottom:5px;'>Word Cloud Negatif {app_name}</p>", unsafe_allow_html=True)
 
             text_negative = " ".join(df_app_text[df_app_text['sentimen'] == "Negatif"]['content'].astype(str))
@@ -688,10 +616,9 @@ for idx, app_name in enumerate(selected_apps):
                 else:
                     st.info("Data ulasan negatif tidak ditemukan.")
 
-# ------------------------------------------------------------
-# URUTAN 6: NILAI METRIK KINERJA KLASIFIKASI NBC
-# ------------------------------------------------------------
+
 st.markdown("---")
+# Evaluasi model
 st.markdown("### Nilai Metrik Kinerja Klasifikasi NBC")
 
 for app_name in selected_apps:
