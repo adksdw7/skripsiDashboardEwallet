@@ -125,10 +125,22 @@ st.markdown("""
         font-size: clamp(10px, 0.9vw, 14px) !important;
     }
 
+    /* FIX RESPONSIF: sebelumnya height dipaksa pakai clamp(...vw) yang
+       dihitung dari lebar viewport, bukan dari tinggi chart aslinya
+       (height=320/340/300 yang sudah diatur di Python). Di HP nilai vw itu
+       jadi lebih kecil dari tinggi asli chart, dan karena overflow:hidden,
+       sisa chart yang tak muat langsung terpotong. Sekarang lebar tetap
+       fleksibel 100% mengikuti device/kolom, tapi tinggi dibiarkan "auto"
+       supaya ikut proporsi asli dari Plotly sendiri -> tidak ada lagi yang
+       kepotong, baik di HP, tablet, maupun saat window di-resize kecil. */
     [data-testid="stPlotlyChart"] {
         width: 100% !important;
         max-width: 100% !important;
-        overflow: hidden !important;
+        overflow: visible !important;
+    }
+
+    [data-testid="stPlotlyChart"] > div {
+        width: 100% !important;
     }
 
     [data-testid="stPlotlyChart"] .js-plotly-plot,
@@ -136,12 +148,12 @@ st.markdown("""
     [data-testid="stPlotlyChart"] .svg-container {
         width: 100% !important;
         max-width: 100% !important;
-        height: clamp(230px, 22vw, 340px) !important;
+        height: auto !important;
     }
 
     [data-testid="stPlotlyChart"] .main-svg {
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important;
     }
 
     [data-testid="stImage"] {
@@ -494,7 +506,7 @@ st.markdown("---")
 st.markdown(
     """
     <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-        🔄 Hasil Analisis 🔄
+         Hasil Analisis 
     </h1>
     """,
     unsafe_allow_html=True
