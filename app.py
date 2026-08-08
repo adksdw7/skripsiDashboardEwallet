@@ -721,7 +721,6 @@ with st.container(key="info_periode"):
 
 
 # Total data ulasan
-st.markdown("### 📥 Total Data Ulasan")
 
 col_u = st.columns(len(selected_apps))
 for idx, app_name in enumerate(selected_apps):
@@ -746,7 +745,7 @@ for idx, app_name in enumerate(selected_apps):
 
             fig_pie = px.pie(
                 df_chart_pie, values='count', names='sentimen', hole=0.4,
-                title=f"Distribusi Sentimen: {app_name}",
+                title=f"Aplikasi: {app_name}",
                 color='sentimen',
                 color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
             )
@@ -803,7 +802,7 @@ with st.container(border=True):
     df_pos_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Positif']
     fig_trend_pos = px.line(
         df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
-        title="📈 Tren Perkembangan Sentimen Positif Bulanan",
+        title="Sentimen Positif",
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_pos.update_layout(
@@ -829,7 +828,7 @@ with st.container(border=True):
     df_neg_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Negatif']
     fig_trend_neg = px.line(
         df_neg_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
-        title="📉 Tren Perkembangan Sentimen Negatif Bulanan",
+        title="Sentimen Negatif",
         color_discrete_map=APP_COLOR_MAP
     )
     fig_trend_neg.update_layout(
@@ -944,7 +943,7 @@ with st.container(key="rating_chart"):
             y="Total",
             color="appName",
             barmode="group",
-            title="Komparasi Distribusi Rating Bintang E-Wallet",
+            title="",
             labels={
                 "score": "Rating Bintang",
                 "Total": "Jumlah Ulasan",
@@ -1054,7 +1053,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Evaluasi model
-judul_bagian("Nilai Metrik Kinerja Klasifikasi NBC", "evaluasi-model")
+judul_bagian("Evaluasi Kinerja Klasifikasi Naive Bayes", "evaluasi-model")
 
 # Ukuran responsif confusion matrix
 st.markdown("""
@@ -1259,7 +1258,7 @@ for app_name in selected_apps:
     st.markdown(
         f"""
         <div style="width:100%; text-align:center; margin:0 auto 12px auto;">
-            <strong>Metrik Performa Pengujian Model NBC: {app_name}</strong>
+            <strong>Metrik Evaluasi: {app_name}</strong>
         </div>
         """,
         unsafe_allow_html=True
