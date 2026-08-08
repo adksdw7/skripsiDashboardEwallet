@@ -513,7 +513,7 @@ NAV_ITEMS = [
     ("Grafik Tren Perkembangan Sentimen Bulanan", "tren-sentimen"),
     ("Penyebaran Distribusi Rating Bintang Pengguna", "distribusi-rating"),
     ("Word Cloud Sentimen", "word-cloud"),
-    ("Nilai Metrik Kinerja Klasifikasi NBC", "evaluasi-model")
+    ("Evaluasi Kinerja Naive Bayes", "evaluasi-model")
 ]
 
 with st.sidebar:
@@ -1053,7 +1053,7 @@ for idx, app_name in enumerate(selected_apps):
 
 st.markdown("---")
 # Evaluasi model
-judul_bagian("Evaluasi Kinerja Klasifikasi Naive Bayes", "evaluasi-model")
+judul_bagian("Evaluasi Kinerja Naive Bayes", "evaluasi-model")
 
 # Ukuran responsif confusion matrix
 st.markdown("""
