@@ -222,8 +222,8 @@ st.markdown("""
 @st.cache_data
 def load_data():
 
-    df_sentimen = pd.read_csv("hasilSentimen.csv")
-    df_evaluasi = pd.read_csv("hasilEvaluasi.csv")
+    df_sentimen = pd.read_csv("hasilSentimenNBC.csv")
+    df_evaluasi = pd.read_csv("hasilEvaluasiNBC.csv")
 
     df_sentimen.columns = df_sentimen.columns.str.strip()
     df_sentimen["appName"] = df_sentimen["appName"].astype(str).str.strip()
