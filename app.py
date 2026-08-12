@@ -1270,7 +1270,7 @@ st.markdown(
         background: #FFF2DB !important;
     }
 
-    /* Tombol sidebar dengan >> dan << */
+    /* Tombol sidebar dengan >>> dan <<< */
     button[data-testid="stSidebarCollapsedControl"],
     button[data-testid="stSidebarCollapseButton"],
     button[aria-label="Open sidebar"],
@@ -1300,6 +1300,7 @@ st.markdown(
         color: transparent !important;
     }
 
+    /* Sidebar tertutup - tampilkan >>> */
     button[aria-label="Open sidebar"]::after,
     button[data-testid="stSidebarCollapsedControl"]::after {
         content: ">>>" !important;
@@ -1317,9 +1318,10 @@ st.markdown(
         visibility: visible !important;
     }
 
+    /* Sidebar terbuka - tampilkan <<< */
     button[aria-label="Close sidebar"]::after,
     button[data-testid="stSidebarCollapseButton"]::after {
-        content: "<<" !important;
+        content: "<<<" !important;
         position: absolute !important;
         inset: 0 !important;
         display: flex !important;
@@ -2049,6 +2051,18 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Navigasi Aplikasi - Selector dengan link ke masing-masing aplikasi
+st.markdown(
+    """
+    <div style="display: flex; gap: 12px; justify-content: center; margin: 8px 0 20px 0; flex-wrap: wrap;">
+        <a href="#dana" style="text-decoration: none; color: #9D6638; background: linear-gradient(180deg, #FFF2DB 0%, #FFFAF3 100%); padding: 10px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(117,78,42,.12); border: none;">DANA</a>
+        <a href="#gopay" style="text-decoration: none; color: #9D6638; background: linear-gradient(180deg, #FFF2DB 0%, #FFFAF3 100%); padding: 10px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(117,78,42,.12); border: none;">GoPay</a>
+        <a href="#shopeepay" style="text-decoration: none; color: #9D6638; background: linear-gradient(180deg, #FFF2DB 0%, #FFFAF3 100%); padding: 10px 28px; border-radius: 10px; font-weight: 700; font-size: 14px; box-shadow: 0 4px 12px rgba(117,78,42,.12); border: none;">ShopeePay</a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Filter aplikasi
 selector_cols = st.columns(3, gap="medium")
 
@@ -2099,7 +2113,7 @@ st.markdown(
 # 7. NAVIGASI SIDEBAR PER APLIKASI YANG DIPILIH
 # ------------------------------------------------------------
 with st.sidebar:
-    st.markdown('<div class="nav-title">Navigasi Aplikasi</div>', unsafe_allow_html=True)
+    st.markdown('<div class="nav-title">📱 Navigasi Aplikasi</div>', unsafe_allow_html=True)
     links = "".join(
         f'<a class="nav-link" href="#{slugify(app)}" target="_self">{app}</a>'
         for app in selected_apps
