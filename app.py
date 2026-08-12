@@ -316,6 +316,107 @@ st.markdown("""
         background: #ffffff;
     }
 
+
+    /* Komposisi Data Penelitian */
+    .dataset-summary-wrap {
+        width: min(100%, 980px);
+        margin: 0 auto;
+    }
+
+    .dataset-app-panel {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1.5px solid #1f2937;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.28);
+        padding: clamp(10px, 1.4vw, 18px);
+        margin: 0 auto clamp(14px, 1.8vw, 22px) auto;
+    }
+
+    .dataset-app-title {
+        width: 100%;
+        text-align: center;
+        margin: 0 0 clamp(10px, 1.2vw, 16px) 0;
+        color: var(--app-color);
+        font-size: clamp(24px, 3vw, 42px);
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .dataset-metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: clamp(8px, 1.2vw, 16px);
+        width: 100%;
+    }
+
+    .dataset-metric-card {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+        background: #ffffff;
+        border: 1px solid #d7dce2;
+        border-radius: 10px;
+        padding: clamp(10px, 1.3vw, 18px) clamp(7px, 1vw, 14px);
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .dataset-metric-value {
+        margin: 0;
+        color: var(--app-color);
+        font-size: clamp(19px, 2.3vw, 31px);
+        font-weight: 800;
+        line-height: 1.15;
+    }
+
+    .dataset-metric-label {
+        margin: clamp(5px, 0.7vw, 9px) 0 0 0;
+        color: #6b7280;
+        font-size: clamp(9px, 0.9vw, 12px);
+        line-height: 1.25;
+    }
+
+    @media (max-width: 700px) {
+        .dataset-summary-wrap {
+            width: 100%;
+        }
+
+        .dataset-app-panel {
+            padding: 10px;
+        }
+
+        .dataset-app-title {
+            font-size: clamp(22px, 8vw, 32px);
+        }
+
+        .dataset-metric-grid {
+            gap: 7px;
+        }
+
+        .dataset-metric-card {
+            padding: 9px 5px;
+        }
+
+        .dataset-metric-value {
+            font-size: clamp(16px, 5vw, 24px);
+        }
+
+        .dataset-metric-label {
+            font-size: clamp(8px, 2.7vw, 10px);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dataset-metric-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dataset-metric-card {
+            padding: 10px 8px;
+        }
+    }
+
     [data-testid="stPlotlyChart"] {
         width: 100% !important;
         max-width: 100% !important;
@@ -658,7 +759,7 @@ st.markdown("""
 
 NAV_ITEMS = [
     ("Pilih E-Wallet", "pilih-e-wallet"),
-    ("Ringkasan Data", "ringkasan-data"),
+    ("Komposisi Data Penelitian", "ringkasan-data"),
     ("Hasil Klasifikasi", "hasil-klasifikasi"),
     ("Perbedaan Prediksi", "perbedaan-prediksi"),
     ("Tren Sentimen", "tren-sentimen"),
@@ -758,53 +859,67 @@ if not selected_apps:
     st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet")
     st.stop()
 
+# ============================================================
+# 2. Komposisi Data Penelitian
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    "Komposisi Data Penelitian",
+    "ringkasan-data"
+)
+
+st.info(
+    "Data yang disajikan merupakan ulasan pengguna selama periode "
+    "1 Juni 2025 hingga 31 Mei 2026"
+)
+
+dataset_panels_html = '<div class="dataset-summary-wrap">'
+
+for app_name in ["DANA", "GoPay", "ShopeePay"]:
+    if app_name not in selected_apps:
+        continue
+
+    nbc_app_summary, _, row_nbc_summary, _ = get_app_data(app_name)
+    app_color_summary = APP_COLOR_MAP[app_name]
+
+    total_data_summary = len(nbc_app_summary)
+    data_train_summary = int(row_nbc_summary["dataTrain"])
+    data_test_summary = int(row_nbc_summary["dataTest"])
+
+    dataset_panels_html += (
+        f'<div class="dataset-app-panel" style="--app-color:{app_color_summary};">'
+        f'<div class="dataset-app-title">{app_name}</div>'
+        f'<div class="dataset-metric-grid">'
+        f'<div class="dataset-metric-card">'
+        f'<p class="dataset-metric-value">{total_data_summary:,}</p>'
+        f'<p class="dataset-metric-label">Total Data Preparation</p>'
+        f'</div>'
+        f'<div class="dataset-metric-card">'
+        f'<p class="dataset-metric-value">{data_train_summary:,}</p>'
+        f'<p class="dataset-metric-label">Data Training</p>'
+        f'</div>'
+        f'<div class="dataset-metric-card">'
+        f'<p class="dataset-metric-value">{data_test_summary:,}</p>'
+        f'<p class="dataset-metric-label">Data Testing</p>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+dataset_panels_html += '</div>'
+
+st.markdown(
+    dataset_panels_html,
+    unsafe_allow_html=True
+)
+
+
 # Untuk struktur komparasi model saat ini, bagian analisis rinci dirender
 # per aplikasi yang dipilih, sehingga setiap aplikasi tetap membandingkan
 # NBC vs SVM pada dataset aplikasinya sendiri.
-
 for selected_app in selected_apps:
     app_color = APP_COLOR_MAP[selected_app]
     nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
-
-    # ============================================================
-    # 2. Ringkasan Data
-    # ============================================================
-    st.markdown("---")
-    judul_bagian(
-        f"Ringkasan Data {selected_app}",
-        "ringkasan-data"
-    )
-
-    st.info(
-        "Data yang disajikan merupakan ulasan pengguna selama periode "
-        "1 Juni 2025 hingga 31 Mei 2026. NBC dan SVM menggunakan data "
-        "preparation serta pembagian train-test yang sama."
-    )
-
-    total_data = len(nbc_app)
-    data_train = int(row_nbc["dataTrain"])
-    data_test = int(row_nbc["dataTest"])
-
-    summary_cols = st.columns(3)
-
-    summary_values = [
-        ("Total Data Preparation", total_data),
-        ("Data Training", data_train),
-        ("Data Testing", data_test)
-    ]
-
-    for col, (label, value) in zip(summary_cols, summary_values):
-        with col:
-            st.markdown(
-                f"""
-                <div class="metric-card">
-                    <h2 style="color:{app_color};">{value:,}</h2>
-                    <p>{label}</p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
 
     # ============================================================
     # 3. Hasil Klasifikasi NBC vs SVM
