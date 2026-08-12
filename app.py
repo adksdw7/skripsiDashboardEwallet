@@ -11,7 +11,7 @@ import base64
 
 # Konfigurasi halaman
 st.set_page_config(
-    page_title="Analisis Sentimen E-Wallet",
+    page_title="Klasifikasi Sentimen E-Wallet",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -425,8 +425,15 @@ except Exception as e:
 
 
 # Session state aplikasi
-if "selected_app" not in st.session_state:
-    st.session_state["selected_app"] = "DANA"
+# User dapat memilih satu atau lebih E-Wallet menggunakan toggle.
+if "tgl_dana" not in st.session_state:
+    st.session_state["tgl_dana"] = True
+
+if "tgl_gopay" not in st.session_state:
+    st.session_state["tgl_gopay"] = True
+
+if "tgl_shopeepay" not in st.session_state:
+    st.session_state["tgl_shopeepay"] = True
 
 
 # Helper
@@ -680,14 +687,12 @@ with st.sidebar:
 
 # Header
 st.title(
-    "📊 ANALISIS SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY"
+    "📊 KLASIFIKASI SENTIMEN APLIKASI E-WALLET DANA, GOPAY, & SHOPEEPAY"
 )
 
 st.info(
-    "**Kegunaan Dashboard Web:** Menampilkan hasil analisis sentimen "
-    "ulasan DANA, GoPay, dan ShopeePay serta membandingkan kinerja "
-    "Multinomial Naïve Bayes dan Support Vector Machine pada data "
-    "aplikasi yang sama."
+    "Menampilkan klasifikasi sentimen ulasan DANA, GoPay, dan ShopeePay "
+    "menggunakan model Multinomial Naïve Bayes dan Support Vector Machine."
 )
 
 
@@ -697,17 +702,19 @@ st.info(
 st.markdown("---")
 judul_bagian("Pilih E-Wallet", "pilih-e-wallet")
 
-selected_app = st.session_state["selected_app"]
-
+# Tampilan pilihan E-Wallet mengikuti desain app.py sebelumnya:
+# logo, website resmi, Play Store, dan toggle multi-pilihan.
 wallet_columns = st.columns(3)
+
+wallet_toggle_keys = {
+    "DANA": "tgl_dana",
+    "GoPay": "tgl_gopay",
+    "ShopeePay": "tgl_shopeepay"
+}
 
 for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
     with wallet_columns[idx]:
         app_color = APP_COLOR_MAP[app_name]
-        is_selected = app_name == selected_app
-        selected_class = " selected-wallet" if is_selected else ""
-        shadow = rgba(app_color, 0.22)
-
         logo_html = get_img_html(
             APP_LOGO_FILE[app_name],
             f"Logo {app_name}"
@@ -716,10 +723,10 @@ for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
         st.markdown(
             f"""
             <div
-                class="wallet-card{selected_class}"
+                class="wallet-card"
                 style="
                     --app-color:{app_color};
-                    --selected-shadow:{shadow};
+                    --selected-shadow:{rgba(app_color, 0.22)};
                 "
             >
                 <div class="wallet-logo">
@@ -733,7 +740,7 @@ for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Website Resmi
+                        Kunjungi Website Resmi
                     </a>
 
                     <a
@@ -742,7 +749,7 @@ for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Play Store
+                        Download di Play Store
                     </a>
                 </div>
             </div>
@@ -750,156 +757,320 @@ for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
             unsafe_allow_html=True
         )
 
-        button_label = (
-            f"✓ {app_name}"
-            if is_selected
-            else f"Pilih {app_name}"
+        st.toggle(
+            app_name,
+            key=wallet_toggle_keys[app_name]
         )
 
-        if st.button(
-            button_label,
-            key=f"select_{app_name.lower()}",
-            use_container_width=True
-        ):
-            if st.session_state["selected_app"] != app_name:
-                st.session_state["selected_app"] = app_name
-                st.rerun()
+selected_apps = []
 
+if st.session_state["tgl_dana"]:
+    selected_apps.append("DANA")
 
-selected_app = st.session_state["selected_app"]
-app_color = APP_COLOR_MAP[selected_app]
+if st.session_state["tgl_gopay"]:
+    selected_apps.append("GoPay")
 
-nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
+if st.session_state["tgl_shopeepay"]:
+    selected_apps.append("ShopeePay")
 
+if not selected_apps:
+    st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet")
+    st.stop()
 
-# ============================================================
-# 2. Ringkasan Data
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Ringkasan Data {selected_app}",
-    "ringkasan-data"
-)
+# Untuk struktur komparasi model saat ini, bagian analisis rinci dirender
+# per aplikasi yang dipilih, sehingga setiap aplikasi tetap membandingkan
+# NBC vs SVM pada dataset aplikasinya sendiri.
 
-st.info(
-    "Data yang disajikan merupakan ulasan pengguna selama periode "
-    "1 Juni 2025 hingga 31 Mei 2026. NBC dan SVM menggunakan data "
-    "preparation serta pembagian train-test yang sama."
-)
+for selected_app in selected_apps:
+    app_color = APP_COLOR_MAP[selected_app]
+    nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
 
-total_data = len(nbc_app)
-data_train = int(row_nbc["dataTrain"])
-data_test = int(row_nbc["dataTest"])
-
-summary_cols = st.columns(3)
-
-summary_values = [
-    ("Total Data Preparation", total_data),
-    ("Data Training", data_train),
-    ("Data Testing", data_test)
-]
-
-for col, (label, value) in zip(summary_cols, summary_values):
-    with col:
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <h2 style="color:{app_color};">{value:,}</h2>
-                <p>{label}</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-# ============================================================
-# 3. Hasil Klasifikasi NBC vs SVM
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Hasil Klasifikasi Sentimen {selected_app}",
-    "hasil-klasifikasi"
-)
-
-nbc_summary = sentiment_summary(
-    nbc_app,
-    "predictLabelNBC"
-)
-
-svm_summary = sentiment_summary(
-    svm_app,
-    "predictLabelSVM"
-)
-
-classification_cols = st.columns(2, gap="medium")
-
-classification_models = [
-    (
-        "NBC",
-        nbc_app,
-        "predictLabelNBC",
-        nbc_summary
-    ),
-    (
-        "SVM",
-        svm_app,
-        "predictLabelSVM",
-        svm_summary
+    st.markdown(
+        f"""
+        <div style="
+            width:100%;
+            text-align:center;
+            margin:8px 0 6px 0;
+            padding:10px 12px;
+            border-radius:12px;
+            border:2px solid {app_color};
+            background:rgba(255,255,255,0.78);
+            box-sizing:border-box;
+        ">
+            <strong style="color:{app_color}; font-size:20px;">
+                Analisis {selected_app}
+            </strong>
+        </div>
+        """,
+        unsafe_allow_html=True
     )
-]
 
-for col, (
-    model_name,
-    df_model,
-    prediction_col,
-    summary
-) in zip(classification_cols, classification_models):
+    # ============================================================
+    # 2. Ringkasan Data
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Ringkasan Data {selected_app}",
+        "ringkasan-data"
+    )
 
-    with col:
-        with st.container(border=True):
-            model_color = MODEL_COLOR_MAP[model_name]
+    st.info(
+        "Data yang disajikan merupakan ulasan pengguna selama periode "
+        "1 Juni 2025 hingga 31 Mei 2026. NBC dan SVM menggunakan data "
+        "preparation serta pembagian train-test yang sama."
+    )
 
+    total_data = len(nbc_app)
+    data_train = int(row_nbc["dataTrain"])
+    data_test = int(row_nbc["dataTest"])
+
+    summary_cols = st.columns(3)
+
+    summary_values = [
+        ("Total Data Preparation", total_data),
+        ("Data Training", data_train),
+        ("Data Testing", data_test)
+    ]
+
+    for col, (label, value) in zip(summary_cols, summary_values):
+        with col:
             st.markdown(
                 f"""
-                <div
-                    class="model-title"
-                    style="color:{model_color};"
-                >
-                    {
-                        "Multinomial Naïve Bayes"
-                        if model_name == "NBC"
-                        else "Support Vector Machine"
-                    }
+                <div class="metric-card">
+                    <h2 style="color:{app_color};">{value:,}</h2>
+                    <p>{label}</p>
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-            pie_data = pd.DataFrame({
-                "Sentimen": ["Positif", "Negatif"],
-                "Jumlah": [
-                    summary["positif"],
-                    summary["negatif"]
-                ]
+
+    # ============================================================
+    # 3. Hasil Klasifikasi NBC vs SVM
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Hasil Klasifikasi Sentimen {selected_app}",
+        "hasil-klasifikasi"
+    )
+
+    nbc_summary = sentiment_summary(
+        nbc_app,
+        "predictLabelNBC"
+    )
+
+    svm_summary = sentiment_summary(
+        svm_app,
+        "predictLabelSVM"
+    )
+
+    classification_cols = st.columns(2, gap="medium")
+
+    classification_models = [
+        (
+            "NBC",
+            nbc_app,
+            "predictLabelNBC",
+            nbc_summary
+        ),
+        (
+            "SVM",
+            svm_app,
+            "predictLabelSVM",
+            svm_summary
+        )
+    ]
+
+    for col, (
+        model_name,
+        df_model,
+        prediction_col,
+        summary
+    ) in zip(classification_cols, classification_models):
+
+        with col:
+            with st.container(border=True):
+                model_color = MODEL_COLOR_MAP[model_name]
+
+                st.markdown(
+                    f"""
+                    <div
+                        class="model-title"
+                        style="color:{model_color};"
+                    >
+                        {
+                            "Multinomial Naïve Bayes"
+                            if model_name == "NBC"
+                            else "Support Vector Machine"
+                        }
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                pie_data = pd.DataFrame({
+                    "Sentimen": ["Positif", "Negatif"],
+                    "Jumlah": [
+                        summary["positif"],
+                        summary["negatif"]
+                    ]
+                })
+
+                fig_pie = px.pie(
+                    pie_data,
+                    values="Jumlah",
+                    names="Sentimen",
+                    hole=0.45,
+                    color="Sentimen",
+                    color_discrete_map={
+                        "Positif": "#1ccc0d",
+                        "Negatif": "#cc0000"
+                    },
+                    category_orders={
+                        "Sentimen": ["Positif", "Negatif"]
+                    }
+                )
+
+                fig_pie.update_traces(
+                    sort=False,
+                    textinfo="percent+label",
+                    hovertemplate=(
+                        "<b>%{label}</b><br>"
+                        "Jumlah: %{value:,}<br>"
+                        "Proporsi: %{percent}"
+                        "<extra></extra>"
+                    )
+                )
+
+                fig_pie.update_layout(
+                    height=300,
+                    margin=dict(t=15, b=50, l=20, r=20),
+                    legend=dict(
+                        orientation="h",
+                        yanchor="top",
+                        y=-0.05,
+                        xanchor="center",
+                        x=0.5
+                    ),
+                    paper_bgcolor="rgba(0,0,0,0)"
+                )
+
+                st.plotly_chart(
+                    fig_pie,
+                    use_container_width=True,
+                    config=PLOTLY_CONFIG
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="sentiment-row">
+                        <div class="sentiment-item">
+                            <h2 style="color:#1a9c11;">
+                                {summary["positifPct"]:.1f}%
+                            </h2>
+                            <p>
+                                Positif ({summary["positif"]:,})
+                            </p>
+                        </div>
+
+                        <div class="sentiment-item">
+                            <h2 style="color:#cc0000;">
+                                {summary["negatifPct"]:.1f}%
+                            </h2>
+                            <p>
+                                Negatif ({summary["negatif"]:,})
+                            </p>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+    # ============================================================
+    # 4. Perbedaan Prediksi NBC vs SVM
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Perbedaan Prediksi NBC dan SVM - {selected_app}",
+        "perbedaan-prediksi"
+    )
+
+    prediction_compare = nbc_app[
+        [
+            "reviewId",
+            "content",
+            "score",
+            "date",
+            "actualLabel",
+            "predictLabelNBC"
+        ]
+    ].merge(
+        svm_app[
+            [
+                "reviewId",
+                "predictLabelSVM"
+            ]
+        ],
+        on="reviewId",
+        how="inner",
+        validate="one_to_one"
+    )
+
+    prediction_compare["kesepakatan"] = (
+        prediction_compare["predictLabelNBC"]
+        == prediction_compare["predictLabelSVM"]
+    )
+
+    same_count = int(prediction_compare["kesepakatan"].sum())
+    different_count = int((~prediction_compare["kesepakatan"]).sum())
+    agreement_pct = (
+        same_count / len(prediction_compare) * 100
+        if len(prediction_compare) > 0
+        else 0
+    )
+
+    nbc_pos_svm_neg = int(
+        (
+            (prediction_compare["predictLabelNBC"] == "positif")
+            & (prediction_compare["predictLabelSVM"] == "negatif")
+        ).sum()
+    )
+
+    nbc_neg_svm_pos = int(
+        (
+            (prediction_compare["predictLabelNBC"] == "negatif")
+            & (prediction_compare["predictLabelSVM"] == "positif")
+        ).sum()
+    )
+
+    agreement_cols = st.columns([1.15, 1], gap="medium")
+
+    with agreement_cols[0]:
+        with st.container(border=True):
+            st.markdown(
+                '<div class="panel-title">Kesepakatan Prediksi Seluruh Data Preparation</div>',
+                unsafe_allow_html=True
+            )
+
+            agreement_data = pd.DataFrame({
+                "Kategori": ["Prediksi Sama", "Prediksi Berbeda"],
+                "Jumlah": [same_count, different_count]
             })
 
-            fig_pie = px.pie(
-                pie_data,
+            fig_agreement = px.pie(
+                agreement_data,
                 values="Jumlah",
-                names="Sentimen",
-                hole=0.45,
-                color="Sentimen",
+                names="Kategori",
+                hole=0.52,
+                color="Kategori",
                 color_discrete_map={
-                    "Positif": "#1ccc0d",
-                    "Negatif": "#cc0000"
-                },
-                category_orders={
-                    "Sentimen": ["Positif", "Negatif"]
+                    "Prediksi Sama": "#22c55e",
+                    "Prediksi Berbeda": "#ef4444"
                 }
             )
 
-            fig_pie.update_traces(
-                sort=False,
+            fig_agreement.update_traces(
                 textinfo="percent+label",
                 hovertemplate=(
                     "<b>%{label}</b><br>"
@@ -909,870 +1080,732 @@ for col, (
                 )
             )
 
-            fig_pie.update_layout(
-                height=300,
-                margin=dict(t=15, b=50, l=20, r=20),
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=-0.05,
-                    xanchor="center",
-                    x=0.5
-                ),
+            fig_agreement.update_layout(
+                height=330,
+                margin=dict(t=10, b=35, l=20, r=20),
+                showlegend=False,
                 paper_bgcolor="rgba(0,0,0,0)"
             )
 
             st.plotly_chart(
-                fig_pie,
+                fig_agreement,
                 use_container_width=True,
                 config=PLOTLY_CONFIG
             )
 
-            st.markdown(
-                f"""
-                <div class="sentiment-row">
-                    <div class="sentiment-item">
-                        <h2 style="color:#1a9c11;">
-                            {summary["positifPct"]:.1f}%
-                        </h2>
-                        <p>
-                            Positif ({summary["positif"]:,})
-                        </p>
-                    </div>
-
-                    <div class="sentiment-item">
-                        <h2 style="color:#cc0000;">
-                            {summary["negatifPct"]:.1f}%
-                        </h2>
-                        <p>
-                            Negatif ({summary["negatif"]:,})
-                        </p>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-
-# ============================================================
-# 4. Perbedaan Prediksi NBC vs SVM
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Perbedaan Prediksi NBC dan SVM - {selected_app}",
-    "perbedaan-prediksi"
-)
-
-prediction_compare = nbc_app[
-    [
-        "reviewId",
-        "content",
-        "score",
-        "date",
-        "actualLabel",
-        "predictLabelNBC"
-    ]
-].merge(
-    svm_app[
-        [
-            "reviewId",
-            "predictLabelSVM"
-        ]
-    ],
-    on="reviewId",
-    how="inner",
-    validate="one_to_one"
-)
-
-prediction_compare["kesepakatan"] = (
-    prediction_compare["predictLabelNBC"]
-    == prediction_compare["predictLabelSVM"]
-)
-
-same_count = int(prediction_compare["kesepakatan"].sum())
-different_count = int((~prediction_compare["kesepakatan"]).sum())
-agreement_pct = (
-    same_count / len(prediction_compare) * 100
-    if len(prediction_compare) > 0
-    else 0
-)
-
-nbc_pos_svm_neg = int(
-    (
-        (prediction_compare["predictLabelNBC"] == "positif")
-        & (prediction_compare["predictLabelSVM"] == "negatif")
-    ).sum()
-)
-
-nbc_neg_svm_pos = int(
-    (
-        (prediction_compare["predictLabelNBC"] == "negatif")
-        & (prediction_compare["predictLabelSVM"] == "positif")
-    ).sum()
-)
-
-agreement_cols = st.columns([1.15, 1], gap="medium")
-
-with agreement_cols[0]:
-    with st.container(border=True):
-        st.markdown(
-            '<div class="panel-title">Kesepakatan Prediksi Seluruh Data Preparation</div>',
-            unsafe_allow_html=True
-        )
-
-        agreement_data = pd.DataFrame({
-            "Kategori": ["Prediksi Sama", "Prediksi Berbeda"],
-            "Jumlah": [same_count, different_count]
-        })
-
-        fig_agreement = px.pie(
-            agreement_data,
-            values="Jumlah",
-            names="Kategori",
-            hole=0.52,
-            color="Kategori",
-            color_discrete_map={
-                "Prediksi Sama": "#22c55e",
-                "Prediksi Berbeda": "#ef4444"
-            }
-        )
-
-        fig_agreement.update_traces(
-            textinfo="percent+label",
-            hovertemplate=(
-                "<b>%{label}</b><br>"
-                "Jumlah: %{value:,}<br>"
-                "Proporsi: %{percent}"
-                "<extra></extra>"
-            )
-        )
-
-        fig_agreement.update_layout(
-            height=330,
-            margin=dict(t=10, b=35, l=20, r=20),
-            showlegend=False,
-            paper_bgcolor="rgba(0,0,0,0)"
-        )
-
-        st.plotly_chart(
-            fig_agreement,
-            use_container_width=True,
-            config=PLOTLY_CONFIG
-        )
-
-with agreement_cols[1]:
-    with st.container(border=True):
-        st.markdown(
-            '<div class="panel-title">Ringkasan Perbedaan Prediksi</div>',
-            unsafe_allow_html=True
-        )
-
-        c1, c2 = st.columns(2)
-
-        with c1:
-            st.markdown(
-                f"""
-                <div class="insight-card">
-                    <p class="insight-label">Prediksi Sama</p>
-                    <p class="insight-value">{same_count:,}</p>
-                    <p class="insight-caption">
-                        {agreement_pct:.2f}% dari seluruh data
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        with c2:
-            st.markdown(
-                f"""
-                <div class="insight-card">
-                    <p class="insight-label">Prediksi Berbeda</p>
-                    <p class="insight-value">{different_count:,}</p>
-                    <p class="insight-caption">
-                        {100 - agreement_pct:.2f}% dari seluruh data
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
-        diff_direction = pd.DataFrame({
-            "Perubahan": [
-                "NBC Positif → SVM Negatif",
-                "NBC Negatif → SVM Positif"
-            ],
-            "Jumlah": [
-                nbc_pos_svm_neg,
-                nbc_neg_svm_pos
-            ]
-        })
-
-        fig_diff = px.bar(
-            diff_direction,
-            x="Jumlah",
-            y="Perubahan",
-            orientation="h",
-            text="Jumlah",
-            color="Perubahan",
-            color_discrete_sequence=[
-                MODEL_COLOR_MAP["NBC"],
-                MODEL_COLOR_MAP["SVM"]
-            ]
-        )
-
-        fig_diff.update_traces(
-            textposition="outside",
-            hovertemplate=(
-                "<b>%{y}</b><br>"
-                "Jumlah: %{x:,}"
-                "<extra></extra>"
-            )
-        )
-
-        fig_diff.update_layout(
-            height=225,
-            margin=dict(t=10, b=35, l=20, r=45),
-            showlegend=False,
-            xaxis_title="Jumlah Ulasan",
-            yaxis_title="",
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)"
-        )
-
-        st.plotly_chart(
-            fig_diff,
-            use_container_width=True,
-            config=PLOTLY_CONFIG
-        )
-
-st.markdown(
-    '<div class="note-box">'
-    'Bagian ini membandingkan prediksi NBC dan SVM pada ulasan yang sama. '
-    'Nilai ini bukan metrik evaluasi model, tetapi menunjukkan tingkat '
-    'kesepakatan hasil klasifikasi kedua algoritma.'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# 5. Tren Sentimen NBC vs SVM
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Tren Sentimen NBC dan SVM - {selected_app}",
-    "tren-sentimen"
-)
-
-trend_nbc = nbc_app[
-    ["date", "predictLabelNBC"]
-].copy()
-
-trend_nbc["Model"] = "NBC"
-trend_nbc["Sentimen"] = (
-    trend_nbc["predictLabelNBC"]
-    .str.capitalize()
-)
-
-trend_svm = svm_app[
-    ["date", "predictLabelSVM"]
-].copy()
-
-trend_svm["Model"] = "SVM"
-trend_svm["Sentimen"] = (
-    trend_svm["predictLabelSVM"]
-    .str.capitalize()
-)
-
-trend_data = pd.concat(
-    [
-        trend_nbc[["date", "Model", "Sentimen"]],
-        trend_svm[["date", "Model", "Sentimen"]]
-    ],
-    ignore_index=True
-)
-
-trend_data = trend_data.dropna(subset=["date"])
-trend_data["Bulan"] = (
-    trend_data["date"]
-    .dt.to_period("M")
-    .astype(str)
-)
-
-trend_group = (
-    trend_data
-    .groupby(
-        ["Bulan", "Model", "Sentimen"]
-    )
-    .size()
-    .reset_index(name="Jumlah")
-)
-
-trend_cols = st.columns(2, gap="medium")
-
-for col, sentiment_name in zip(
-    trend_cols,
-    ["Positif", "Negatif"]
-):
-    with col:
+    with agreement_cols[1]:
         with st.container(border=True):
-            df_trend_sentiment = trend_group[
-                trend_group["Sentimen"] == sentiment_name
-            ]
-
-            fig_trend = px.line(
-                df_trend_sentiment,
-                x="Bulan",
-                y="Jumlah",
-                color="Model",
-                markers=True,
-                color_discrete_map=MODEL_COLOR_MAP,
-                title=f"Sentimen {sentiment_name}"
-            )
-
-            fig_trend.update_layout(
-                height=340,
-                margin=dict(t=55, b=75, l=55, r=25),
-                legend_title_text="",
-                legend=dict(
-                    orientation="h",
-                    yanchor="top",
-                    y=-0.2,
-                    xanchor="center",
-                    x=0.5
-                ),
-                xaxis_title="Periode Bulan",
-                yaxis_title="Jumlah Ulasan",
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)"
-            )
-
-            st.plotly_chart(
-                fig_trend,
-                use_container_width=True,
-                config=PLOTLY_CONFIG
-            )
-
-
-# ============================================================
-# 6. Distribusi Rating
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Distribusi Rating Ulasan {selected_app}",
-    "distribusi-rating"
-)
-
-rating_data = (
-    nbc_app
-    .groupby("score")
-    .size()
-    .reset_index(name="Jumlah")
-)
-
-with st.container(border=True):
-    fig_rating = px.bar(
-        rating_data,
-        x="score",
-        y="Jumlah",
-        text="Jumlah",
-        color_discrete_sequence=[app_color],
-        labels={
-            "score": "Rating Bintang",
-            "Jumlah": "Jumlah Ulasan"
-        }
-    )
-
-    fig_rating.update_traces(
-        textposition="outside",
-        hovertemplate=(
-            "Rating: %{x}<br>"
-            "Jumlah Ulasan: %{y:,}"
-            "<extra></extra>"
-        )
-    )
-
-    fig_rating.update_layout(
-        height=430,
-        margin=dict(t=35, b=65, l=60, r=30),
-        xaxis=dict(dtick=1),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
-    )
-
-    st.plotly_chart(
-        fig_rating,
-        use_container_width=True,
-        config=PLOTLY_CONFIG
-    )
-
-st.markdown(
-    '<div class="note-box">'
-    'Distribusi rating merupakan informasi dari dataset aplikasi dan tidak '
-    'bergantung pada algoritma NBC maupun SVM.'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# 7. Word Cloud NBC vs SVM
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Word Cloud Hasil Klasifikasi {selected_app}",
-    "word-cloud"
-)
-
-wordcloud_cols = st.columns(2, gap="medium")
-
-wc_models = [
-    ("NBC", nbc_app, "predictLabelNBC"),
-    ("SVM", svm_app, "predictLabelSVM")
-]
-
-for col, (
-    model_name,
-    df_model,
-    prediction_col
-) in zip(wordcloud_cols, wc_models):
-
-    with col:
-        with st.container(border=True):
-            model_color = MODEL_COLOR_MAP[model_name]
-
             st.markdown(
-                f"""
-                <div
-                    class="model-title"
-                    style="color:{model_color};"
-                >
-                    {model_name}
-                </div>
-                """,
+                '<div class="panel-title">Ringkasan Perbedaan Prediksi</div>',
                 unsafe_allow_html=True
             )
 
-            for sentiment_value, sentiment_title in [
-                ("positif", "Positif"),
-                ("negatif", "Negatif")
-            ]:
+            c1, c2 = st.columns(2)
+
+            with c1:
                 st.markdown(
                     f"""
-                    <div class="panel-title">
-                        Sentimen {sentiment_title}
+                    <div class="insight-card">
+                        <p class="insight-label">Prediksi Sama</p>
+                        <p class="insight-value">{same_count:,}</p>
+                        <p class="insight-caption">
+                            {agreement_pct:.2f}% dari seluruh data
+                        </p>
                     </div>
                     """,
                     unsafe_allow_html=True
                 )
 
-                text_wc = " ".join(
-                    df_model[
-                        df_model[prediction_col]
-                        == sentiment_value
-                    ]["content"]
-                    .astype(str)
+            with c2:
+                st.markdown(
+                    f"""
+                    <div class="insight-card">
+                        <p class="insight-label">Prediksi Berbeda</p>
+                        <p class="insight-value">{different_count:,}</p>
+                        <p class="insight-caption">
+                            {100 - agreement_pct:.2f}% dari seluruh data
+                        </p>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
                 )
 
-                fig_wc = wordcloud_figure(
-                    text_wc,
-                    sentiment_value
+            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+            diff_direction = pd.DataFrame({
+                "Perubahan": [
+                    "NBC Positif → SVM Negatif",
+                    "NBC Negatif → SVM Positif"
+                ],
+                "Jumlah": [
+                    nbc_pos_svm_neg,
+                    nbc_neg_svm_pos
+                ]
+            })
+
+            fig_diff = px.bar(
+                diff_direction,
+                x="Jumlah",
+                y="Perubahan",
+                orientation="h",
+                text="Jumlah",
+                color="Perubahan",
+                color_discrete_sequence=[
+                    MODEL_COLOR_MAP["NBC"],
+                    MODEL_COLOR_MAP["SVM"]
+                ]
+            )
+
+            fig_diff.update_traces(
+                textposition="outside",
+                hovertemplate=(
+                    "<b>%{y}</b><br>"
+                    "Jumlah: %{x:,}"
+                    "<extra></extra>"
                 )
-
-                if fig_wc is not None:
-                    st.pyplot(
-                        fig_wc,
-                        use_container_width=True
-                    )
-                    plt.close(fig_wc)
-                else:
-                    st.info(
-                        f"Tidak ada data sentimen {sentiment_title.lower()}."
-                    )
-
-
-# ============================================================
-# 8. Perbandingan Kinerja Model
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Perbandingan Kinerja NBC dan SVM - {selected_app}",
-    "perbandingan-model"
-)
-
-performance_cols = st.columns(2, gap="medium")
-
-for col, (
-    model_name,
-    row_eval
-) in zip(
-    performance_cols,
-    [
-        ("NBC", row_nbc),
-        ("SVM", row_svm)
-    ]
-):
-    with col:
-        with st.container(border=True):
-            model_color = MODEL_COLOR_MAP[model_name]
-
-            st.markdown(
-                f"""
-                <div
-                    class="model-title"
-                    style="color:{model_color};"
-                >
-                    {
-                        "Multinomial Naïve Bayes"
-                        if model_name == "NBC"
-                        else "Support Vector Machine"
-                    }
-                </div>
-                """,
-                unsafe_allow_html=True
             )
 
-            metric_html = "".join(
-                f"""
-                <div
-                    class="compare-kpi"
-                    style="--model-color:{model_color};"
-                >
-                    <p class="compare-kpi-label">
-                        {metric_name}
-                    </p>
-                    <p class="compare-kpi-value">
-                        {float(row_eval[metric_name]) * 100:.2f}%
-                    </p>
-                </div>
-                """
-                for metric_name in METRIC_ORDER
-            )
-
-            st.markdown(
-                f"""
-                <div class="compare-kpi-grid">
-                    {metric_html}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-
-performance_long = []
-
-for model_name, row_eval in [
-    ("NBC", row_nbc),
-    ("SVM", row_svm)
-]:
-    for metric_name in METRIC_ORDER:
-        performance_long.append({
-            "Model": model_name,
-            "Metrik": metric_name,
-            "Nilai": float(row_eval[metric_name])
-        })
-
-performance_df = pd.DataFrame(performance_long)
-performance_df["Label"] = (
-    performance_df["Nilai"]
-    .map(lambda x: f"{x:.4f}")
-)
-
-with st.container(border=True):
-    st.markdown(
-        '<div class="panel-title">Diagram Perbandingan Metrik Evaluasi</div>',
-        unsafe_allow_html=True
-    )
-
-    fig_performance = px.bar(
-        performance_df,
-        x="Metrik",
-        y="Nilai",
-        color="Model",
-        barmode="group",
-        text="Label",
-        category_orders={
-            "Metrik": METRIC_ORDER,
-            "Model": ["NBC", "SVM"]
-        },
-        color_discrete_map=MODEL_COLOR_MAP,
-        labels={
-            "Nilai": "Nilai",
-            "Metrik": "",
-            "Model": "Model"
-        }
-    )
-
-    fig_performance.update_traces(
-        textposition="outside",
-        cliponaxis=False,
-        hovertemplate=(
-            "<b>%{fullData.name}</b><br>"
-            "Metrik: %{x}<br>"
-            "Nilai: %{y:.4f}"
-            "<extra></extra>"
-        )
-    )
-
-    fig_performance.update_layout(
-        height=440,
-        margin=dict(t=25, b=55, l=55, r=25),
-        yaxis=dict(
-            range=[0, 1.08],
-            tickformat=".2f",
-            gridcolor="rgba(0,0,0,0.08)",
-            zeroline=False
-        ),
-        legend_title_text="",
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="center",
-            x=0.5
-        ),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)"
-    )
-
-    st.plotly_chart(
-        fig_performance,
-        use_container_width=True,
-        config=PLOTLY_CONFIG
-    )
-
-
-# ============================================================
-# 9. Confusion Matrix NBC vs SVM
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Confusion Matrix NBC dan SVM - {selected_app}",
-    "confusion-matrix"
-)
-
-cm_cols = st.columns(2, gap="medium")
-
-for col, (
-    model_name,
-    row_eval
-) in zip(
-    cm_cols,
-    [
-        ("NBC", row_nbc),
-        ("SVM", row_svm)
-    ]
-):
-    with col:
-        with st.container(border=True):
-            st.markdown(
-                f"""
-                <div
-                    class="panel-title"
-                    style="color:{MODEL_COLOR_MAP[model_name]};"
-                >
-                    Confusion Matrix {model_name}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            fig_cm = confusion_figure(
-                row_eval,
-                model_name
+            fig_diff.update_layout(
+                height=225,
+                margin=dict(t=10, b=35, l=20, r=45),
+                showlegend=False,
+                xaxis_title="Jumlah Ulasan",
+                yaxis_title="",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)"
             )
 
             st.plotly_chart(
-                fig_cm,
+                fig_diff,
                 use_container_width=True,
-                config={
-                    **PLOTLY_CONFIG,
-                    "modeBarButtonsToRemove": [
-                        "lasso2d",
-                        "select2d"
-                    ]
-                }
+                config=PLOTLY_CONFIG
             )
 
-st.markdown(
-    '<div class="note-box">'
-    'Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), '
-    'sedangkan warna lebih muda menunjukkan kesalahan klasifikasi '
-    '(FP dan FN). Kedua confusion matrix berasal dari data testing '
-    'aplikasi yang sama.'
-    '</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# 10. Ringkasan Model
-# ============================================================
-st.markdown("---")
-judul_bagian(
-    f"Ringkasan Perbandingan Model - {selected_app}",
-    "ringkasan-model"
-)
-
-comparison_rows = []
-
-nbc_wins = 0
-svm_wins = 0
-ties = 0
-
-for metric_name in METRIC_ORDER:
-    nbc_value = float(row_nbc[metric_name])
-    svm_value = float(row_svm[metric_name])
-
-    difference_pp = (
-        svm_value - nbc_value
-    ) * 100
-
-    if abs(difference_pp) < 0.000001:
-        winner = "Sama"
-        ties += 1
-    elif nbc_value > svm_value:
-        winner = "NBC"
-        nbc_wins += 1
-    else:
-        winner = "SVM"
-        svm_wins += 1
-
-    comparison_rows.append({
-        "Metrik": metric_name,
-        "NBC": nbc_value * 100,
-        "SVM": svm_value * 100,
-        "Unggul": winner,
-        "Selisih (SVM - NBC)": difference_pp
-    })
-
-comparison_table = pd.DataFrame(comparison_rows)
-
-accuracy_nbc = float(row_nbc["Accuracy"]) * 100
-accuracy_svm = float(row_svm["Accuracy"]) * 100
-
-if accuracy_nbc > accuracy_svm:
-    accuracy_winner = "NBC"
-    accuracy_best = accuracy_nbc
-    accuracy_gap = accuracy_nbc - accuracy_svm
-elif accuracy_svm > accuracy_nbc:
-    accuracy_winner = "SVM"
-    accuracy_best = accuracy_svm
-    accuracy_gap = accuracy_svm - accuracy_nbc
-else:
-    accuracy_winner = "Sama"
-    accuracy_best = accuracy_nbc
-    accuracy_gap = 0
-
-summary_cols = st.columns(3)
-
-with summary_cols[0]:
     st.markdown(
-        f"""
-        <div class="insight-card">
-            <p class="insight-label">
-                Accuracy Lebih Tinggi
-            </p>
-            <p
-                class="insight-value"
-                style="
-                    color:{
-                        MODEL_COLOR_MAP.get(
-                            accuracy_winner,
-                            "#111827"
+        '<div class="note-box">'
+        'Bagian ini membandingkan prediksi NBC dan SVM pada ulasan yang sama. '
+        'Nilai ini bukan metrik evaluasi model, tetapi menunjukkan tingkat '
+        'kesepakatan hasil klasifikasi kedua algoritma.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    # ============================================================
+    # 5. Tren Sentimen NBC vs SVM
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Tren Sentimen NBC dan SVM - {selected_app}",
+        "tren-sentimen"
+    )
+
+    trend_nbc = nbc_app[
+        ["date", "predictLabelNBC"]
+    ].copy()
+
+    trend_nbc["Model"] = "NBC"
+    trend_nbc["Sentimen"] = (
+        trend_nbc["predictLabelNBC"]
+        .str.capitalize()
+    )
+
+    trend_svm = svm_app[
+        ["date", "predictLabelSVM"]
+    ].copy()
+
+    trend_svm["Model"] = "SVM"
+    trend_svm["Sentimen"] = (
+        trend_svm["predictLabelSVM"]
+        .str.capitalize()
+    )
+
+    trend_data = pd.concat(
+        [
+            trend_nbc[["date", "Model", "Sentimen"]],
+            trend_svm[["date", "Model", "Sentimen"]]
+        ],
+        ignore_index=True
+    )
+
+    trend_data = trend_data.dropna(subset=["date"])
+    trend_data["Bulan"] = (
+        trend_data["date"]
+        .dt.to_period("M")
+        .astype(str)
+    )
+
+    trend_group = (
+        trend_data
+        .groupby(
+            ["Bulan", "Model", "Sentimen"]
+        )
+        .size()
+        .reset_index(name="Jumlah")
+    )
+
+    trend_cols = st.columns(2, gap="medium")
+
+    for col, sentiment_name in zip(
+        trend_cols,
+        ["Positif", "Negatif"]
+    ):
+        with col:
+            with st.container(border=True):
+                df_trend_sentiment = trend_group[
+                    trend_group["Sentimen"] == sentiment_name
+                ]
+
+                fig_trend = px.line(
+                    df_trend_sentiment,
+                    x="Bulan",
+                    y="Jumlah",
+                    color="Model",
+                    markers=True,
+                    color_discrete_map=MODEL_COLOR_MAP,
+                    title=f"Sentimen {sentiment_name}"
+                )
+
+                fig_trend.update_layout(
+                    height=340,
+                    margin=dict(t=55, b=75, l=55, r=25),
+                    legend_title_text="",
+                    legend=dict(
+                        orientation="h",
+                        yanchor="top",
+                        y=-0.2,
+                        xanchor="center",
+                        x=0.5
+                    ),
+                    xaxis_title="Periode Bulan",
+                    yaxis_title="Jumlah Ulasan",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    plot_bgcolor="rgba(0,0,0,0)"
+                )
+
+                st.plotly_chart(
+                    fig_trend,
+                    use_container_width=True,
+                    config=PLOTLY_CONFIG
+                )
+
+
+    # ============================================================
+    # 6. Distribusi Rating
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Distribusi Rating Ulasan {selected_app}",
+        "distribusi-rating"
+    )
+
+    rating_data = (
+        nbc_app
+        .groupby("score")
+        .size()
+        .reset_index(name="Jumlah")
+    )
+
+    with st.container(border=True):
+        fig_rating = px.bar(
+            rating_data,
+            x="score",
+            y="Jumlah",
+            text="Jumlah",
+            color_discrete_sequence=[app_color],
+            labels={
+                "score": "Rating Bintang",
+                "Jumlah": "Jumlah Ulasan"
+            }
+        )
+
+        fig_rating.update_traces(
+            textposition="outside",
+            hovertemplate=(
+                "Rating: %{x}<br>"
+                "Jumlah Ulasan: %{y:,}"
+                "<extra></extra>"
+            )
+        )
+
+        fig_rating.update_layout(
+            height=430,
+            margin=dict(t=35, b=65, l=60, r=30),
+            xaxis=dict(dtick=1),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+
+        st.plotly_chart(
+            fig_rating,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
+
+    st.markdown(
+        '<div class="note-box">'
+        'Distribusi rating merupakan informasi dari dataset aplikasi dan tidak '
+        'bergantung pada algoritma NBC maupun SVM.'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    # ============================================================
+    # 7. Word Cloud NBC vs SVM
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Word Cloud Hasil Klasifikasi {selected_app}",
+        "word-cloud"
+    )
+
+    wordcloud_cols = st.columns(2, gap="medium")
+
+    wc_models = [
+        ("NBC", nbc_app, "predictLabelNBC"),
+        ("SVM", svm_app, "predictLabelSVM")
+    ]
+
+    for col, (
+        model_name,
+        df_model,
+        prediction_col
+    ) in zip(wordcloud_cols, wc_models):
+
+        with col:
+            with st.container(border=True):
+                model_color = MODEL_COLOR_MAP[model_name]
+
+                st.markdown(
+                    f"""
+                    <div
+                        class="model-title"
+                        style="color:{model_color};"
+                    >
+                        {model_name}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                for sentiment_value, sentiment_title in [
+                    ("positif", "Positif"),
+                    ("negatif", "Negatif")
+                ]:
+                    st.markdown(
+                        f"""
+                        <div class="panel-title">
+                            Sentimen {sentiment_title}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+                    text_wc = " ".join(
+                        df_model[
+                            df_model[prediction_col]
+                            == sentiment_value
+                        ]["content"]
+                        .astype(str)
+                    )
+
+                    fig_wc = wordcloud_figure(
+                        text_wc,
+                        sentiment_value
+                    )
+
+                    if fig_wc is not None:
+                        st.pyplot(
+                            fig_wc,
+                            use_container_width=True
                         )
-                    };
-                "
-            >
-                {accuracy_winner}
-            </p>
-            <p class="insight-caption">
-                {accuracy_best:.2f}% |
-                selisih {accuracy_gap:.2f} poin persentase
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
+                        plt.close(fig_wc)
+                    else:
+                        st.info(
+                            f"Tidak ada data sentimen {sentiment_title.lower()}."
+                        )
+
+
+    # ============================================================
+    # 8. Perbandingan Kinerja Model
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Perbandingan Kinerja NBC dan SVM - {selected_app}",
+        "perbandingan-model"
     )
 
-with summary_cols[1]:
+    performance_cols = st.columns(2, gap="medium")
+
+    for col, (
+        model_name,
+        row_eval
+    ) in zip(
+        performance_cols,
+        [
+            ("NBC", row_nbc),
+            ("SVM", row_svm)
+        ]
+    ):
+        with col:
+            with st.container(border=True):
+                model_color = MODEL_COLOR_MAP[model_name]
+
+                st.markdown(
+                    f"""
+                    <div
+                        class="model-title"
+                        style="color:{model_color};"
+                    >
+                        {
+                            "Multinomial Naïve Bayes"
+                            if model_name == "NBC"
+                            else "Support Vector Machine"
+                        }
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                metric_html = "".join(
+                    f"""
+                    <div
+                        class="compare-kpi"
+                        style="--model-color:{model_color};"
+                    >
+                        <p class="compare-kpi-label">
+                            {metric_name}
+                        </p>
+                        <p class="compare-kpi-value">
+                            {float(row_eval[metric_name]) * 100:.2f}%
+                        </p>
+                    </div>
+                    """
+                    for metric_name in METRIC_ORDER
+                )
+
+                st.markdown(
+                    f"""
+                    <div class="compare-kpi-grid">
+                        {metric_html}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+
+    performance_long = []
+
+    for model_name, row_eval in [
+        ("NBC", row_nbc),
+        ("SVM", row_svm)
+    ]:
+        for metric_name in METRIC_ORDER:
+            performance_long.append({
+                "Model": model_name,
+                "Metrik": metric_name,
+                "Nilai": float(row_eval[metric_name])
+            })
+
+    performance_df = pd.DataFrame(performance_long)
+    performance_df["Label"] = (
+        performance_df["Nilai"]
+        .map(lambda x: f"{x:.4f}")
+    )
+
+    with st.container(border=True):
+        st.markdown(
+            '<div class="panel-title">Diagram Perbandingan Metrik Evaluasi</div>',
+            unsafe_allow_html=True
+        )
+
+        fig_performance = px.bar(
+            performance_df,
+            x="Metrik",
+            y="Nilai",
+            color="Model",
+            barmode="group",
+            text="Label",
+            category_orders={
+                "Metrik": METRIC_ORDER,
+                "Model": ["NBC", "SVM"]
+            },
+            color_discrete_map=MODEL_COLOR_MAP,
+            labels={
+                "Nilai": "Nilai",
+                "Metrik": "",
+                "Model": "Model"
+            }
+        )
+
+        fig_performance.update_traces(
+            textposition="outside",
+            cliponaxis=False,
+            hovertemplate=(
+                "<b>%{fullData.name}</b><br>"
+                "Metrik: %{x}<br>"
+                "Nilai: %{y:.4f}"
+                "<extra></extra>"
+            )
+        )
+
+        fig_performance.update_layout(
+            height=440,
+            margin=dict(t=25, b=55, l=55, r=25),
+            yaxis=dict(
+                range=[0, 1.08],
+                tickformat=".2f",
+                gridcolor="rgba(0,0,0,0.08)",
+                zeroline=False
+            ),
+            legend_title_text="",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="center",
+                x=0.5
+            ),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+
+        st.plotly_chart(
+            fig_performance,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
+
+
+    # ============================================================
+    # 9. Confusion Matrix NBC vs SVM
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Confusion Matrix NBC dan SVM - {selected_app}",
+        "confusion-matrix"
+    )
+
+    cm_cols = st.columns(2, gap="medium")
+
+    for col, (
+        model_name,
+        row_eval
+    ) in zip(
+        cm_cols,
+        [
+            ("NBC", row_nbc),
+            ("SVM", row_svm)
+        ]
+    ):
+        with col:
+            with st.container(border=True):
+                st.markdown(
+                    f"""
+                    <div
+                        class="panel-title"
+                        style="color:{MODEL_COLOR_MAP[model_name]};"
+                    >
+                        Confusion Matrix {model_name}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                fig_cm = confusion_figure(
+                    row_eval,
+                    model_name
+                )
+
+                st.plotly_chart(
+                    fig_cm,
+                    use_container_width=True,
+                    config={
+                        **PLOTLY_CONFIG,
+                        "modeBarButtonsToRemove": [
+                            "lasso2d",
+                            "select2d"
+                        ]
+                    }
+                )
+
     st.markdown(
-        f"""
-        <div class="insight-card">
-            <p class="insight-label">
-                Metrik Unggul NBC
-            </p>
-            <p
-                class="insight-value"
-                style="color:{MODEL_COLOR_MAP["NBC"]};"
-            >
-                {nbc_wins} / {len(METRIC_ORDER)}
-            </p>
-            <p class="insight-caption">
-                Jumlah metrik dengan nilai lebih tinggi
-            </p>
-        </div>
-        """,
+        '<div class="note-box">'
+        'Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), '
+        'sedangkan warna lebih muda menunjukkan kesalahan klasifikasi '
+        '(FP dan FN). Kedua confusion matrix berasal dari data testing '
+        'aplikasi yang sama.'
+        '</div>',
         unsafe_allow_html=True
     )
 
-with summary_cols[2]:
-    st.markdown(
-        f"""
-        <div class="insight-card">
-            <p class="insight-label">
-                Metrik Unggul SVM
-            </p>
-            <p
-                class="insight-value"
-                style="color:{MODEL_COLOR_MAP["SVM"]};"
-            >
-                {svm_wins} / {len(METRIC_ORDER)}
-            </p>
-            <p class="insight-caption">
-                Jumlah metrik dengan nilai lebih tinggi
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
+
+    # ============================================================
+    # 10. Ringkasan Model
+    # ============================================================
+    st.markdown("---")
+    judul_bagian(
+        f"Ringkasan Perbandingan Model - {selected_app}",
+        "ringkasan-model"
     )
 
-st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+    comparison_rows = []
 
-display_table = comparison_table.copy()
-display_table["NBC"] = display_table["NBC"].map(
-    lambda x: f"{x:.2f}%"
-)
-display_table["SVM"] = display_table["SVM"].map(
-    lambda x: f"{x:.2f}%"
-)
-display_table["Selisih (SVM - NBC)"] = (
-    display_table["Selisih (SVM - NBC)"]
-    .map(lambda x: f"{x:+.2f} p.p.")
-)
+    nbc_wins = 0
+    svm_wins = 0
+    ties = 0
 
-st.dataframe(
-    display_table,
-    use_container_width=True,
-    hide_index=True
-)
+    for metric_name in METRIC_ORDER:
+        nbc_value = float(row_nbc[metric_name])
+        svm_value = float(row_svm[metric_name])
 
-if accuracy_winner == "Sama":
-    conclusion_text = (
-        f"Pada data testing {selected_app}, NBC dan SVM memperoleh "
-        f"Accuracy yang sama sebesar {accuracy_best:.2f}%."
+        difference_pp = (
+            svm_value - nbc_value
+        ) * 100
+
+        if abs(difference_pp) < 0.000001:
+            winner = "Sama"
+            ties += 1
+        elif nbc_value > svm_value:
+            winner = "NBC"
+            nbc_wins += 1
+        else:
+            winner = "SVM"
+            svm_wins += 1
+
+        comparison_rows.append({
+            "Metrik": metric_name,
+            "NBC": nbc_value * 100,
+            "SVM": svm_value * 100,
+            "Unggul": winner,
+            "Selisih (SVM - NBC)": difference_pp
+        })
+
+    comparison_table = pd.DataFrame(comparison_rows)
+
+    accuracy_nbc = float(row_nbc["Accuracy"]) * 100
+    accuracy_svm = float(row_svm["Accuracy"]) * 100
+
+    if accuracy_nbc > accuracy_svm:
+        accuracy_winner = "NBC"
+        accuracy_best = accuracy_nbc
+        accuracy_gap = accuracy_nbc - accuracy_svm
+    elif accuracy_svm > accuracy_nbc:
+        accuracy_winner = "SVM"
+        accuracy_best = accuracy_svm
+        accuracy_gap = accuracy_svm - accuracy_nbc
+    else:
+        accuracy_winner = "Sama"
+        accuracy_best = accuracy_nbc
+        accuracy_gap = 0
+
+    summary_cols = st.columns(3)
+
+    with summary_cols[0]:
+        st.markdown(
+            f"""
+            <div class="insight-card">
+                <p class="insight-label">
+                    Accuracy Lebih Tinggi
+                </p>
+                <p
+                    class="insight-value"
+                    style="
+                        color:{
+                            MODEL_COLOR_MAP.get(
+                                accuracy_winner,
+                                "#111827"
+                            )
+                        };
+                    "
+                >
+                    {accuracy_winner}
+                </p>
+                <p class="insight-caption">
+                    {accuracy_best:.2f}% |
+                    selisih {accuracy_gap:.2f} poin persentase
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with summary_cols[1]:
+        st.markdown(
+            f"""
+            <div class="insight-card">
+                <p class="insight-label">
+                    Metrik Unggul NBC
+                </p>
+                <p
+                    class="insight-value"
+                    style="color:{MODEL_COLOR_MAP["NBC"]};"
+                >
+                    {nbc_wins} / {len(METRIC_ORDER)}
+                </p>
+                <p class="insight-caption">
+                    Jumlah metrik dengan nilai lebih tinggi
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with summary_cols[2]:
+        st.markdown(
+            f"""
+            <div class="insight-card">
+                <p class="insight-label">
+                    Metrik Unggul SVM
+                </p>
+                <p
+                    class="insight-value"
+                    style="color:{MODEL_COLOR_MAP["SVM"]};"
+                >
+                    {svm_wins} / {len(METRIC_ORDER)}
+                </p>
+                <p class="insight-caption">
+                    Jumlah metrik dengan nilai lebih tinggi
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+
+    display_table = comparison_table.copy()
+    display_table["NBC"] = display_table["NBC"].map(
+        lambda x: f"{x:.2f}%"
     )
-else:
-    conclusion_text = (
-        f"Pada data testing {selected_app}, {accuracy_winner} memperoleh "
-        f"Accuracy lebih tinggi sebesar {accuracy_gap:.2f} poin persentase. "
-        f"Hasil ini hanya menjelaskan kinerja pada dataset dan konfigurasi "
-        f"penelitian ini, bukan menyatakan satu algoritma selalu lebih baik "
-        f"untuk seluruh kondisi."
+    display_table["SVM"] = display_table["SVM"].map(
+        lambda x: f"{x:.2f}%"
+    )
+    display_table["Selisih (SVM - NBC)"] = (
+        display_table["Selisih (SVM - NBC)"]
+        .map(lambda x: f"{x:+.2f} p.p.")
     )
 
-st.info(conclusion_text)
+    st.dataframe(
+        display_table,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    if accuracy_winner == "Sama":
+        conclusion_text = (
+            f"Pada data testing {selected_app}, NBC dan SVM memperoleh "
+            f"Accuracy yang sama sebesar {accuracy_best:.2f}%."
+        )
+    else:
+        conclusion_text = (
+            f"Pada data testing {selected_app}, {accuracy_winner} memperoleh "
+            f"Accuracy lebih tinggi sebesar {accuracy_gap:.2f} poin persentase. "
+            f"Hasil ini hanya menjelaskan kinerja pada dataset dan konfigurasi "
+            f"penelitian ini, bukan menyatakan satu algoritma selalu lebih baik "
+            f"untuk seluruh kondisi."
+        )
+
+    st.info(conclusion_text)
