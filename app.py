@@ -720,40 +720,21 @@ for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
             f"Logo {app_name}"
         )
 
+        wallet_html = (
+            f'<div class="wallet-card" '
+            f'style="--app-color:{app_color};--selected-shadow:{rgba(app_color, 0.22)};">'
+            f'<div class="wallet-logo">{logo_html}</div>'
+            f'<div class="wallet-links">'
+            f'<a class="wallet-link" href="{APP_WEBSITE_URL[app_name]}" '
+            f'target="_blank" rel="noopener noreferrer">Kunjungi Website Resmi</a>'
+            f'<a class="wallet-link" href="{APP_PLAYSTORE_URL[app_name]}" '
+            f'target="_blank" rel="noopener noreferrer">Download di Play Store</a>'
+            f'</div>'
+            f'</div>'
+        )
+
         st.markdown(
-            f"""
-            <div
-                class="wallet-card"
-                style="
-                    --app-color:{app_color};
-                    --selected-shadow:{rgba(app_color, 0.22)};
-                "
-            >
-                <div class="wallet-logo">
-                    {logo_html}
-                </div>
-
-                <div class="wallet-links">
-                    <a
-                        class="wallet-link"
-                        href="{APP_WEBSITE_URL[app_name]}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Kunjungi Website Resmi
-                    </a>
-
-                    <a
-                        class="wallet-link"
-                        href="{APP_PLAYSTORE_URL[app_name]}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Download di Play Store
-                    </a>
-                </div>
-            </div>
-            """,
+            wallet_html,
             unsafe_allow_html=True
         )
 
@@ -784,26 +765,6 @@ if not selected_apps:
 for selected_app in selected_apps:
     app_color = APP_COLOR_MAP[selected_app]
     nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
-
-    st.markdown(
-        f"""
-        <div style="
-            width:100%;
-            text-align:center;
-            margin:8px 0 6px 0;
-            padding:10px 12px;
-            border-radius:12px;
-            border:2px solid {app_color};
-            background:rgba(255,255,255,0.78);
-            box-sizing:border-box;
-        ">
-            <strong style="color:{app_color}; font-size:20px;">
-                Analisis {selected_app}
-            </strong>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
     # ============================================================
     # 2. Ringkasan Data
