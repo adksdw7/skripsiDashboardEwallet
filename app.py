@@ -19,24 +19,24 @@ st.set_page_config(
 
 # Konstanta
 APP_COLOR_MAP = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
+    "DANA": "#9D6638",
+    "GoPay": "#9D6638",
+    "ShopeePay": "#9D6638"
 }
 
 MODEL_COLOR_MAP = {
-    "NBC": "#111844",
-    "SVM": "#662222"
+    "NBC": "#9D6638",
+    "SVM": "#9D6638"
 }
 
 MODEL_SENTIMENT_COLOR_MAP = {
     "NBC": {
-        "Positif": "#4B5694",
-        "Negatif": "#111844"
+        "Positif": "#9D6638",
+        "Negatif": "#9D6638"
     },
     "SVM": {
-        "Positif": "#A3485A",
-        "Negatif": "#662222"
+        "Positif": "#9D6638",
+        "Negatif": "#9D6638"
     }
 }
 
@@ -152,7 +152,7 @@ st.markdown("""
 
     .metric-card p {
         margin: 5px 0 0 0;
-        color: #000000;
+        color: #9D6638;
         font-size: 13px;
     }
 
@@ -170,7 +170,7 @@ st.markdown("""
 
     .dashboard-main-title {
         margin: 0;
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(28px, 4vw, 54px);
         font-weight: 800;
         line-height: 1.12;
@@ -185,7 +185,7 @@ st.markdown("""
         padding: clamp(10px, 1.1vw, 14px) clamp(12px, 2vw, 24px);
         box-sizing: border-box;
         text-align: center;
-        color: #000000;
+        color: #9D6638;
         background: linear-gradient(
             to bottom,
             #FFF2DB 0%,
@@ -221,15 +221,15 @@ st.markdown("""
     }
 
     .st-key-sentiment_panel_dana [data-testid="stVerticalBlockBorderWrapper"] {
-        border-color: #2377ca !important;
+        border-color: #9D6638 !important;
     }
 
     .st-key-sentiment_panel_gopay [data-testid="stVerticalBlockBorderWrapper"] {
-        border-color: #01aed6 !important;
+        border-color: #9D6638 !important;
     }
 
     .st-key-sentiment_panel_shopeepay [data-testid="stVerticalBlockBorderWrapper"] {
-        border-color: #ff773c !important;
+        border-color: #9D6638 !important;
     }
 
     .sentiment-summary-grid {
@@ -254,7 +254,7 @@ st.markdown("""
 
     .sentiment-summary-label {
         margin: 3px 0 0 0;
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(9px, 0.9vw, 12px);
         line-height: 1.3;
     }
@@ -263,7 +263,7 @@ st.markdown("""
         width: 100%;
         text-align: center;
         margin: 0 0 18px 0;
-        color: #000000;
+        color: #9D6638;
     }
 
     .panel-title {
@@ -271,7 +271,7 @@ st.markdown("""
         font-weight: 700;
         font-size: clamp(14px, 1vw, 18px);
         margin-bottom: 10px;
-        color: #000000;
+        color: #9D6638;
     }
 
     .model-title {
@@ -301,7 +301,7 @@ st.markdown("""
 
     .sentiment-item p {
         margin: 2px 0 0 0;
-        color: #000000;
+        color: #9D6638;
         font-size: 13px;
     }
 
@@ -320,7 +320,7 @@ st.markdown("""
     }
 
     .compare-kpi-label {
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(9px, 0.72vw, 11px);
         margin: 0;
     }
@@ -350,20 +350,20 @@ st.markdown("""
     }
 
     .insight-label {
-        color: #000000;
+        color: #9D6638;
         font-size: 12px;
         margin: 0;
     }
 
     .insight-value {
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(19px, 1.8vw, 28px);
         font-weight: 800;
         margin: 4px 0 0 0;
     }
 
     .insight-caption {
-        color: #000000;
+        color: #9D6638;
         font-size: 11px;
         margin: 4px 0 0 0;
     }
@@ -382,7 +382,7 @@ st.markdown("""
         border-radius: 10px;
         padding: 10px 14px;
         text-align: center;
-        color: #000000;
+        color: #9D6638;
         font-size: 12px;
         line-height: 1.45;
     }
@@ -428,7 +428,7 @@ st.markdown("""
         padding: 7px 5px;
         text-align: center;
         text-decoration: none !important;
-        color: #374151 !important;
+        color: #9D6638 !important;
         font-size: 11px;
         font-weight: 600;
         background: linear-gradient(
@@ -466,7 +466,7 @@ st.markdown("""
         width: 100%;
         text-align: center;
         margin: 0 0 clamp(10px, 1.2vw, 16px) 0;
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(24px, 3vw, 42px);
         font-weight: 800;
         line-height: 1.1;
@@ -493,7 +493,7 @@ st.markdown("""
 
     .dataset-metric-value {
         margin: 0;
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(19px, 2.3vw, 31px);
         font-weight: 800;
         line-height: 1.15;
@@ -501,7 +501,7 @@ st.markdown("""
 
     .dataset-metric-label {
         margin: clamp(5px, 0.7vw, 9px) 0 0 0;
-        color: #000000;
+        color: #9D6638;
         font-size: clamp(9px, 0.9vw, 12px);
         line-height: 1.25;
     }
@@ -581,7 +581,7 @@ st.markdown("""
     html, body, [data-testid="stAppViewContainer"],
     p, div, h1, h2, h3, h4, h5, h6, label,
     span, strong, small {
-        color: #000000;
+        color: #9D6638;
     }
 
     .stApp {
@@ -641,7 +641,7 @@ st.markdown("""
             #FFF8EE 68%,
             #FFFAF3 100%
         ) !important;
-        color: #000000 !important;
+        color: #9D6638 !important;
     }
 
     .dataset-app-title,
@@ -650,7 +650,59 @@ st.markdown("""
     .section-title,
     .panel-title,
     .dashboard-main-title {
-        color: #000000 !important;
+        color: #9D6638 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+
+st.markdown("""
+<style>
+    /* Semua teks dashboard */
+    html, body, [data-testid="stAppViewContainer"],
+    p, div, h1, h2, h3, h4, h5, h6,
+    label, span, strong, small, a,
+    button, input, textarea,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stMetricLabel"],
+    [data-testid="stMetricValue"] {
+        color: #9D6638 !important;
+    }
+
+    /* Toggle aktif */
+    [data-testid="stToggle"] input:checked + div,
+    [data-testid="stToggle"] input:checked + div > div,
+    [data-baseweb="checkbox"] input:checked + div,
+    [data-baseweb="checkbox"] input:checked + div > div {
+        background-color: #9D6638 !important;
+        border-color: #9D6638 !important;
+    }
+
+    /* Toggle tidak aktif */
+    [data-testid="stToggle"] input:not(:checked) + div,
+    [data-testid="stToggle"] input:not(:checked) + div > div,
+    [data-baseweb="checkbox"] input:not(:checked) + div,
+    [data-baseweb="checkbox"] input:not(:checked) + div > div {
+        background-color: #FFF2DB !important;
+        border-color: #FFF2DB !important;
+    }
+
+    /* Fallback selector untuk versi Streamlit yang berbeda */
+    [role="switch"][aria-checked="true"] {
+        background-color: #9D6638 !important;
+        border-color: #9D6638 !important;
+    }
+
+    [role="switch"][aria-checked="false"] {
+        background-color: #FFF2DB !important;
+        border-color: #FFF2DB !important;
+    }
+
+    /* Thumb toggle tetap terlihat */
+    [role="switch"] > div,
+    [data-testid="stToggle"] [data-baseweb="checkbox"] > div > div {
+        border-color: #9D6638 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -776,7 +828,7 @@ def get_img_html(file_path, alt_text):
         )
 
     return (
-        f'<div style="color:#000000;text-align:center;">'
+        f'<div style="color:#9D6638;text-align:center;">'
         f'{alt_text}</div>'
     )
 
@@ -851,7 +903,7 @@ def confusion_figure(row_eval, model_name):
                 ]
             ],
             texttemplate="<b>%{text}</b>",
-            textfont=dict(size=13, color="#000000"),
+            textfont=dict(size=13, color="#9D6638"),
             hovertemplate=(
                 "<b>%{customdata[1]}</b><br>"
                 "%{y}<br>"
@@ -862,7 +914,7 @@ def confusion_figure(row_eval, model_name):
             hoverlabel=dict(
                 bgcolor="white",
                 bordercolor=model_color,
-                font=dict(color="#000000", size=12)
+                font=dict(color="#9D6638", size=12)
             ),
             colorscale=[
                 [0, rgba(model_color, 0.10)],
@@ -884,7 +936,7 @@ def confusion_figure(row_eval, model_name):
         margin=dict(l=65, r=25, t=50, b=30),
         paper_bgcolor="#FFFAF3",
         plot_bgcolor="#FFFAF3",
-        font=dict(color="#000000", size=10),
+        font=dict(color="#9D6638", size=10),
         xaxis=dict(
             side="top",
             fixedrange=True,
@@ -912,7 +964,7 @@ def wordcloud_figure(text, sentiment, model_name):
     ).generate(text)
 
     sentiment_key = sentiment.capitalize()
-    sentiment_color = MODEL_SENTIMENT_COLOR_MAP[model_name][sentiment_key]
+    sentiment_color = "#9D6638"
 
     wc = wc.recolor(
         color_func=lambda *args, **kwargs: sentiment_color
@@ -950,7 +1002,7 @@ st.markdown("""
         margin-bottom: 12px;
         padding-bottom: 10px;
         border-bottom: 1px solid #FFF2DB;
-        color: #000000;
+        color: #9D6638;
         font-weight: 800;
         font-size: 18px;
     }
@@ -960,7 +1012,7 @@ st.markdown("""
         padding: 9px 11px;
         margin: 3px 0;
         border-radius: 9px;
-        color: #222222 !important;
+        color: #9D6638 !important;
         text-decoration: none !important;
         font-size: 13px;
         font-weight: 500;
@@ -1383,8 +1435,8 @@ for selected_app in selected_apps:
                 hole=0.52,
                 color="Kategori",
                 color_discrete_map={
-                    "Prediksi Sama": "#22c55e",
-                    "Prediksi Berbeda": "#ef4444"
+                    "Prediksi Sama": "#9D6638",
+                    "Prediksi Berbeda": "#9D6638"
                 }
             )
 
@@ -2034,7 +2086,7 @@ for selected_app in selected_apps:
                         color:{
                             MODEL_COLOR_MAP.get(
                                 accuracy_winner,
-                                "#111827"
+                                "#9D6638"
                             )
                         };
                     "
