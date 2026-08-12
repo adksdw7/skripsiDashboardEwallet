@@ -1896,7 +1896,8 @@ for selected_app in selected_apps:
 
                     fig_wc = wordcloud_figure(
                         text_wc,
-                        sentiment_value
+                        sentiment_value,
+                        model_name
                     )
 
                     if fig_wc is not None:
