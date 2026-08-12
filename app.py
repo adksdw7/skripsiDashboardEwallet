@@ -85,11 +85,7 @@ st.markdown("""
     }
 
     .stApp {
-        background:
-            radial-gradient(circle at 8% 12%, rgba(35, 119, 202, 0.16) 0%, transparent 42%),
-            radial-gradient(circle at 92% 18%, rgba(1, 174, 214, 0.14) 0%, transparent 42%),
-            radial-gradient(circle at 50% 100%, rgba(255, 119, 60, 0.13) 0%, transparent 48%),
-            #fafbfc;
+        background: #FFFAF3;
         background-attachment: fixed;
     }
 
@@ -172,11 +168,21 @@ st.markdown("""
         padding: clamp(10px, 1.1vw, 14px) clamp(12px, 2vw, 24px);
         box-sizing: border-box;
         text-align: center;
-        color: #1565a8;
-        background: rgba(219, 238, 255, 0.78);
+        color: #111827;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        );
         border-radius: 12px;
         font-size: clamp(11px, 1.15vw, 15px);
         line-height: 1.5;
+    }
+
+    .section-subtitle {
+        margin-bottom: clamp(16px, 2vw, 24px);
     }
 
     .distribution-app-title {
@@ -453,7 +459,7 @@ st.markdown("""
 
     .dataset-metric-value {
         margin: 0;
-        color: var(--app-color);
+        color: #111827;
         font-size: clamp(19px, 2.3vw, 31px);
         font-weight: 800;
         line-height: 1.15;
