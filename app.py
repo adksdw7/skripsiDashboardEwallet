@@ -5,51 +5,65 @@ import plotly.express as px
 import plotly.graph_objects as go
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-from collections import Counter
 import os
 import base64
 
 
 # Konfigurasi halaman
 st.set_page_config(
-    page_title="Komparasi Sentimen E-Wallet",
+    page_title="Analisis Sentimen E-Wallet",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
+
+# Konstanta
+APP_COLOR_MAP = {
+    "DANA": "#2377ca",
+    "GoPay": "#01aed6",
+    "ShopeePay": "#ff773c"
+}
+
+MODEL_COLOR_MAP = {
+    "NBC": "#4f46e5",
+    "SVM": "#f59e0b"
+}
+
+APP_LOGO_FILE = {
+    "DANA": "logoDana.png",
+    "GoPay": "logoGopay.png",
+    "ShopeePay": "logoShopeepay.png"
+}
+
+APP_PLAYSTORE_URL = {
+    "DANA": "https://play.google.com/store/apps/details?id=id.dana&hl=id",
+    "GoPay": "https://play.google.com/store/apps/details?id=com.gojek.gopay&hl=id",
+    "ShopeePay": "https://play.google.com/store/apps/details?id=com.shopeepay.id&hl=id"
+}
+
+APP_WEBSITE_URL = {
+    "DANA": "https://www.dana.id/",
+    "GoPay": "https://gopay.co.id/",
+    "ShopeePay": "https://shopeepay.co.id/"
+}
+
+PLOTLY_CONFIG = {
+    "displaylogo": False,
+    "responsive": True
+}
+
+METRIC_ORDER = [
+    "Accuracy",
+    "Precision",
+    "Recall",
+    "Specificity",
+    "F1-Score"
+]
+
+
 # Style dashboard
 st.markdown("""
 <style>
-    .metric-card {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0px 4px 6px rgba(0,0,0,0.02);
-        text-align: center;
-        margin-bottom: 15px;
-    }
-
-    .st-key-info_kegunaan [data-testid="stAlertContainer"],
-    .st-key-info_kegunaan [data-testid="stAlert"],
-    .st-key-info_periode [data-testid="stAlertContainer"],
-    .st-key-info_periode [data-testid="stAlert"] {
-        text-align: center;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<style>
-    hr {
-        border: none;
-        height: 4px;
-        border-radius: 2px;
-        background: linear-gradient(90deg, #2377ca, #01aed6, #ff773c);
-        margin: 2.5rem 0;
-        opacity: 10;
-    }
-
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
     html, body, [data-testid="stAppViewContainer"],
@@ -57,8 +71,6 @@ st.markdown("""
         font-family: 'Plus Jakarta Sans', sans-serif !important;
     }
 
-    /* Jangan timpa font ikon bawaan Streamlit. Jika font ikon berubah,
-       nama ikon seperti keyboard_double_arrow_right tampil sebagai teks. */
     [data-testid="stIconMaterial"] {
         font-family: 'Material Symbols Rounded' !important;
         font-weight: normal !important;
@@ -66,13 +78,11 @@ st.markdown("""
         letter-spacing: normal !important;
         text-transform: none !important;
         white-space: nowrap !important;
-        word-wrap: normal !important;
         direction: ltr !important;
         -webkit-font-feature-settings: 'liga' !important;
         font-feature-settings: 'liga' !important;
         -webkit-font-smoothing: antialiased !important;
     }
-
 
     .stApp {
         background:
@@ -83,19 +93,20 @@ st.markdown("""
         background-attachment: fixed;
     }
 
-
-    .metric-card {
-        border: 2px solid #d7dce2 !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.04), 0 8px 16px rgba(0,0,0,0.08), 0 16px 32px rgba(0,0,0,0.1) !important;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .metric-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.12) !important;
+    .block-container {
+        width: 100%;
+        max-width: 1500px;
+        padding-left: clamp(0.75rem, 2vw, 2.5rem);
+        padding-right: clamp(0.75rem, 2vw, 2.5rem);
     }
 
-    .landing-card {
-        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    hr {
+        border: none;
+        height: 4px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #2377ca, #01aed6, #ff773c);
+        margin: 2.2rem 0;
+        opacity: 1;
     }
 
     [data-testid="stVerticalBlockBorderWrapper"] {
@@ -109,80 +120,208 @@ st.markdown("""
         border-radius: 12px !important;
         box-shadow: 0 6px 16px rgba(0,0,0,0.06) !important;
     }
-</style>
-""", unsafe_allow_html=True)
-
-
-# Responsive dashboard
-st.markdown("""
-<style>
-    .block-container {
-        width: 100%;
-        max-width: 1500px;
-        padding-left: clamp(0.75rem, 2vw, 2.5rem);
-        padding-right: clamp(0.75rem, 2vw, 2.5rem);
-    }
-
-    [data-testid="stHorizontalBlock"] {
-        gap: clamp(0.5rem, 1vw, 1rem) !important;
-    }
-
-    [data-testid="column"],
-    [data-testid="stColumn"] {
-        min-width: 0 !important;
-    }
 
     .metric-card {
-        padding: clamp(10px, 1.2vw, 20px) !important;
+        background: #ffffff;
+        border: 2px solid #d7dce2;
+        border-radius: 12px;
+        padding: 18px 12px;
+        text-align: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        min-height: 90px;
+        box-sizing: border-box;
     }
 
     .metric-card h2,
     .metric-card h3 {
-        font-size: clamp(17px, 1.8vw, 30px) !important;
+        margin: 0;
     }
 
     .metric-card p {
-        font-size: clamp(10px, 0.9vw, 14px) !important;
+        margin: 5px 0 0 0;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .section-anchor {
+        scroll-margin-top: 18px;
+    }
+
+    .section-title {
+        width: 100%;
+        text-align: center;
+        margin: 0 0 18px 0;
+        color: #111827;
+    }
+
+    .panel-title {
+        text-align: center;
+        font-weight: 700;
+        font-size: clamp(14px, 1vw, 18px);
+        margin-bottom: 10px;
+        color: #111827;
+    }
+
+    .model-title {
+        text-align: center;
+        font-weight: 800;
+        font-size: clamp(16px, 1.3vw, 22px);
+        margin-bottom: 8px;
+    }
+
+    .sentiment-row {
+        display: flex;
+        width: 100%;
+        gap: 12px;
+        justify-content: space-between;
+        margin-top: 4px;
+    }
+
+    .sentiment-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .sentiment-item h2 {
+        margin: 0;
+        font-size: clamp(20px, 2vw, 30px);
+    }
+
+    .sentiment-item p {
+        margin: 2px 0 0 0;
+        color: #6b7280;
+        font-size: 13px;
+    }
+
+    .compare-kpi {
+        background: #ffffff;
+        border: 1px solid #d7dce2;
+        border-top: 4px solid var(--model-color);
+        border-radius: 10px;
+        padding: 10px 6px;
+        text-align: center;
+        box-shadow: 0 3px 9px rgba(0,0,0,0.07);
+        min-height: 78px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .compare-kpi-label {
+        color: #5f6368;
+        font-size: clamp(9px, 0.72vw, 11px);
+        margin: 0;
+    }
+
+    .compare-kpi-value {
+        color: var(--model-color);
+        font-size: clamp(15px, 1.25vw, 20px);
+        font-weight: 800;
+        margin: 4px 0 0 0;
+    }
+
+    .compare-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .insight-card {
+        background: #ffffff;
+        border: 1px solid #d7dce2;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 0 5px 14px rgba(0,0,0,0.06);
+        min-height: 92px;
+        box-sizing: border-box;
+    }
+
+    .insight-label {
+        color: #6b7280;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .insight-value {
+        color: #111827;
+        font-size: clamp(19px, 1.8vw, 28px);
+        font-weight: 800;
+        margin: 4px 0 0 0;
+    }
+
+    .insight-caption {
+        color: #6b7280;
+        font-size: 11px;
+        margin: 4px 0 0 0;
+    }
+
+    .note-box {
+        width: 100%;
+        box-sizing: border-box;
+        background: rgba(255,255,255,0.75);
+        border: 1px solid #e3e5e8;
+        border-radius: 10px;
+        padding: 10px 14px;
+        text-align: center;
+        color: #4b5563;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .wallet-card {
+        background: #ffffff;
+        border: 2px solid var(--app-color);
+        border-radius: 14px;
+        padding: 18px 14px 14px 14px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        min-height: 185px;
+        box-sizing: border-box;
+    }
+
+    .wallet-card.selected-wallet {
+        border-width: 4px;
+        box-shadow: 0 10px 28px var(--selected-shadow);
+    }
+
+    .wallet-logo {
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+    .wallet-logo img {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+    }
+
+    .wallet-links {
+        display: flex;
+        gap: 8px;
+    }
+
+    .wallet-link {
+        flex: 1;
+        border: 1.5px solid var(--app-color);
+        border-radius: 8px;
+        padding: 7px 5px;
+        text-align: center;
+        text-decoration: none !important;
+        color: #374151 !important;
+        font-size: 11px;
+        font-weight: 600;
+        background: #ffffff;
     }
 
     [data-testid="stPlotlyChart"] {
         width: 100% !important;
         max-width: 100% !important;
-        overflow: visible !important;
-    }
-
-    [data-testid="stPlotlyChart"] > div,
-    [data-testid="stPlotlyChart"] .js-plotly-plot,
-    [data-testid="stPlotlyChart"] .plot-container {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-    [data-testid="stImage"] {
-        display: flex;
-        justify-content: center;
-        width: 100% !important;
-    }
-
-    [data-testid="stImage"] img {
-        width: min(100%, 460px) !important;
-        max-width: 100% !important;
-        height: auto !important;
-        object-fit: contain !important;
-    }
-
-    @media (max-width: 1100px) {
-        [data-testid="stImage"] img {
-            width: min(100%, 380px) !important;
-        }
     }
 
     @media (max-width: 900px) {
-        .block-container {
-            padding-left: 0.65rem;
-            padding-right: 0.65rem;
-        }
-
         [data-testid="stHorizontalBlock"] {
             flex-wrap: wrap !important;
         }
@@ -191,27 +330,14 @@ st.markdown("""
         [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
             flex: 1 1 100% !important;
             width: 100% !important;
-            min-width: 100% !important;
         }
 
-        [data-testid="stImage"] img {
-            width: min(100%, 320px) !important;
+        .compare-kpi-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        .metric-card {
-            padding: 10px !important;
-        }
-
-        h1 {
-            font-size: clamp(24px, 6vw, 36px) !important;
-        }
-
-        h2 {
-            font-size: clamp(20px, 5vw, 30px) !important;
-        }
-
-        h3 {
-            font-size: clamp(17px, 4vw, 24px) !important;
+        .wallet-links {
+            flex-direction: column;
         }
     }
 </style>
@@ -221,915 +347,163 @@ st.markdown("""
 # Load data
 @st.cache_data
 def load_data():
+    df_nbc = pd.read_csv("hasilSentimenNBC.csv")
+    df_svm = pd.read_csv("hasilSentimenSVM.csv")
+    eval_nbc = pd.read_csv("hasilEvaluasiNBC.csv")
+    eval_svm = pd.read_csv("hasilEvaluasiSVM.csv")
 
-    df_sentimen = pd.read_csv("hasilSentimenNBC.csv")
-    df_evaluasi = pd.read_csv("hasilEvaluasiNBC.csv")
+    for df in [df_nbc, df_svm, eval_nbc, eval_svm]:
+        df.columns = df.columns.str.strip()
 
-    df_sentimen.columns = df_sentimen.columns.str.strip()
-    df_sentimen["appName"] = df_sentimen["appName"].astype(str).str.strip()
-    df_sentimen["sentimen"] = df_sentimen["predictLabel"].astype(str).str.strip().str.capitalize()
+    df_nbc["appName"] = df_nbc["appName"].astype(str).str.strip()
+    df_svm["appName"] = df_svm["appName"].astype(str).str.strip()
 
+    df_nbc["actualLabel"] = (
+        df_nbc["actualLabel"].astype(str).str.strip().str.lower()
+    )
+    df_svm["actualLabel"] = (
+        df_svm["actualLabel"].astype(str).str.strip().str.lower()
+    )
 
-    df_raw_dana = pd.read_csv("rawDana.csv")
-    df_raw_gopay = pd.read_csv("rawGopay.csv")
-    df_raw_shopee = pd.read_csv("rawShopeepay.csv")
+    df_nbc["predictLabelNBC"] = (
+        df_nbc["predictLabel"].astype(str).str.strip().str.lower()
+    )
+    df_svm["predictLabelSVM"] = (
+        df_svm["predictLabelSVM"].astype(str).str.strip().str.lower()
+    )
 
+    df_nbc["date"] = pd.to_datetime(df_nbc["date"], errors="coerce")
+    df_svm["date"] = pd.to_datetime(df_svm["date"], errors="coerce")
 
-    df_evaluasi.columns = df_evaluasi.columns.str.strip()
+    eval_nbc["appName"] = eval_nbc["appName"].astype(str).str.strip()
+    eval_svm["appName"] = eval_svm["appName"].astype(str).str.strip()
 
-    df_evaluasi = df_evaluasi.rename(columns={
-        "appName": "aplikasi",
-        "dataTrain": "jumlahDataTrain",
-        "dataTest": "jumlahDataTest"
-    })
+    # Validasi bahwa NBC dan SVM membandingkan data yang sama per aplikasi.
+    for app_name in ["DANA", "GoPay", "ShopeePay"]:
+        nbc_app = df_nbc[df_nbc["appName"] == app_name]
+        svm_app = df_svm[df_svm["appName"] == app_name]
 
+        if len(nbc_app) != len(svm_app):
+            raise ValueError(
+                f"Jumlah data NBC dan SVM berbeda untuk {app_name}."
+            )
 
-    df_sentimen['date'] = pd.to_datetime(df_sentimen['date'])
+        if set(nbc_app["reviewId"]) != set(svm_app["reviewId"]):
+            raise ValueError(
+                f"reviewId NBC dan SVM tidak identik untuk {app_name}."
+            )
 
-    return df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay, df_raw_shopee
+        row_nbc = eval_nbc[eval_nbc["appName"] == app_name]
+        row_svm = eval_svm[eval_svm["appName"] == app_name]
+
+        if row_nbc.empty or row_svm.empty:
+            raise ValueError(
+                f"Data evaluasi {app_name} tidak lengkap."
+            )
+
+        if int(row_nbc.iloc[0]["dataTrain"]) != int(row_svm.iloc[0]["dataTrain"]):
+            raise ValueError(
+                f"Jumlah data training NBC dan SVM berbeda untuk {app_name}."
+            )
+
+        if int(row_nbc.iloc[0]["dataTest"]) != int(row_svm.iloc[0]["dataTest"]):
+            raise ValueError(
+                f"Jumlah data testing NBC dan SVM berbeda untuk {app_name}."
+            )
+
+    return df_nbc, df_svm, eval_nbc, eval_svm
 
 
 try:
-    df_sentimen, df_evaluasi, df_raw_dana, df_raw_gopay, df_raw_shopee = load_data()
+    df_nbc, df_svm, eval_nbc, eval_svm = load_data()
 except Exception as e:
-    st.error(f"Gagal memuat data CSV. Pastikan file berada di repositori yang sama. Error: {e}")
+    st.error(
+        "Gagal memuat atau memvalidasi data. Pastikan empat file hasil NBC "
+        f"dan SVM berada di folder yang sama. Error: {e}"
+    )
     st.stop()
 
 
-# Warna aplikasi
-APP_COLOR_MAP = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
-PLOTLY_CONFIG = {
-    "displaylogo": False,
-    "responsive": True
-}
+# Session state aplikasi
+if "selected_app" not in st.session_state:
+    st.session_state["selected_app"] = "DANA"
 
 
-# Warna transparan
+# Helper
 def rgba(hex_color, alpha):
     hex_color = hex_color.lstrip("#")
-    r, g, b = [int(hex_color[i:i+2], 16) for i in (0, 2, 4)]
+    r, g, b = [int(hex_color[i:i + 2], 16) for i in (0, 2, 4)]
     return f"rgba({r}, {g}, {b}, {alpha})"
 
 
-# Judul bagian
 def judul_bagian(teks, anchor):
     st.markdown(
         f"""
         <div id="{anchor}" class="section-anchor"></div>
-        <h1 style="text-align:center; width:100%; margin-bottom:20px;">
-            {teks}
-        </h1>
+        <h1 class="section-title">{teks}</h1>
         """,
         unsafe_allow_html=True
     )
 
 
-# Logo aplikasi
 def get_img_html(file_path, alt_text):
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             data = base64.b64encode(f.read()).decode("utf-8")
-        return f'<img src="data:image/png;base64,{data}" style="width: 100%; max-width: 80px; height: auto; object-fit: contain;">'
-    return f'<p style="color: gray; font-size: 14px; text-align: center;">{alt_text}</p>'
 
+        return (
+            f'<img src="data:image/png;base64,{data}" '
+            f'alt="{alt_text}">'
+        )
 
-# Ulasan pengguna
-def get_top_reviews(app_name, sentiment):
-    raw = {
-        "DANA": df_raw_dana,
-        "GoPay": df_raw_gopay,
-        "ShopeePay": df_raw_shopee
-    }[app_name]
-
-    label = sentiment.lower()
-
-    hasil = df_sentimen[
-        (df_sentimen["appName"] == app_name) &
-        (df_sentimen["actualLabel"].str.lower() == label) &
-        (df_sentimen["predictLabel"].str.lower() == label)
-    ][["reviewId", "score"]]
-
-    hasil = hasil.merge(
-        raw[["reviewId", "content"]],
-        on="reviewId",
-        how="inner"
-    )
-
-    hasil["content"] = hasil["content"].astype(str).str.strip()
-    hasil = hasil[hasil["content"].str.split().str.len() >= 3]
-    hasil = hasil.drop_duplicates("content")
-
-    if hasil.empty:
-        return []
-
-    hasil = hasil.sample(
-        n=min(10, len(hasil)),
-        random_state=42
-    )
-
-    return [
-        f"{row.content} — Rating {int(row.score)}"
-        for row in hasil.itertuples()
-    ]
-
-
-# Warna word cloud negatif
-def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
-    return "#cc0000"
-
-
-
-# Sidebar navigasi
-st.markdown("""
-<style>
-    [data-testid="stHeader"],
-    header[data-testid="stHeader"] {
-        background: #fff1ea !important;
-        border-bottom: 1px solid rgba(255, 119, 60, 0.16) !important;
-    }
-
-    /* Tombol buka/tutup sidebar */
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"],
-    [data-testid="stSidebarCollapseButton"] {
-        background: transparent !important;
-    }
-
-    /* Sembunyikan ikon Material khusus tombol sidebar. */
-    [data-testid="stSidebarCollapsedControl"] [data-testid="stIconMaterial"],
-    [data-testid="collapsedControl"] [data-testid="stIconMaterial"],
-    [data-testid="stSidebarCollapseButton"] [data-testid="stIconMaterial"],
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] [data-testid="stIconMaterial"] {
-        display: none !important;
-        visibility: hidden !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: hidden !important;
-    }
-
-    /* Hilangkan teks/nama ikon yang mungkin tersisa pada child tombol. */
-    [data-testid="stSidebarCollapsedControl"] button,
-    [data-testid="collapsedControl"] button,
-    [data-testid="stSidebarCollapseButton"] button,
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] {
-        min-width: 42px !important;
-        min-height: 42px !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        color: transparent !important;
-        font-size: 0 !important;
-        position: relative !important;
-        overflow: hidden !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"] button > *,
-    [data-testid="collapsedControl"] button > *,
-    [data-testid="stSidebarCollapseButton"] button > *,
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"] > * {
-        font-size: 0 !important;
-        color: transparent !important;
-        text-indent: -9999px !important;
-        overflow: hidden !important;
-        max-width: 0 !important;
-    }
-
-    /* Simbol pengganti tanpa gambar tambahan. */
-    [data-testid="stSidebarCollapsedControl"] button::before,
-    [data-testid="collapsedControl"] button::before,
-    [data-testid="stSidebarCollapseButton"] button::before,
-    [data-testid="stSidebar"] button[aria-label="Collapse sidebar"]::before {
-        content: ":::" !important;
-        display: block !important;
-        color: #555555 !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 22px !important;
-        font-weight: 700 !important;
-        letter-spacing: 2px !important;
-        line-height: 1 !important;
-        text-indent: 0 !important;
-    }
-
-    /* Fallback jika versi Streamlit menaruh kontrol tanpa elemen button. */
-    [data-testid="stSidebarCollapsedControl"]:not(:has(button)),
-    [data-testid="collapsedControl"]:not(:has(button)),
-    [data-testid="stSidebarCollapseButton"]:not(:has(button)) {
-        color: transparent !important;
-        font-size: 0 !important;
-        position: relative !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"]:not(:has(button))::before,
-    [data-testid="collapsedControl"]:not(:has(button))::before,
-    [data-testid="stSidebarCollapseButton"]:not(:has(button))::before {
-        content: ":::" !important;
-        color: #555555 !important;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 22px !important;
-        font-weight: 700 !important;
-        letter-spacing: 2px !important;
-        line-height: 1 !important;
-    }
-
-    [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #e5e7eb !important;
-    }
-
-    [data-testid="stSidebar"] > div:first-child {
-        background-color: #ffffff !important;
-    }
-
-    [data-testid="stSidebarContent"] {
-        background-color: #ffffff !important;
-    }
-
-    .sidebar-nav-wrap {
-        position: sticky;
-        top: 0;
-        background: #ffffff;
-        z-index: 10;
-        padding-top: 0.25rem;
-    }
-
-    .sidebar-nav-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 14px;
-        padding: 2px 2px 10px 2px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .sidebar-nav-title strong {
-        color: #111111;
-        font-size: 18px;
-    }
-
-    .sidebar-nav-dots {
-        color: #666666;
-        font-size: 24px;
-        line-height: 1;
-    }
-
-    .sidebar-nav-link {
-        display: block;
-        padding: 10px 12px;
-        margin: 4px 0;
-        border-radius: 9px;
-        color: #222222 !important;
-        text-decoration: none !important;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 1.35;
-        transition: background-color 0.15s ease;
-    }
-
-    .sidebar-nav-link:hover {
-        background-color: #f3f4f6;
-        color: #111111 !important;
-    }
-
-    .section-anchor {
-        scroll-margin-top: 20px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-NAV_ITEMS = [
-    ("Pilih E-Wallet", "pilih-e-wallet"),
-    ("Hasil Analisis", "hasil-analisis"),
-    ("Proporsi Distribusi Sentimen Pengguna", "proporsi-sentimen"),
-    ("Grafik Tren Perkembangan Sentimen Bulanan", "tren-sentimen"),
-    ("Penyebaran Distribusi Rating Bintang Pengguna", "distribusi-rating"),
-    ("Word Cloud Sentimen", "word-cloud"),
-    ("Evaluasi Kinerja Naive Bayes", "evaluasi-model")
-]
-
-with st.sidebar:
-    nav_links = "".join(
-        f'<a class="sidebar-nav-link" href="#{anchor}" target="_self">{label}</a>'
-        for label, anchor in NAV_ITEMS
-    )
-
-    st.markdown(
-        f"""
-        <div class="sidebar-nav-wrap">
-            <div class="sidebar-nav-title">
-                <strong>Navigasi</strong>
-                <span class="sidebar-nav-dots">⋮</span>
-            </div>
-            {nav_links}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Judul
-st.title("📊 KOMPARATIF SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY")
-with st.container(key="info_kegunaan"):
-    st.info("""**Kegunaan Dashboard Web**: Membandingkan sentimen pengguna terhadap E-Wallet DANA, GoPay, dan ShopeePay berdasarkan ulasan Google Play Store.""")
-
-
-st.markdown("---")
-
-# Informasi aplikasi
-LANDING_CARD_COLOR = {
-    "DANA": "#2377ca",
-    "GoPay": "#01aed6",
-    "ShopeePay": "#ff773c"
-}
-
-
-APP_DESCRIPTIONS = {
-    "DANA": "Aplikasi dengan penerapan sistem open platform yang mempermudah integrasi berbagai mitra bisnis dan aplikasi pihak ketiga. Fokus operasionalnya diarahkan untuk memfasilitasi ekosistem transaksi harian secara non-tunai, seperti transfer dana, pembayaran tagihan, dan pemindaian kode QRIS. Ketersediaan fitur DANA Bisnis menjadi nilai tambah penting dalam mendukung digitalisasi dan manajemen keuangan para pelaku UMKM",
-    "GoPay": "Produk finansial dari GoTo Financial yang kini beroperasi sebagai aplikasi mandiri ini lebih menekankan fungsionalitasnya pada efisiensi manajemen keuangan personal. Di samping melayani kebutuhan transaksi pembayaran dan transfer dana, keunggulan utamanya berada pada sistem pencatatan pengeluaran otomatis. Aplikasi ini juga memperluas cakupan layanannya melalui integrasi perbankan digital lewat fitur GoPay Tabungan by Jago",
-    "ShopeePay": "Keunggulan aplikasi yang dikelola oleh PT AirPay International Indonesia ini berakar kuat pada ekosistem belanja daring aplikasi Shopee. Setelah memperluas jangkauannya melalui aplikasi mandiri, sistem fokus pada penyelesaian transaksi komersial yang instan, pengelolaan beberapa sumber dana sekaligus, serta perluasan akses pembayaran berbasis QRIS di berbagai merchant luring"
-}
-
-APP_LOGO_FILE = {
-    "DANA": "logoDana.png",
-    "GoPay": "logoGopay.png",
-    "ShopeePay": "logoShopeepay.png"
-}
-
-
-APP_PLAYSTORE_URL = {
-    "DANA": "https://play.google.com/store/apps/details?id=id.dana&hl=id",
-    "GoPay": "https://play.google.com/store/apps/details?id=com.gojek.gopay&hl=id",
-    "ShopeePay": "https://play.google.com/store/apps/details?id=com.shopeepay.id&hl=id"
-}
-
-
-APP_WEBSITE_URL = {
-    "DANA": "https://www.dana.id/",
-    "GoPay": "https://gopay.co.id/",
-    "ShopeePay": "https://shopeepay.co.id/"
-}
-
-
-st.markdown("""
-<style>
-    .landing-card {
-        border: 2px solid var(--card-color);
-        border-radius: 12px;
-        padding: 24px 28px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 24px;
-    }
-    .landing-logo-wrap {
-        flex: 0 1 100px;
-        width: clamp(48px, 10vw, 100px);
-        aspect-ratio: 1 / 1;
-        border-radius: 16px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .landing-logo-wrap img {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-        object-fit: contain;
-    }
-    .landing-text-wrap {
-        flex: 1 1 280px;
-        min-width: 0;
-    }
-    .landing-text-wrap h2 {
-        margin: 0 0 8px 0;
-        color: var(--card-color);
-        font-size: 28px;
-    }
-    .landing-text-wrap p {
-        margin: 0;
-        color: #333333;
-        font-size: 15px;
-        line-height: 1.6;
-    }
-    .landing-btn-row {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 14px;
-    }
-    .landing-download-btn {
-        display: inline-block;
-        padding: 8px 18px;
-        border: 2px solid var(--card-color);
-        border-radius: 8px;
-        color: #222222;
-        text-decoration: none;
-        font-size: 14px;
-        font-weight: 500;
-        background-color: #ffffff;
-        white-space: nowrap;
-    }
-    .landing-download-btn:hover {
-        background-color: rgba(0,0,0,0.04);
-    }
-
-    @media (max-width: 600px) {
-        .landing-card {
-            padding: 18px;
-            gap: 14px;
-        }
-        .landing-logo-wrap {
-            width: clamp(48px, 18vw, 75px);
-            flex-basis: clamp(48px, 18vw, 75px);
-        }
-        .landing-text-wrap h2 {
-            font-size: 22px;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-for app_name in ["DANA", "GoPay", "ShopeePay"]:
-    color_code = LANDING_CARD_COLOR[app_name]
-    logo_html = get_img_html(APP_LOGO_FILE[app_name], f"[Logo {app_name}]")
-    website_url = APP_WEBSITE_URL[app_name]
-    playstore_url = APP_PLAYSTORE_URL[app_name]
-    st.markdown(
-        f'''
-        <div class="landing-card" style="--card-color: {color_code};">
-            <div class="landing-logo-wrap">{logo_html}</div>
-            <div class="landing-text-wrap">
-                <h2>{app_name}</h2>
-                <p>{APP_DESCRIPTIONS[app_name]}</p>
-                <div class="landing-btn-row">
-                    <a class="landing-download-btn" href="{website_url}" target="_blank" rel="noopener noreferrer">Kunjungi Website Resmi</a>
-                    <a class="landing-download-btn" href="{playstore_url}" target="_blank" rel="noopener noreferrer">Download di Play Store</a>
-                </div>
-            </div>
-        </div>
-        ''',
-        unsafe_allow_html=True
+    return (
+        f'<div style="color:#6b7280;text-align:center;">'
+        f'{alt_text}</div>'
     )
 
 
-st.markdown("---")
-judul_bagian("Pilih E-Wallet", "pilih-e-wallet")
+def get_app_data(app_name):
+    nbc_app = df_nbc[df_nbc["appName"] == app_name].copy()
+    svm_app = df_svm[df_svm["appName"] == app_name].copy()
 
-# Pilih E-Wallet
-col_btn1, col_btn2, col_btn3 = st.columns(3)
-with col_btn1:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoDana.png", "[Logo DANA]")}</div>', unsafe_allow_html=True)
-    dana_active = st.toggle("DANA", value=True, key="tgl_dana")
-with col_btn2:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoGopay.png", "[Logo GoPay]")}</div>', unsafe_allow_html=True)
-    gopay_active = st.toggle("GoPay", value=True, key="tgl_gopay")
-with col_btn3:
-    st.markdown(f'<div class="metric-card">{get_img_html("logoShopeepay.png", "[Logo ShopeePay]")}</div>', unsafe_allow_html=True)
-    shopee_active = st.toggle("ShopeePay", value=True, key="tgl_shopee")
+    row_nbc = eval_nbc[eval_nbc["appName"] == app_name].iloc[0]
+    row_svm = eval_svm[eval_svm["appName"] == app_name].iloc[0]
 
-selected_apps = []
-if dana_active:
-    selected_apps.append("DANA")
-if gopay_active:
-    selected_apps.append("GoPay")
-if shopee_active:
-    selected_apps.append("ShopeePay")
+    return nbc_app, svm_app, row_nbc, row_svm
 
 
-if not selected_apps:
-    st.warning("⚠️ Silakan pilih minimal satu aplikasi E-Wallet")
-    st.stop()
-
-
-st.markdown("---")
-judul_bagian("Hasil Analisis", "hasil-analisis")
-with st.container(key="info_periode"):
-    st.info("Data yang disajikan merupakan ulasan pengguna selama periode 1 Juni 2025 hingga 31 Mei 2026")
-
-
-# Total data ulasan
-
-col_u = st.columns(len(selected_apps))
-for idx, app_name in enumerate(selected_apps):
-    with col_u[idx]:
-        app_total = len(df_sentimen[df_sentimen['appName'] == app_name])
-        st.markdown(
-            f'<div class="metric-card"><h2 style="margin:0;color:{APP_COLOR_MAP[app_name]};">{app_total:,}</h2><p style="margin:5px 0 0 0;color:gray;font-size:14px;">Total Ulasan {app_name}</p></div>',
-            unsafe_allow_html=True
-        )
-
-
-st.markdown("---")
-# Diagram donat
-judul_bagian("Proporsi Distribusi Sentimen Pengguna", "proporsi-sentimen")
-
-col_pie = st.columns(len(selected_apps))
-for idx, app_name in enumerate(selected_apps):
-    with col_pie[idx]:
-        with st.container(border=True):
-            df_app_sent = df_sentimen[df_sentimen['appName'] == app_name]
-            df_chart_pie = df_app_sent['sentimen'].value_counts().reset_index()
-
-            fig_pie = px.pie(
-                df_chart_pie, values='count', names='sentimen', hole=0.4,
-                title=f"Aplikasi: {app_name}",
-                color='sentimen',
-                color_discrete_map={'Positif': '#1ccc0d', 'Negatif': '#cc0000'}
-            )
-            fig_pie.update_layout(
-                autosize=True,
-                height=280,
-                margin=dict(t=55, b=70, l=20, r=20),
-                font=dict(size=12),
-                legend=dict(orientation="h", yanchor="bottom", y=-0.2, xanchor="center", x=0.5)
-            )
-            st.plotly_chart(fig_pie, use_container_width=True, config=PLOTLY_CONFIG)
-
-
-            total_app_review = len(df_app_sent)
-            if total_app_review > 0:
-                pos_count = len(df_app_sent[df_app_sent['sentimen'] == 'Positif'])
-                neg_count = len(df_app_sent[df_app_sent['sentimen'] == 'Negatif'])
-                pos_pct = (pos_count / total_app_review) * 100
-                neg_pct = (neg_count / total_app_review) * 100
-                color_code = APP_COLOR_MAP.get(app_name, "#2377ca")
-
-                col_neg, col_pos = st.columns(2)
-                with col_neg:
-                    st.markdown(f'''
-                    <div style="text-align:center;">
-                        <h2 style="margin:0; color:{color_code}; font-size: clamp(18px, 2.2vw, 30px); font-weight: bold;">{neg_pct:.1f}%</h2>
-                        <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Negatif</p>
-                    </div>
-                    ''', unsafe_allow_html=True)
-                with col_pos:
-                    st.markdown(f'''
-                    <div style="text-align:center;">
-                        <h2 style="margin:0; color:{color_code}; font-size: clamp(18px, 2.2vw, 30px); font-weight: bold;">{pos_pct:.1f}%</h2>
-                        <p style="margin:2px 0 0 0; color: gray; font-size: 13px;">Sentimen Positif</p>
-                    </div>
-                    ''', unsafe_allow_html=True)
-
-
-st.markdown("---")
-# Tren sentimen
-judul_bagian("Grafik Tren Perkembangan Sentimen Bulanan", "tren-sentimen")
-
-filtered_df = df_sentimen[df_sentimen['appName'].isin(selected_apps)].copy()
-filtered_df['Bulan'] = filtered_df['date'].dt.to_period('M').astype(str)
-
-df_chart_trend_global = (
-    filtered_df
-    .groupby(['Bulan', 'appName', 'sentimen'])
-    .size()
-    .reset_index(name='Jumlah')
-)
-
-with st.container(border=True):
-    df_pos_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Positif']
-    fig_trend_pos = px.line(
-        df_pos_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
-        title="Sentimen Positif",
-        color_discrete_map=APP_COLOR_MAP
+def sentiment_summary(df, prediction_column):
+    counts = (
+        df[prediction_column]
+        .value_counts()
+        .reindex(["positif", "negatif"], fill_value=0)
     )
-    fig_trend_pos.update_layout(
-        autosize=True,
-        height=300,
-        font=dict(size=12),
-        legend_title_text="",
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.28,
-            xanchor="center",
-            x=0.5
-        ),
-        xaxis_title="Periode Bulan",
-        yaxis_title="Jumlah Ulasan",
-        margin=dict(t=55, b=85, l=55, r=25)
-    )
-    fig_trend_pos.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_trend_pos, use_container_width=True, config=PLOTLY_CONFIG)
 
-with st.container(border=True):
-    df_neg_trend = df_chart_trend_global[df_chart_trend_global['sentimen'] == 'Negatif']
-    fig_trend_neg = px.line(
-        df_neg_trend, x='Bulan', y='Jumlah', color='appName', markers=True,
-        title="Sentimen Negatif",
-        color_discrete_map=APP_COLOR_MAP
-    )
-    fig_trend_neg.update_layout(
-        autosize=True,
-        height=300,
-        font=dict(size=12),
-        legend_title_text="",
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.28,
-            xanchor="center",
-            x=0.5
-        ),
-        xaxis_title="Periode Bulan",
-        yaxis_title="Jumlah Ulasan",
-        margin=dict(t=55, b=85, l=55, r=25)
-    )
-    fig_trend_neg.update_xaxes(title_standoff=25)
-    st.plotly_chart(fig_trend_neg, use_container_width=True, config=PLOTLY_CONFIG)
+    total = int(counts.sum())
+    positif = int(counts["positif"])
+    negatif = int(counts["negatif"])
 
+    positif_pct = (positif / total * 100) if total > 0 else 0
+    negatif_pct = (negatif / total * 100) if total > 0 else 0
 
-st.markdown("---")
-# Distribusi rating
-judul_bagian("Penyebaran Distribusi Rating Bintang Pengguna", "distribusi-rating")
-
-# Ukuran responsif diagram rating
-st.markdown("""
-<style>
-    .st-key-rating_chart {
-        width: min(80vw, 760px);
-        margin-left: auto;
-        margin-right: auto;
+    return {
+        "total": total,
+        "positif": positif,
+        "negatif": negatif,
+        "positifPct": positif_pct,
+        "negatifPct": negatif_pct
     }
 
-    .st-key-rating_chart [data-testid="stPlotlyChart"] {
-        width: 100% !important;
-        aspect-ratio: 1 / 1;
-    }
 
-    .st-key-rating_chart [data-testid="stPlotlyChart"] > div {
-        width: 100% !important;
-        height: 100% !important;
-    }
+def confusion_figure(row_eval, model_name):
+    model_color = MODEL_COLOR_MAP[model_name]
 
-    .st-key-rating_chart .js-plotly-plot,
-    .st-key-rating_chart .plot-container,
-    .st-key-rating_chart .svg-container {
-        width: 100% !important;
-        height: 100% !important;
-    }
-
-    @media (max-width: 700px) {
-        .st-key-rating_chart {
-            width: 90vw;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-with st.container(key="rating_chart"):
-    if len(selected_apps) == 1:
-        app_name = selected_apps[0]
-        df_app_rate = df_sentimen[df_sentimen["appName"] == app_name]
-        df_chart_rate = (
-            df_app_rate
-            .groupby("score")
-            .size()
-            .reset_index(name="Total")
-        )
-
-        fig_rate = px.bar(
-            df_chart_rate,
-            x="score",
-            y="Total",
-            title=f"Distribusi Rating Bintang: {app_name}",
-            labels={
-                "score": "Rating Bintang",
-                "Total": "Jumlah Ulasan"
-            },
-            color_discrete_sequence=[APP_COLOR_MAP[app_name]]
-        )
-
-        fig_rate.update_layout(
-            autosize=True,
-            height=600,
-            font=dict(size=12),
-            margin=dict(t=60, b=70, l=65, r=30),
-            xaxis=dict(dtick=1)
-        )
-
-        st.plotly_chart(
-            fig_rate,
-            use_container_width=True,
-            config=PLOTLY_CONFIG
-        )
-
-    else:
-        df_rating_group = df_sentimen[
-            df_sentimen["appName"].isin(selected_apps)
-        ]
-        df_rating_group = (
-            df_rating_group
-            .groupby(["score", "appName"])
-            .size()
-            .reset_index(name="Total")
-        )
-
-        fig_rate_group = px.bar(
-            df_rating_group,
-            x="score",
-            y="Total",
-            color="appName",
-            barmode="group",
-            title="",
-            labels={
-                "score": "Rating Bintang",
-                "Total": "Jumlah Ulasan",
-                "appName": "Aplikasi"
-            },
-            color_discrete_map=APP_COLOR_MAP
-        )
-
-        fig_rate_group.update_layout(
-            autosize=True,
-            height=600,
-            font=dict(size=12),
-            legend_title_text="",
-            bargap=0.03,
-            bargroupgap=0,
-            xaxis=dict(dtick=1),
-            legend=dict(
-                orientation="h",
-                yanchor="top",
-                y=-0.18,
-                xanchor="center",
-                x=0.5
-            ),
-            margin=dict(t=60, b=90, l=65, r=30)
-        )
-
-        fig_rate_group.update_xaxes(title_standoff=20)
-
-        st.plotly_chart(
-            fig_rate_group,
-            use_container_width=True,
-            config=PLOTLY_CONFIG
-        )
-
-
-st.markdown("---")
-# Word cloud
-judul_bagian("Word Cloud Sentimen", "word-cloud")
-
-wc_positive_color = {"DANA": "Blues", "GoPay": "Greens", "ShopeePay": "Oranges"}
-
-# Posisi word cloud menyesuaikan jumlah aplikasi yang dipilih
-if len(selected_apps) == 1:
-    _, col_wc_center, _ = st.columns([1, 1, 1])
-    col_wc = [col_wc_center]
-elif len(selected_apps) == 2:
-    _, col_wc_1, col_wc_2, _ = st.columns([0.5, 1, 1, 0.5])
-    col_wc = [col_wc_1, col_wc_2]
-else:
-    col_wc = st.columns(3)
-
-for idx, app_name in enumerate(selected_apps):
-    with col_wc[idx]:
-        with st.container(border=True):
-            df_app_text = df_sentimen[df_sentimen['appName'] == app_name]
-
-            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-bottom:5px;'>Word Cloud Positif {app_name}</p>", unsafe_allow_html=True)
-
-            text_positive = " ".join(df_app_text[df_app_text['sentimen'] == "Positif"]['content'].astype(str))
-            if text_positive.strip():
-                wc_positive = WordCloud(
-                    background_color="white", max_words=50,
-                    colormap=wc_positive_color[app_name], width=360, height=225
-                ).generate(text_positive)
-
-                fig, ax = plt.subplots(figsize=(3.6, 2.25))
-                ax.imshow(wc_positive, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig, use_container_width=True)
-                plt.close()
-
-            show_positive = st.toggle(f"Tampilkan ulasan positif {app_name}", key=f"positive_{app_name}")
-            if show_positive:
-                st.markdown("**10 Contoh Ulasan Positif:**")
-                positive_reviews = get_top_reviews(app_name, "Positif")
-                if positive_reviews:
-                    for i, review in enumerate(positive_reviews, 1):
-                        st.write(f"{i}. {review}")
-                else:
-                    st.info("Data ulasan positif tidak ditemukan.")
-
-            st.markdown(f"<p style='text-align:center; font-weight:bold; margin-top:15px; margin-bottom:5px;'>Word Cloud Negatif {app_name}</p>", unsafe_allow_html=True)
-
-            text_negative = " ".join(df_app_text[df_app_text['sentimen'] == "Negatif"]['content'].astype(str))
-            if text_negative.strip():
-                wc_negative = WordCloud(
-                    background_color="white", max_words=50, width=360, height=225
-                ).generate(text_negative)
-                wc_negative.recolor(color_func=red_color_func)
-
-                fig, ax = plt.subplots(figsize=(3.6, 2.25))
-                ax.imshow(wc_negative, interpolation="bilinear")
-                ax.axis("off")
-                st.pyplot(fig, use_container_width=True)
-                plt.close()
-
-            show_negative = st.toggle(f"Tampilkan ulasan negatif {app_name}", key=f"negative_{app_name}")
-            if show_negative:
-                st.markdown("**10 Contoh Ulasan Negatif:**")
-                negative_reviews = get_top_reviews(app_name, "Negatif")
-                if negative_reviews:
-                    for i, review in enumerate(negative_reviews, 1):
-                        st.write(f"{i}. {review}")
-                else:
-                    st.info("Data ulasan negatif tidak ditemukan.")
-
-
-st.markdown("---")
-# Evaluasi model
-judul_bagian("Evaluasi Kinerja Naive Bayes", "evaluasi-model")
-
-# Ukuran responsif confusion matrix
-st.markdown("""
-<style>
-    .st-key-confusion_matrix_dana,
-    .st-key-confusion_matrix_gopay,
-    .st-key-confusion_matrix_shopeepay {
-        width: min(80vw, 650px);
-        max-width: 650px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .st-key-confusion_matrix_dana [data-testid="stPlotlyChart"],
-    .st-key-confusion_matrix_gopay [data-testid="stPlotlyChart"],
-    .st-key-confusion_matrix_shopeepay [data-testid="stPlotlyChart"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        aspect-ratio: 1 / 1 !important;
-    }
-
-    .st-key-confusion_matrix_dana [data-testid="stPlotlyChart"] > div,
-    .st-key-confusion_matrix_gopay [data-testid="stPlotlyChart"] > div,
-    .st-key-confusion_matrix_shopeepay [data-testid="stPlotlyChart"] > div {
-        width: 100% !important;
-        height: 100% !important;
-    }
-
-    .st-key-confusion_matrix_dana .js-plotly-plot,
-    .st-key-confusion_matrix_dana .plot-container,
-    .st-key-confusion_matrix_dana .svg-container,
-    .st-key-confusion_matrix_gopay .js-plotly-plot,
-    .st-key-confusion_matrix_gopay .plot-container,
-    .st-key-confusion_matrix_gopay .svg-container,
-    .st-key-confusion_matrix_shopeepay .js-plotly-plot,
-    .st-key-confusion_matrix_shopeepay .plot-container,
-    .st-key-confusion_matrix_shopeepay .svg-container {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-    }
-
-    @media (max-width: 700px) {
-        .st-key-confusion_matrix_dana,
-        .st-key-confusion_matrix_gopay,
-        .st-key-confusion_matrix_shopeepay {
-            width: 90vw;
-        }
-    }
-</style>
-""", unsafe_allow_html=True)
-
-for app_name in selected_apps:
-    row_eval = df_evaluasi[df_evaluasi["aplikasi"] == app_name]
-
-    if row_eval.empty:
-        continue
-
-    row_eval = row_eval.iloc[0]
-    app_color = APP_COLOR_MAP[app_name]
-
-    tp = int(row_eval["TP"])
-    fn = int(row_eval["FN"])
-    fp = int(row_eval["FP"])
     tn = int(row_eval["TN"])
+    fp = int(row_eval["FP"])
+    fn = int(row_eval["FN"])
+    tp = int(row_eval["TP"])
 
-    st.markdown(
-        f"""
-        <div style="width:100%; text-align:center; margin:0 auto 10px auto;">
-            <strong>Confusion Matrix: {app_name}</strong>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    fig_cm = go.Figure(
+    fig = go.Figure(
         go.Heatmap(
             z=[
                 [1, 0],
@@ -1158,10 +532,7 @@ for app_name in selected_apps:
                 ]
             ],
             texttemplate="<b>%{text}</b>",
-            textfont=dict(
-                size=15,
-                color="#111111"
-            ),
+            textfont=dict(size=13, color="#111111"),
             hovertemplate=(
                 "<b>%{customdata[1]}</b><br>"
                 "%{y}<br>"
@@ -1171,127 +542,1237 @@ for app_name in selected_apps:
             ),
             hoverlabel=dict(
                 bgcolor="white",
-                bordercolor=app_color,
-                font=dict(
-                    color="#111111",
-                    size=12
-                )
+                bordercolor=model_color,
+                font=dict(color="#111111", size=12)
             ),
             colorscale=[
-                [0, rgba(app_color, 0.12)],
-                [0.49, rgba(app_color, 0.12)],
-                [0.50, rgba(app_color, 0.48)],
-                [1, rgba(app_color, 0.48)]
+                [0, rgba(model_color, 0.10)],
+                [0.49, rgba(model_color, 0.10)],
+                [0.50, rgba(model_color, 0.48)],
+                [1, rgba(model_color, 0.48)]
             ],
             zmin=0,
             zmax=1,
             showscale=False,
-            xgap=4,
-            ygap=4
+            xgap=3,
+            ygap=3
         )
     )
 
-    fig_cm.update_layout(
+    fig.update_layout(
         autosize=True,
-        height=600,
-        margin=dict(l=70, r=40, t=70, b=50),
+        height=410,
+        margin=dict(l=65, r=25, t=50, b=30),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(
-            color="#111111",
-            size=12
-        ),
+        font=dict(color="#111111", size=10),
         xaxis=dict(
             side="top",
             fixedrange=True,
-            tickfont=dict(
-                color="#111111",
-                size=12
-            )
+            tickfont=dict(size=10)
         ),
         yaxis=dict(
             autorange="reversed",
             fixedrange=True,
-            tickfont=dict(
-                color="#111111",
-                size=12
-            )
+            tickfont=dict(size=10)
         )
     )
 
-    with st.container(key=f"confusion_matrix_{app_name.lower()}"):
-        st.plotly_chart(
-            fig_cm,
-            use_container_width=True,
-            config={
-                **PLOTLY_CONFIG,
-                "modeBarButtonsToRemove": [
-                    "lasso2d",
-                    "select2d"
+    return fig
+
+
+def wordcloud_figure(text, sentiment):
+    if not text.strip():
+        return None
+
+    wc = WordCloud(
+        background_color="white",
+        max_words=50,
+        width=520,
+        height=280
+    ).generate(text)
+
+    if sentiment == "positif":
+        wc = wc.recolor(
+            color_func=lambda *args, **kwargs: "#1a9c11"
+        )
+    else:
+        wc = wc.recolor(
+            color_func=lambda *args, **kwargs: "#cc0000"
+        )
+
+    fig, ax = plt.subplots(figsize=(5.2, 2.8))
+    ax.imshow(wc, interpolation="bilinear")
+    ax.axis("off")
+    fig.tight_layout(pad=0)
+
+    return fig
+
+
+# Sidebar
+st.markdown("""
+<style>
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"] {
+        background: #fff1ea !important;
+        border-bottom: 1px solid rgba(255, 119, 60, 0.16) !important;
+    }
+
+    [data-testid="stSidebar"] {
+        background-color: #ffffff !important;
+        border-right: 1px solid #e5e7eb !important;
+    }
+
+    .sidebar-nav-title {
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        color: #111827;
+        font-weight: 800;
+        font-size: 18px;
+    }
+
+    .sidebar-nav-link {
+        display: block;
+        padding: 9px 11px;
+        margin: 3px 0;
+        border-radius: 9px;
+        color: #222222 !important;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .sidebar-nav-link:hover {
+        background: #f3f4f6;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+NAV_ITEMS = [
+    ("Pilih E-Wallet", "pilih-e-wallet"),
+    ("Ringkasan Data", "ringkasan-data"),
+    ("Hasil Klasifikasi", "hasil-klasifikasi"),
+    ("Perbedaan Prediksi", "perbedaan-prediksi"),
+    ("Tren Sentimen", "tren-sentimen"),
+    ("Distribusi Rating", "distribusi-rating"),
+    ("Word Cloud", "word-cloud"),
+    ("Perbandingan Kinerja Model", "perbandingan-model"),
+    ("Confusion Matrix", "confusion-matrix"),
+    ("Ringkasan Model", "ringkasan-model")
+]
+
+with st.sidebar:
+    nav_links = "".join(
+        f'<a class="sidebar-nav-link" href="#{anchor}" target="_self">'
+        f'{label}</a>'
+        for label, anchor in NAV_ITEMS
+    )
+
+    st.markdown(
+        f"""
+        <div class="sidebar-nav-title">Navigasi</div>
+        {nav_links}
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# Header
+st.title(
+    "📊 ANALISIS SENTIMEN E-WALLET DANA, GOPAY & SHOPEEPAY"
+)
+
+st.info(
+    "**Kegunaan Dashboard Web:** Menampilkan hasil analisis sentimen "
+    "ulasan DANA, GoPay, dan ShopeePay serta membandingkan kinerja "
+    "Multinomial Naïve Bayes dan Support Vector Machine pada data "
+    "aplikasi yang sama."
+)
+
+
+# ============================================================
+# 1. Pilih E-Wallet
+# ============================================================
+st.markdown("---")
+judul_bagian("Pilih E-Wallet", "pilih-e-wallet")
+
+selected_app = st.session_state["selected_app"]
+
+wallet_columns = st.columns(3)
+
+for idx, app_name in enumerate(["DANA", "GoPay", "ShopeePay"]):
+    with wallet_columns[idx]:
+        app_color = APP_COLOR_MAP[app_name]
+        is_selected = app_name == selected_app
+        selected_class = " selected-wallet" if is_selected else ""
+        shadow = rgba(app_color, 0.22)
+
+        logo_html = get_img_html(
+            APP_LOGO_FILE[app_name],
+            f"Logo {app_name}"
+        )
+
+        st.markdown(
+            f"""
+            <div
+                class="wallet-card{selected_class}"
+                style="
+                    --app-color:{app_color};
+                    --selected-shadow:{shadow};
+                "
+            >
+                <div class="wallet-logo">
+                    {logo_html}
+                </div>
+
+                <div class="wallet-links">
+                    <a
+                        class="wallet-link"
+                        href="{APP_WEBSITE_URL[app_name]}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Website Resmi
+                    </a>
+
+                    <a
+                        class="wallet-link"
+                        href="{APP_PLAYSTORE_URL[app_name]}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Play Store
+                    </a>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        button_label = (
+            f"✓ {app_name}"
+            if is_selected
+            else f"Pilih {app_name}"
+        )
+
+        if st.button(
+            button_label,
+            key=f"select_{app_name.lower()}",
+            use_container_width=True
+        ):
+            if st.session_state["selected_app"] != app_name:
+                st.session_state["selected_app"] = app_name
+                st.rerun()
+
+
+selected_app = st.session_state["selected_app"]
+app_color = APP_COLOR_MAP[selected_app]
+
+nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
+
+
+# ============================================================
+# 2. Ringkasan Data
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Ringkasan Data {selected_app}",
+    "ringkasan-data"
+)
+
+st.info(
+    "Data yang disajikan merupakan ulasan pengguna selama periode "
+    "1 Juni 2025 hingga 31 Mei 2026. NBC dan SVM menggunakan data "
+    "preparation serta pembagian train-test yang sama."
+)
+
+total_data = len(nbc_app)
+data_train = int(row_nbc["dataTrain"])
+data_test = int(row_nbc["dataTest"])
+
+summary_cols = st.columns(3)
+
+summary_values = [
+    ("Total Data Preparation", total_data),
+    ("Data Training", data_train),
+    ("Data Testing", data_test)
+]
+
+for col, (label, value) in zip(summary_cols, summary_values):
+    with col:
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <h2 style="color:{app_color};">{value:,}</h2>
+                <p>{label}</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+# ============================================================
+# 3. Hasil Klasifikasi NBC vs SVM
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Hasil Klasifikasi Sentimen {selected_app}",
+    "hasil-klasifikasi"
+)
+
+nbc_summary = sentiment_summary(
+    nbc_app,
+    "predictLabelNBC"
+)
+
+svm_summary = sentiment_summary(
+    svm_app,
+    "predictLabelSVM"
+)
+
+classification_cols = st.columns(2, gap="medium")
+
+classification_models = [
+    (
+        "NBC",
+        nbc_app,
+        "predictLabelNBC",
+        nbc_summary
+    ),
+    (
+        "SVM",
+        svm_app,
+        "predictLabelSVM",
+        svm_summary
+    )
+]
+
+for col, (
+    model_name,
+    df_model,
+    prediction_col,
+    summary
+) in zip(classification_cols, classification_models):
+
+    with col:
+        with st.container(border=True):
+            model_color = MODEL_COLOR_MAP[model_name]
+
+            st.markdown(
+                f"""
+                <div
+                    class="model-title"
+                    style="color:{model_color};"
+                >
+                    {
+                        "Multinomial Naïve Bayes"
+                        if model_name == "NBC"
+                        else "Support Vector Machine"
+                    }
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            pie_data = pd.DataFrame({
+                "Sentimen": ["Positif", "Negatif"],
+                "Jumlah": [
+                    summary["positif"],
+                    summary["negatif"]
                 ]
+            })
+
+            fig_pie = px.pie(
+                pie_data,
+                values="Jumlah",
+                names="Sentimen",
+                hole=0.45,
+                color="Sentimen",
+                color_discrete_map={
+                    "Positif": "#1ccc0d",
+                    "Negatif": "#cc0000"
+                },
+                category_orders={
+                    "Sentimen": ["Positif", "Negatif"]
+                }
+            )
+
+            fig_pie.update_traces(
+                sort=False,
+                textinfo="percent+label",
+                hovertemplate=(
+                    "<b>%{label}</b><br>"
+                    "Jumlah: %{value:,}<br>"
+                    "Proporsi: %{percent}"
+                    "<extra></extra>"
+                )
+            )
+
+            fig_pie.update_layout(
+                height=300,
+                margin=dict(t=15, b=50, l=20, r=20),
+                legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-0.05,
+                    xanchor="center",
+                    x=0.5
+                ),
+                paper_bgcolor="rgba(0,0,0,0)"
+            )
+
+            st.plotly_chart(
+                fig_pie,
+                use_container_width=True,
+                config=PLOTLY_CONFIG
+            )
+
+            st.markdown(
+                f"""
+                <div class="sentiment-row">
+                    <div class="sentiment-item">
+                        <h2 style="color:#1a9c11;">
+                            {summary["positifPct"]:.1f}%
+                        </h2>
+                        <p>
+                            Positif ({summary["positif"]:,})
+                        </p>
+                    </div>
+
+                    <div class="sentiment-item">
+                        <h2 style="color:#cc0000;">
+                            {summary["negatifPct"]:.1f}%
+                        </h2>
+                        <p>
+                            Negatif ({summary["negatif"]:,})
+                        </p>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+
+# ============================================================
+# 4. Perbedaan Prediksi NBC vs SVM
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Perbedaan Prediksi NBC dan SVM - {selected_app}",
+    "perbedaan-prediksi"
+)
+
+prediction_compare = nbc_app[
+    [
+        "reviewId",
+        "content",
+        "score",
+        "date",
+        "actualLabel",
+        "predictLabelNBC"
+    ]
+].merge(
+    svm_app[
+        [
+            "reviewId",
+            "predictLabelSVM"
+        ]
+    ],
+    on="reviewId",
+    how="inner",
+    validate="one_to_one"
+)
+
+prediction_compare["kesepakatan"] = (
+    prediction_compare["predictLabelNBC"]
+    == prediction_compare["predictLabelSVM"]
+)
+
+same_count = int(prediction_compare["kesepakatan"].sum())
+different_count = int((~prediction_compare["kesepakatan"]).sum())
+agreement_pct = (
+    same_count / len(prediction_compare) * 100
+    if len(prediction_compare) > 0
+    else 0
+)
+
+nbc_pos_svm_neg = int(
+    (
+        (prediction_compare["predictLabelNBC"] == "positif")
+        & (prediction_compare["predictLabelSVM"] == "negatif")
+    ).sum()
+)
+
+nbc_neg_svm_pos = int(
+    (
+        (prediction_compare["predictLabelNBC"] == "negatif")
+        & (prediction_compare["predictLabelSVM"] == "positif")
+    ).sum()
+)
+
+agreement_cols = st.columns([1.15, 1], gap="medium")
+
+with agreement_cols[0]:
+    with st.container(border=True):
+        st.markdown(
+            '<div class="panel-title">Kesepakatan Prediksi Seluruh Data Preparation</div>',
+            unsafe_allow_html=True
+        )
+
+        agreement_data = pd.DataFrame({
+            "Kategori": ["Prediksi Sama", "Prediksi Berbeda"],
+            "Jumlah": [same_count, different_count]
+        })
+
+        fig_agreement = px.pie(
+            agreement_data,
+            values="Jumlah",
+            names="Kategori",
+            hole=0.52,
+            color="Kategori",
+            color_discrete_map={
+                "Prediksi Sama": "#22c55e",
+                "Prediksi Berbeda": "#ef4444"
             }
         )
 
+        fig_agreement.update_traces(
+            textinfo="percent+label",
+            hovertemplate=(
+                "<b>%{label}</b><br>"
+                "Jumlah: %{value:,}<br>"
+                "Proporsi: %{percent}"
+                "<extra></extra>"
+            )
+        )
+
+        fig_agreement.update_layout(
+            height=330,
+            margin=dict(t=10, b=35, l=20, r=20),
+            showlegend=False,
+            paper_bgcolor="rgba(0,0,0,0)"
+        )
+
+        st.plotly_chart(
+            fig_agreement,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
+
+with agreement_cols[1]:
+    with st.container(border=True):
+        st.markdown(
+            '<div class="panel-title">Ringkasan Perbedaan Prediksi</div>',
+            unsafe_allow_html=True
+        )
+
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <p class="insight-label">Prediksi Sama</p>
+                    <p class="insight-value">{same_count:,}</p>
+                    <p class="insight-caption">
+                        {agreement_pct:.2f}% dari seluruh data
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        with c2:
+            st.markdown(
+                f"""
+                <div class="insight-card">
+                    <p class="insight-label">Prediksi Berbeda</p>
+                    <p class="insight-value">{different_count:,}</p>
+                    <p class="insight-caption">
+                        {100 - agreement_pct:.2f}% dari seluruh data
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+        diff_direction = pd.DataFrame({
+            "Perubahan": [
+                "NBC Positif → SVM Negatif",
+                "NBC Negatif → SVM Positif"
+            ],
+            "Jumlah": [
+                nbc_pos_svm_neg,
+                nbc_neg_svm_pos
+            ]
+        })
+
+        fig_diff = px.bar(
+            diff_direction,
+            x="Jumlah",
+            y="Perubahan",
+            orientation="h",
+            text="Jumlah",
+            color="Perubahan",
+            color_discrete_sequence=[
+                MODEL_COLOR_MAP["NBC"],
+                MODEL_COLOR_MAP["SVM"]
+            ]
+        )
+
+        fig_diff.update_traces(
+            textposition="outside",
+            hovertemplate=(
+                "<b>%{y}</b><br>"
+                "Jumlah: %{x:,}"
+                "<extra></extra>"
+            )
+        )
+
+        fig_diff.update_layout(
+            height=225,
+            margin=dict(t=10, b=35, l=20, r=45),
+            showlegend=False,
+            xaxis_title="Jumlah Ulasan",
+            yaxis_title="",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+
+        st.plotly_chart(
+            fig_diff,
+            use_container_width=True,
+            config=PLOTLY_CONFIG
+        )
+
+st.markdown(
+    '<div class="note-box">'
+    'Bagian ini membandingkan prediksi NBC dan SVM pada ulasan yang sama. '
+    'Nilai ini bukan metrik evaluasi model, tetapi menunjukkan tingkat '
+    'kesepakatan hasil klasifikasi kedua algoritma.'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# 5. Tren Sentimen NBC vs SVM
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Tren Sentimen NBC dan SVM - {selected_app}",
+    "tren-sentimen"
+)
+
+trend_nbc = nbc_app[
+    ["date", "predictLabelNBC"]
+].copy()
+
+trend_nbc["Model"] = "NBC"
+trend_nbc["Sentimen"] = (
+    trend_nbc["predictLabelNBC"]
+    .str.capitalize()
+)
+
+trend_svm = svm_app[
+    ["date", "predictLabelSVM"]
+].copy()
+
+trend_svm["Model"] = "SVM"
+trend_svm["Sentimen"] = (
+    trend_svm["predictLabelSVM"]
+    .str.capitalize()
+)
+
+trend_data = pd.concat(
+    [
+        trend_nbc[["date", "Model", "Sentimen"]],
+        trend_svm[["date", "Model", "Sentimen"]]
+    ],
+    ignore_index=True
+)
+
+trend_data = trend_data.dropna(subset=["date"])
+trend_data["Bulan"] = (
+    trend_data["date"]
+    .dt.to_period("M")
+    .astype(str)
+)
+
+trend_group = (
+    trend_data
+    .groupby(
+        ["Bulan", "Model", "Sentimen"]
+    )
+    .size()
+    .reset_index(name="Jumlah")
+)
+
+trend_cols = st.columns(2, gap="medium")
+
+for col, sentiment_name in zip(
+    trend_cols,
+    ["Positif", "Negatif"]
+):
+    with col:
+        with st.container(border=True):
+            df_trend_sentiment = trend_group[
+                trend_group["Sentimen"] == sentiment_name
+            ]
+
+            fig_trend = px.line(
+                df_trend_sentiment,
+                x="Bulan",
+                y="Jumlah",
+                color="Model",
+                markers=True,
+                color_discrete_map=MODEL_COLOR_MAP,
+                title=f"Sentimen {sentiment_name}"
+            )
+
+            fig_trend.update_layout(
+                height=340,
+                margin=dict(t=55, b=75, l=55, r=25),
+                legend_title_text="",
+                legend=dict(
+                    orientation="h",
+                    yanchor="top",
+                    y=-0.2,
+                    xanchor="center",
+                    x=0.5
+                ),
+                xaxis_title="Periode Bulan",
+                yaxis_title="Jumlah Ulasan",
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)"
+            )
+
+            st.plotly_chart(
+                fig_trend,
+                use_container_width=True,
+                config=PLOTLY_CONFIG
+            )
+
+
+# ============================================================
+# 6. Distribusi Rating
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Distribusi Rating Ulasan {selected_app}",
+    "distribusi-rating"
+)
+
+rating_data = (
+    nbc_app
+    .groupby("score")
+    .size()
+    .reset_index(name="Jumlah")
+)
+
+with st.container(border=True):
+    fig_rating = px.bar(
+        rating_data,
+        x="score",
+        y="Jumlah",
+        text="Jumlah",
+        color_discrete_sequence=[app_color],
+        labels={
+            "score": "Rating Bintang",
+            "Jumlah": "Jumlah Ulasan"
+        }
+    )
+
+    fig_rating.update_traces(
+        textposition="outside",
+        hovertemplate=(
+            "Rating: %{x}<br>"
+            "Jumlah Ulasan: %{y:,}"
+            "<extra></extra>"
+        )
+    )
+
+    fig_rating.update_layout(
+        height=430,
+        margin=dict(t=35, b=65, l=60, r=30),
+        xaxis=dict(dtick=1),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+
+    st.plotly_chart(
+        fig_rating,
+        use_container_width=True,
+        config=PLOTLY_CONFIG
+    )
+
+st.markdown(
+    '<div class="note-box">'
+    'Distribusi rating merupakan informasi dari dataset aplikasi dan tidak '
+    'bergantung pada algoritma NBC maupun SVM.'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# 7. Word Cloud NBC vs SVM
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Word Cloud Hasil Klasifikasi {selected_app}",
+    "word-cloud"
+)
+
+wordcloud_cols = st.columns(2, gap="medium")
+
+wc_models = [
+    ("NBC", nbc_app, "predictLabelNBC"),
+    ("SVM", svm_app, "predictLabelSVM")
+]
+
+for col, (
+    model_name,
+    df_model,
+    prediction_col
+) in zip(wordcloud_cols, wc_models):
+
+    with col:
+        with st.container(border=True):
+            model_color = MODEL_COLOR_MAP[model_name]
+
+            st.markdown(
+                f"""
+                <div
+                    class="model-title"
+                    style="color:{model_color};"
+                >
+                    {model_name}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            for sentiment_value, sentiment_title in [
+                ("positif", "Positif"),
+                ("negatif", "Negatif")
+            ]:
+                st.markdown(
+                    f"""
+                    <div class="panel-title">
+                        Sentimen {sentiment_title}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+                text_wc = " ".join(
+                    df_model[
+                        df_model[prediction_col]
+                        == sentiment_value
+                    ]["content"]
+                    .astype(str)
+                )
+
+                fig_wc = wordcloud_figure(
+                    text_wc,
+                    sentiment_value
+                )
+
+                if fig_wc is not None:
+                    st.pyplot(
+                        fig_wc,
+                        use_container_width=True
+                    )
+                    plt.close(fig_wc)
+                else:
+                    st.info(
+                        f"Tidak ada data sentimen {sentiment_title.lower()}."
+                    )
+
+
+# ============================================================
+# 8. Perbandingan Kinerja Model
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Perbandingan Kinerja NBC dan SVM - {selected_app}",
+    "perbandingan-model"
+)
+
+performance_cols = st.columns(2, gap="medium")
+
+for col, (
+    model_name,
+    row_eval
+) in zip(
+    performance_cols,
+    [
+        ("NBC", row_nbc),
+        ("SVM", row_svm)
+    ]
+):
+    with col:
+        with st.container(border=True):
+            model_color = MODEL_COLOR_MAP[model_name]
+
+            st.markdown(
+                f"""
+                <div
+                    class="model-title"
+                    style="color:{model_color};"
+                >
+                    {
+                        "Multinomial Naïve Bayes"
+                        if model_name == "NBC"
+                        else "Support Vector Machine"
+                    }
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            metric_html = "".join(
+                f"""
+                <div
+                    class="compare-kpi"
+                    style="--model-color:{model_color};"
+                >
+                    <p class="compare-kpi-label">
+                        {metric_name}
+                    </p>
+                    <p class="compare-kpi-value">
+                        {float(row_eval[metric_name]) * 100:.2f}%
+                    </p>
+                </div>
+                """
+                for metric_name in METRIC_ORDER
+            )
+
+            st.markdown(
+                f"""
+                <div class="compare-kpi-grid">
+                    {metric_html}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+
+performance_long = []
+
+for model_name, row_eval in [
+    ("NBC", row_nbc),
+    ("SVM", row_svm)
+]:
+    for metric_name in METRIC_ORDER:
+        performance_long.append({
+            "Model": model_name,
+            "Metrik": metric_name,
+            "Nilai": float(row_eval[metric_name])
+        })
+
+performance_df = pd.DataFrame(performance_long)
+performance_df["Label"] = (
+    performance_df["Nilai"]
+    .map(lambda x: f"{x:.4f}")
+)
+
+with st.container(border=True):
     st.markdown(
-        """
-        <div style="
-            width:100%;
-            text-align:center;
-            margin:-10px auto 18px auto;
-            padding:0 12px;
-            box-sizing:border-box;
-        ">
-            <p style="
-                color:#111111;
-                font-size:clamp(11px, 1vw, 14px);
-                margin:0;
-            ">
-                Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN),
-                sedangkan warna lebih muda menunjukkan kesalahan klasifikasi
-                (FP dan FN).
+        '<div class="panel-title">Diagram Perbandingan Metrik Evaluasi</div>',
+        unsafe_allow_html=True
+    )
+
+    fig_performance = px.bar(
+        performance_df,
+        x="Metrik",
+        y="Nilai",
+        color="Model",
+        barmode="group",
+        text="Label",
+        category_orders={
+            "Metrik": METRIC_ORDER,
+            "Model": ["NBC", "SVM"]
+        },
+        color_discrete_map=MODEL_COLOR_MAP,
+        labels={
+            "Nilai": "Nilai",
+            "Metrik": "",
+            "Model": "Model"
+        }
+    )
+
+    fig_performance.update_traces(
+        textposition="outside",
+        cliponaxis=False,
+        hovertemplate=(
+            "<b>%{fullData.name}</b><br>"
+            "Metrik: %{x}<br>"
+            "Nilai: %{y:.4f}"
+            "<extra></extra>"
+        )
+    )
+
+    fig_performance.update_layout(
+        height=440,
+        margin=dict(t=25, b=55, l=55, r=25),
+        yaxis=dict(
+            range=[0, 1.08],
+            tickformat=".2f",
+            gridcolor="rgba(0,0,0,0.08)",
+            zeroline=False
+        ),
+        legend_title_text="",
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="center",
+            x=0.5
+        ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)"
+    )
+
+    st.plotly_chart(
+        fig_performance,
+        use_container_width=True,
+        config=PLOTLY_CONFIG
+    )
+
+
+# ============================================================
+# 9. Confusion Matrix NBC vs SVM
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Confusion Matrix NBC dan SVM - {selected_app}",
+    "confusion-matrix"
+)
+
+cm_cols = st.columns(2, gap="medium")
+
+for col, (
+    model_name,
+    row_eval
+) in zip(
+    cm_cols,
+    [
+        ("NBC", row_nbc),
+        ("SVM", row_svm)
+    ]
+):
+    with col:
+        with st.container(border=True):
+            st.markdown(
+                f"""
+                <div
+                    class="panel-title"
+                    style="color:{MODEL_COLOR_MAP[model_name]};"
+                >
+                    Confusion Matrix {model_name}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            fig_cm = confusion_figure(
+                row_eval,
+                model_name
+            )
+
+            st.plotly_chart(
+                fig_cm,
+                use_container_width=True,
+                config={
+                    **PLOTLY_CONFIG,
+                    "modeBarButtonsToRemove": [
+                        "lasso2d",
+                        "select2d"
+                    ]
+                }
+            )
+
+st.markdown(
+    '<div class="note-box">'
+    'Warna lebih pekat menunjukkan klasifikasi benar (TP dan TN), '
+    'sedangkan warna lebih muda menunjukkan kesalahan klasifikasi '
+    '(FP dan FN). Kedua confusion matrix berasal dari data testing '
+    'aplikasi yang sama.'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# 10. Ringkasan Model
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    f"Ringkasan Perbandingan Model - {selected_app}",
+    "ringkasan-model"
+)
+
+comparison_rows = []
+
+nbc_wins = 0
+svm_wins = 0
+ties = 0
+
+for metric_name in METRIC_ORDER:
+    nbc_value = float(row_nbc[metric_name])
+    svm_value = float(row_svm[metric_name])
+
+    difference_pp = (
+        svm_value - nbc_value
+    ) * 100
+
+    if abs(difference_pp) < 0.000001:
+        winner = "Sama"
+        ties += 1
+    elif nbc_value > svm_value:
+        winner = "NBC"
+        nbc_wins += 1
+    else:
+        winner = "SVM"
+        svm_wins += 1
+
+    comparison_rows.append({
+        "Metrik": metric_name,
+        "NBC": nbc_value * 100,
+        "SVM": svm_value * 100,
+        "Unggul": winner,
+        "Selisih (SVM - NBC)": difference_pp
+    })
+
+comparison_table = pd.DataFrame(comparison_rows)
+
+accuracy_nbc = float(row_nbc["Accuracy"]) * 100
+accuracy_svm = float(row_svm["Accuracy"]) * 100
+
+if accuracy_nbc > accuracy_svm:
+    accuracy_winner = "NBC"
+    accuracy_best = accuracy_nbc
+    accuracy_gap = accuracy_nbc - accuracy_svm
+elif accuracy_svm > accuracy_nbc:
+    accuracy_winner = "SVM"
+    accuracy_best = accuracy_svm
+    accuracy_gap = accuracy_svm - accuracy_nbc
+else:
+    accuracy_winner = "Sama"
+    accuracy_best = accuracy_nbc
+    accuracy_gap = 0
+
+summary_cols = st.columns(3)
+
+with summary_cols[0]:
+    st.markdown(
+        f"""
+        <div class="insight-card">
+            <p class="insight-label">
+                Accuracy Lebih Tinggi
+            </p>
+            <p
+                class="insight-value"
+                style="
+                    color:{
+                        MODEL_COLOR_MAP.get(
+                            accuracy_winner,
+                            "#111827"
+                        )
+                    };
+                "
+            >
+                {accuracy_winner}
+            </p>
+            <p class="insight-caption">
+                {accuracy_best:.2f}% |
+                selisih {accuracy_gap:.2f} poin persentase
             </p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
+with summary_cols[1]:
     st.markdown(
         f"""
-        <div style="width:100%; text-align:center; margin:0 auto 12px auto;">
-            <strong>Metrik Evaluasi: {app_name}</strong>
+        <div class="insight-card">
+            <p class="insight-label">
+                Metrik Unggul NBC
+            </p>
+            <p
+                class="insight-value"
+                style="color:{MODEL_COLOR_MAP["NBC"]};"
+            >
+                {nbc_wins} / {len(METRIC_ORDER)}
+            </p>
+            <p class="insight-caption">
+                Jumlah metrik dengan nilai lebih tinggi
+            </p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
-    col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-
-    metric_labels = [
-        ("Accuracy", col_m1),
-        ("Precision", col_m2),
-        ("Recall", col_m3),
-        ("Specificity", col_m4),
-        ("F1-Score", col_m5)
-    ]
-
-    for label, col in metric_labels:
-        nilai = float(row_eval[label]) * 100
-
-        col.markdown(
-            f"""
-            <div class="metric-card">
-                <p style="margin:0;color:#111111;font-size:14px;">
-                    {label}
-                </p>
-                <h3 style="margin:0;color:{app_color};">
-                    {nilai:.2f}%
-                </h3>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
+with summary_cols[2]:
     st.markdown(
-        '<div style="margin-bottom:25px;"></div>',
+        f"""
+        <div class="insight-card">
+            <p class="insight-label">
+                Metrik Unggul SVM
+            </p>
+            <p
+                class="insight-value"
+                style="color:{MODEL_COLOR_MAP["SVM"]};"
+            >
+                {svm_wins} / {len(METRIC_ORDER)}
+            </p>
+            <p class="insight-caption">
+                Jumlah metrik dengan nilai lebih tinggi
+            </p>
+        </div>
+        """,
         unsafe_allow_html=True
     )
+
+st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+
+display_table = comparison_table.copy()
+display_table["NBC"] = display_table["NBC"].map(
+    lambda x: f"{x:.2f}%"
+)
+display_table["SVM"] = display_table["SVM"].map(
+    lambda x: f"{x:.2f}%"
+)
+display_table["Selisih (SVM - NBC)"] = (
+    display_table["Selisih (SVM - NBC)"]
+    .map(lambda x: f"{x:+.2f} p.p.")
+)
+
+st.dataframe(
+    display_table,
+    use_container_width=True,
+    hide_index=True
+)
+
+if accuracy_winner == "Sama":
+    conclusion_text = (
+        f"Pada data testing {selected_app}, NBC dan SVM memperoleh "
+        f"Accuracy yang sama sebesar {accuracy_best:.2f}%."
+    )
+else:
+    conclusion_text = (
+        f"Pada data testing {selected_app}, {accuracy_winner} memperoleh "
+        f"Accuracy lebih tinggi sebesar {accuracy_gap:.2f} poin persentase. "
+        f"Hasil ini hanya menjelaskan kinerja pada dataset dan konfigurasi "
+        f"penelitian ini, bukan menyatakan satu algoritma selalu lebih baik "
+        f"untuk seluruh kondisi."
+    )
+
+st.info(conclusion_text)
