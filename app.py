@@ -147,6 +147,95 @@ st.markdown("""
         scroll-margin-top: 18px;
     }
 
+    .dashboard-header-wrap {
+        width: min(100%, 1050px);
+        margin: 0 auto;
+        padding: clamp(0.25rem, 1vw, 0.65rem) clamp(0.5rem, 2vw, 1.25rem);
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .dashboard-main-title {
+        margin: 0;
+        color: #111827;
+        font-size: clamp(28px, 4vw, 54px);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -0.02em;
+        text-align: center;
+    }
+
+    .dashboard-subtitle,
+    .section-subtitle {
+        width: min(100%, 980px);
+        margin: clamp(10px, 1.4vw, 16px) auto 0 auto;
+        padding: clamp(10px, 1.1vw, 14px) clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+        text-align: center;
+        color: #1565a8;
+        background: rgba(219, 238, 255, 0.78);
+        border-radius: 12px;
+        font-size: clamp(11px, 1.15vw, 15px);
+        line-height: 1.5;
+    }
+
+    .distribution-app-title {
+        width: 100%;
+        text-align: center;
+        margin: 0 0 clamp(8px, 1vw, 14px) 0;
+        font-size: clamp(24px, 3vw, 42px);
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .st-key-sentiment_panel_dana,
+    .st-key-sentiment_panel_gopay,
+    .st-key-sentiment_panel_shopeepay {
+        width: min(100%, 1100px);
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: clamp(14px, 1.8vw, 22px);
+    }
+
+    .st-key-sentiment_panel_dana [data-testid="stVerticalBlockBorderWrapper"] {
+        border-color: #2377ca !important;
+    }
+
+    .st-key-sentiment_panel_gopay [data-testid="stVerticalBlockBorderWrapper"] {
+        border-color: #01aed6 !important;
+    }
+
+    .st-key-sentiment_panel_shopeepay [data-testid="stVerticalBlockBorderWrapper"] {
+        border-color: #ff773c !important;
+    }
+
+    .sentiment-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        gap: clamp(8px, 1.2vw, 14px);
+        margin-top: 4px;
+    }
+
+    .sentiment-summary-item {
+        min-width: 0;
+        text-align: center;
+    }
+
+    .sentiment-summary-value {
+        margin: 0;
+        font-size: clamp(18px, 2vw, 29px);
+        font-weight: 800;
+        line-height: 1.15;
+    }
+
+    .sentiment-summary-label {
+        margin: 3px 0 0 0;
+        color: #6b7280;
+        font-size: clamp(9px, 0.9vw, 12px);
+        line-height: 1.3;
+    }
+
     .section-title {
         width: 100%;
         text-align: center;
@@ -326,7 +415,7 @@ st.markdown("""
     .dataset-app-panel {
         width: 100%;
         box-sizing: border-box;
-        border: 1.5px solid #1f2937;
+        border: 1.5px solid var(--app-color);
         border-radius: 14px;
         background: rgba(255,255,255,0.28);
         padding: clamp(10px, 1.4vw, 18px);
@@ -759,8 +848,8 @@ st.markdown("""
 
 NAV_ITEMS = [
     ("Pilih E-Wallet", "pilih-e-wallet"),
-    ("Komposisi Data Penelitian", "ringkasan-data"),
-    ("Hasil Klasifikasi", "hasil-klasifikasi"),
+    ("Hasil Analisis", "hasil-analisis"),
+    ("Distribusi Sentimen", "distribusi-sentimen"),
     ("Perbedaan Prediksi", "perbedaan-prediksi"),
     ("Tren Sentimen", "tren-sentimen"),
     ("Distribusi Rating", "distribusi-rating"),
@@ -787,13 +876,20 @@ with st.sidebar:
 
 
 # Header
-st.title(
-    "📊 KLASIFIKASI SENTIMEN APLIKASI E-WALLET DANA, GOPAY, & SHOPEEPAY"
-)
-
-st.info(
-    "Menampilkan klasifikasi sentimen ulasan DANA, GoPay, dan ShopeePay "
-    "menggunakan model Multinomial Naïve Bayes dan Support Vector Machine."
+st.markdown(
+    """
+    <div class="dashboard-header-wrap">
+        <h1 class="dashboard-main-title">
+            KLASIFIKASI SENTIMEN<br>
+            DANA, GOPAY, & SHOPEEPAY
+        </h1>
+        <div class="dashboard-subtitle">
+            Menampilkan klasifikasi sentimen menggunakan model
+            Multinomial Naïve Bayes dan Support Vector Machine
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
 
 
@@ -860,17 +956,20 @@ if not selected_apps:
     st.stop()
 
 # ============================================================
-# 2. Komposisi Data Penelitian
+# 2. Hasil Analisis
 # ============================================================
 st.markdown("---")
 judul_bagian(
-    "Komposisi Data Penelitian",
-    "ringkasan-data"
+    "Hasil Analisis",
+    "hasil-analisis"
 )
 
-st.info(
-    "Data yang disajikan merupakan ulasan pengguna selama periode "
-    "1 Juni 2025 hingga 31 Mei 2026"
+st.markdown(
+    '<div class="section-subtitle">'
+    'Data yang disajikan merupakan ulasan pengguna selama periode '
+    '1 Juni 2025 hingga 31 Mei 2026'
+    '</div>',
+    unsafe_allow_html=True
 )
 
 dataset_panels_html = '<div class="dataset-summary-wrap">'
@@ -914,21 +1013,21 @@ st.markdown(
 )
 
 
-# Untuk struktur komparasi model saat ini, bagian analisis rinci dirender
-# per aplikasi yang dipilih, sehingga setiap aplikasi tetap membandingkan
-# NBC vs SVM pada dataset aplikasinya sendiri.
-for selected_app in selected_apps:
+# ============================================================
+# 3. Distribusi Sentimen
+# ============================================================
+st.markdown("---")
+judul_bagian(
+    "Distribusi Sentimen",
+    "distribusi-sentimen"
+)
+
+for selected_app in ["DANA", "GoPay", "ShopeePay"]:
+    if selected_app not in selected_apps:
+        continue
+
     app_color = APP_COLOR_MAP[selected_app]
     nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
-
-    # ============================================================
-    # 3. Hasil Klasifikasi NBC vs SVM
-    # ============================================================
-    st.markdown("---")
-    judul_bagian(
-        f"Hasil Klasifikasi Sentimen {selected_app}",
-        "hasil-klasifikasi"
-    )
 
     nbc_summary = sentiment_summary(
         nbc_app,
@@ -940,128 +1039,144 @@ for selected_app in selected_apps:
         "predictLabelSVM"
     )
 
-    classification_cols = st.columns(2, gap="medium")
-
-    classification_models = [
-        (
-            "NBC",
-            nbc_app,
-            "predictLabelNBC",
-            nbc_summary
-        ),
-        (
-            "SVM",
-            svm_app,
-            "predictLabelSVM",
-            svm_summary
+    with st.container(
+        border=True,
+        key=f"sentiment_panel_{selected_app.lower()}"
+    ):
+        st.markdown(
+            f'<div class="distribution-app-title" '
+            f'style="color:{app_color};">'
+            f'{selected_app}'
+            f'</div>',
+            unsafe_allow_html=True
         )
-    ]
 
-    for col, (
-        model_name,
-        df_model,
-        prediction_col,
-        summary
-    ) in zip(classification_cols, classification_models):
+        classification_cols = st.columns(2, gap="medium")
 
-        with col:
-            with st.container(border=True):
-                model_color = MODEL_COLOR_MAP[model_name]
+        classification_models = [
+            (
+                "NBC",
+                nbc_app,
+                "predictLabelNBC",
+                nbc_summary
+            ),
+            (
+                "SVM",
+                svm_app,
+                "predictLabelSVM",
+                svm_summary
+            )
+        ]
 
-                st.markdown(
-                    f"""
-                    <div
-                        class="model-title"
-                        style="color:{model_color};"
-                    >
-                        {
-                            "Multinomial Naïve Bayes"
-                            if model_name == "NBC"
-                            else "Support Vector Machine"
-                        }
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        for col, (
+            model_name,
+            df_model,
+            prediction_col,
+            summary
+        ) in zip(
+            classification_cols,
+            classification_models
+        ):
+            with col:
+                with st.container(border=True):
+                    model_color = MODEL_COLOR_MAP[model_name]
 
-                pie_data = pd.DataFrame({
-                    "Sentimen": ["Positif", "Negatif"],
-                    "Jumlah": [
-                        summary["positif"],
-                        summary["negatif"]
-                    ]
-                })
-
-                fig_pie = px.pie(
-                    pie_data,
-                    values="Jumlah",
-                    names="Sentimen",
-                    hole=0.45,
-                    color="Sentimen",
-                    color_discrete_map={
-                        "Positif": "#1ccc0d",
-                        "Negatif": "#cc0000"
-                    },
-                    category_orders={
-                        "Sentimen": ["Positif", "Negatif"]
-                    }
-                )
-
-                fig_pie.update_traces(
-                    sort=False,
-                    textinfo="percent+label",
-                    hovertemplate=(
-                        "<b>%{label}</b><br>"
-                        "Jumlah: %{value:,}<br>"
-                        "Proporsi: %{percent}"
-                        "<extra></extra>"
+                    model_label = (
+                        "Multinomial Naïve Bayes"
+                        if model_name == "NBC"
+                        else "Support Vector Machine"
                     )
-                )
 
-                fig_pie.update_layout(
-                    height=300,
-                    margin=dict(t=15, b=50, l=20, r=20),
-                    legend=dict(
-                        orientation="h",
-                        yanchor="top",
-                        y=-0.05,
-                        xanchor="center",
-                        x=0.5
-                    ),
-                    paper_bgcolor="rgba(0,0,0,0)"
-                )
+                    st.markdown(
+                        f'<div class="model-title" '
+                        f'style="color:{model_color};">'
+                        f'{model_label}'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
 
-                st.plotly_chart(
-                    fig_pie,
-                    use_container_width=True,
-                    config=PLOTLY_CONFIG
-                )
+                    pie_data = pd.DataFrame({
+                        "Sentimen": ["Positif", "Negatif"],
+                        "Jumlah": [
+                            summary["positif"],
+                            summary["negatif"]
+                        ]
+                    })
 
-                st.markdown(
-                    f"""
-                    <div class="sentiment-row">
-                        <div class="sentiment-item">
-                            <h2 style="color:#1a9c11;">
-                                {summary["positifPct"]:.1f}%
-                            </h2>
-                            <p>
-                                Positif ({summary["positif"]:,})
-                            </p>
-                        </div>
+                    fig_pie = px.pie(
+                        pie_data,
+                        values="Jumlah",
+                        names="Sentimen",
+                        hole=0.45,
+                        color="Sentimen",
+                        color_discrete_map={
+                            "Positif": "#1ccc0d",
+                            "Negatif": "#cc0000"
+                        },
+                        category_orders={
+                            "Sentimen": ["Positif", "Negatif"]
+                        }
+                    )
 
-                        <div class="sentiment-item">
-                            <h2 style="color:#cc0000;">
-                                {summary["negatifPct"]:.1f}%
-                            </h2>
-                            <p>
-                                Negatif ({summary["negatif"]:,})
-                            </p>
-                        </div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                    fig_pie.update_traces(
+                        sort=False,
+                        textinfo="percent+label",
+                        hovertemplate=(
+                            "<b>%{label}</b><br>"
+                            "Jumlah: %{value:,}<br>"
+                            "Proporsi: %{percent}"
+                            "<extra></extra>"
+                        )
+                    )
 
+                    fig_pie.update_layout(
+                        height=300,
+                        margin=dict(t=15, b=50, l=20, r=20),
+                        legend=dict(
+                            orientation="h",
+                            yanchor="top",
+                            y=-0.05,
+                            xanchor="center",
+                            x=0.5
+                        ),
+                        paper_bgcolor="rgba(0,0,0,0)"
+                    )
+
+                    st.plotly_chart(
+                        fig_pie,
+                        use_container_width=True,
+                        config=PLOTLY_CONFIG
+                    )
+
+                    # HTML dibuat tanpa indentasi multiline agar tidak
+                    # terbaca sebagai code block oleh Markdown Streamlit.
+                    sentiment_html = (
+                        f'<div class="sentiment-summary-grid">'
+                        f'<div class="sentiment-summary-item">'
+                        f'<p class="sentiment-summary-value" style="color:#1a9c11;">'
+                        f'{summary["positifPct"]:.1f}%</p>'
+                        f'<p class="sentiment-summary-label">'
+                        f'Positif ({summary["positif"]:,})</p>'
+                        f'</div>'
+                        f'<div class="sentiment-summary-item">'
+                        f'<p class="sentiment-summary-value" style="color:#cc0000;">'
+                        f'{summary["negatifPct"]:.1f}%</p>'
+                        f'<p class="sentiment-summary-label">'
+                        f'Negatif ({summary["negatif"]:,})</p>'
+                        f'</div>'
+                        f'</div>'
+                    )
+
+                    st.markdown(
+                        sentiment_html,
+                        unsafe_allow_html=True
+                    )
+
+
+# Bagian analisis lanjutan tetap dirender per aplikasi yang dipilih.
+for selected_app in selected_apps:
+    app_color = APP_COLOR_MAP[selected_app]
+    nbc_app, svm_app, row_nbc, row_svm = get_app_data(selected_app)
 
     # ============================================================
     # 4. Perbedaan Prediksi NBC vs SVM
