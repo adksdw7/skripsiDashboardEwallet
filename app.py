@@ -25,8 +25,19 @@ APP_COLOR_MAP = {
 }
 
 MODEL_COLOR_MAP = {
-    "NBC": "#4f46e5",
-    "SVM": "#f59e0b"
+    "NBC": "#111844",
+    "SVM": "#662222"
+}
+
+MODEL_SENTIMENT_COLOR_MAP = {
+    "NBC": {
+        "Positif": "#4B5694",
+        "Negatif": "#111844"
+    },
+    "SVM": {
+        "Positif": "#A3485A",
+        "Negatif": "#662222"
+    }
 }
 
 APP_LOGO_FILE = {
@@ -100,14 +111,20 @@ st.markdown("""
         border: none;
         height: 4px;
         border-radius: 2px;
-        background: linear-gradient(90deg, #2377ca, #01aed6, #ff773c);
+        background: #FFF2DB;
         margin: 2.2rem 0;
         opacity: 1;
     }
 
     [data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #ffffff !important;
-        border: 2px solid #d7dce2 !important;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        ) !important;
+        border: 2px solid #FFF2DB !important;
         border-radius: 16px !important;
         box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
     }
@@ -118,8 +135,8 @@ st.markdown("""
     }
 
     .metric-card {
-        background: #ffffff;
-        border: 2px solid #d7dce2;
+        background: linear-gradient(to bottom, #FFF2DB 0%, #FFF5E6 34%, #FFF8EE 68%, #FFFAF3 100%);
+        border: 2px solid #FFF2DB;
         border-radius: 12px;
         padding: 18px 12px;
         text-align: center;
@@ -135,7 +152,7 @@ st.markdown("""
 
     .metric-card p {
         margin: 5px 0 0 0;
-        color: #6b7280;
+        color: #000000;
         font-size: 13px;
     }
 
@@ -153,7 +170,7 @@ st.markdown("""
 
     .dashboard-main-title {
         margin: 0;
-        color: #111827;
+        color: #000000;
         font-size: clamp(28px, 4vw, 54px);
         font-weight: 800;
         line-height: 1.12;
@@ -168,7 +185,7 @@ st.markdown("""
         padding: clamp(10px, 1.1vw, 14px) clamp(12px, 2vw, 24px);
         box-sizing: border-box;
         text-align: center;
-        color: #111827;
+        color: #000000;
         background: linear-gradient(
             to bottom,
             #FFF2DB 0%,
@@ -237,7 +254,7 @@ st.markdown("""
 
     .sentiment-summary-label {
         margin: 3px 0 0 0;
-        color: #6b7280;
+        color: #000000;
         font-size: clamp(9px, 0.9vw, 12px);
         line-height: 1.3;
     }
@@ -246,7 +263,7 @@ st.markdown("""
         width: 100%;
         text-align: center;
         margin: 0 0 18px 0;
-        color: #111827;
+        color: #000000;
     }
 
     .panel-title {
@@ -254,7 +271,7 @@ st.markdown("""
         font-weight: 700;
         font-size: clamp(14px, 1vw, 18px);
         margin-bottom: 10px;
-        color: #111827;
+        color: #000000;
     }
 
     .model-title {
@@ -284,14 +301,14 @@ st.markdown("""
 
     .sentiment-item p {
         margin: 2px 0 0 0;
-        color: #6b7280;
+        color: #000000;
         font-size: 13px;
     }
 
     .compare-kpi {
-        background: #ffffff;
-        border: 1px solid #d7dce2;
-        border-top: 4px solid var(--model-color);
+        background: linear-gradient(to bottom, #FFF2DB 0%, #FFF5E6 34%, #FFF8EE 68%, #FFFAF3 100%);
+        border: 1px solid #FFF2DB;
+        border-top: 4px solid #FFF2DB;
         border-radius: 10px;
         padding: 10px 6px;
         text-align: center;
@@ -303,7 +320,7 @@ st.markdown("""
     }
 
     .compare-kpi-label {
-        color: #5f6368;
+        color: #000000;
         font-size: clamp(9px, 0.72vw, 11px);
         margin: 0;
     }
@@ -323,8 +340,8 @@ st.markdown("""
     }
 
     .insight-card {
-        background: #ffffff;
-        border: 1px solid #d7dce2;
+        background: linear-gradient(to bottom, #FFF2DB 0%, #FFF5E6 34%, #FFF8EE 68%, #FFFAF3 100%);
+        border: 1px solid #FFF2DB;
         border-radius: 12px;
         padding: 14px 16px;
         box-shadow: 0 5px 14px rgba(0,0,0,0.06);
@@ -333,20 +350,20 @@ st.markdown("""
     }
 
     .insight-label {
-        color: #6b7280;
+        color: #000000;
         font-size: 12px;
         margin: 0;
     }
 
     .insight-value {
-        color: #111827;
+        color: #000000;
         font-size: clamp(19px, 1.8vw, 28px);
         font-weight: 800;
         margin: 4px 0 0 0;
     }
 
     .insight-caption {
-        color: #6b7280;
+        color: #000000;
         font-size: 11px;
         margin: 4px 0 0 0;
     }
@@ -354,19 +371,25 @@ st.markdown("""
     .note-box {
         width: 100%;
         box-sizing: border-box;
-        background: rgba(255,255,255,0.75);
-        border: 1px solid #e3e5e8;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        );
+        border: 1px solid #FFF2DB;
         border-radius: 10px;
         padding: 10px 14px;
         text-align: center;
-        color: #4b5563;
+        color: #000000;
         font-size: 12px;
         line-height: 1.45;
     }
 
     .wallet-card {
         background: #ffffff;
-        border: 2px solid var(--app-color);
+        border: 2px solid #FFF2DB;
         border-radius: 14px;
         padding: 18px 14px 14px 14px;
         box-shadow: 0 8px 24px rgba(0,0,0,0.08);
@@ -400,7 +423,7 @@ st.markdown("""
 
     .wallet-link {
         flex: 1;
-        border: 1.5px solid var(--app-color);
+        border: 1.5px solid #FFF2DB;
         border-radius: 8px;
         padding: 7px 5px;
         text-align: center;
@@ -408,7 +431,12 @@ st.markdown("""
         color: #374151 !important;
         font-size: 11px;
         font-weight: 600;
-        background: #ffffff;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF7E9 46%,
+            #FFFAF3 100%
+        );
     }
 
 
@@ -421,9 +449,15 @@ st.markdown("""
     .dataset-app-panel {
         width: 100%;
         box-sizing: border-box;
-        border: 1.5px solid var(--app-color);
+        border: 1.5px solid #FFF2DB;
         border-radius: 14px;
-        background: rgba(255,255,255,0.28);
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        );
         padding: clamp(10px, 1.4vw, 18px);
         margin: 0 auto clamp(14px, 1.8vw, 22px) auto;
     }
@@ -432,7 +466,7 @@ st.markdown("""
         width: 100%;
         text-align: center;
         margin: 0 0 clamp(10px, 1.2vw, 16px) 0;
-        color: var(--app-color);
+        color: #000000;
         font-size: clamp(24px, 3vw, 42px);
         font-weight: 800;
         line-height: 1.1;
@@ -449,8 +483,8 @@ st.markdown("""
         width: 100%;
         min-width: 0;
         box-sizing: border-box;
-        background: #ffffff;
-        border: 1px solid #d7dce2;
+        background: linear-gradient(to bottom, #FFF2DB 0%, #FFF5E6 34%, #FFF8EE 68%, #FFFAF3 100%);
+        border: 1px solid #FFF2DB;
         border-radius: 10px;
         padding: clamp(10px, 1.3vw, 18px) clamp(7px, 1vw, 14px);
         text-align: center;
@@ -459,7 +493,7 @@ st.markdown("""
 
     .dataset-metric-value {
         margin: 0;
-        color: #111827;
+        color: #000000;
         font-size: clamp(19px, 2.3vw, 31px);
         font-weight: 800;
         line-height: 1.15;
@@ -467,7 +501,7 @@ st.markdown("""
 
     .dataset-metric-label {
         margin: clamp(5px, 0.7vw, 9px) 0 0 0;
-        color: #6b7280;
+        color: #000000;
         font-size: clamp(9px, 0.9vw, 12px);
         line-height: 1.25;
     }
@@ -535,6 +569,88 @@ st.markdown("""
         .wallet-links {
             flex-direction: column;
         }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+
+st.markdown("""
+<style>
+    /* Final visual hierarchy override */
+    html, body, [data-testid="stAppViewContainer"],
+    p, div, h1, h2, h3, h4, h5, h6, label,
+    span, strong, small {
+        color: #000000;
+    }
+
+    .stApp {
+        background: #FFFAF3 !important;
+    }
+
+    hr {
+        background: #FFF2DB !important;
+        border-color: #FFF2DB !important;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"],
+    .metric-card,
+    .wallet-card,
+    .wallet-link,
+    .dataset-app-panel,
+    .dataset-metric-card,
+    .compare-kpi,
+    .insight-card,
+    .note-box {
+        border-color: #FFF2DB !important;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        ) !important;
+    }
+
+    [data-testid="stAlertContainer"],
+    [data-testid="stAlert"] {
+        border-color: #FFF2DB !important;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        ) !important;
+    }
+
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarContent"],
+    [data-testid="stHeader"] {
+        border-color: #FFF2DB !important;
+        background: #FFFAF3 !important;
+    }
+
+    .dashboard-subtitle,
+    .section-subtitle {
+        border: 1px solid #FFF2DB !important;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        ) !important;
+        color: #000000 !important;
+    }
+
+    .dataset-app-title,
+    .distribution-app-title,
+    .model-title,
+    .section-title,
+    .panel-title,
+    .dashboard-main-title {
+        color: #000000 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -660,7 +776,7 @@ def get_img_html(file_path, alt_text):
         )
 
     return (
-        f'<div style="color:#6b7280;text-align:center;">'
+        f'<div style="color:#000000;text-align:center;">'
         f'{alt_text}</div>'
     )
 
@@ -735,7 +851,7 @@ def confusion_figure(row_eval, model_name):
                 ]
             ],
             texttemplate="<b>%{text}</b>",
-            textfont=dict(size=13, color="#111111"),
+            textfont=dict(size=13, color="#000000"),
             hovertemplate=(
                 "<b>%{customdata[1]}</b><br>"
                 "%{y}<br>"
@@ -746,7 +862,7 @@ def confusion_figure(row_eval, model_name):
             hoverlabel=dict(
                 bgcolor="white",
                 bordercolor=model_color,
-                font=dict(color="#111111", size=12)
+                font=dict(color="#000000", size=12)
             ),
             colorscale=[
                 [0, rgba(model_color, 0.10)],
@@ -766,9 +882,9 @@ def confusion_figure(row_eval, model_name):
         autosize=True,
         height=410,
         margin=dict(l=65, r=25, t=50, b=30),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#111111", size=10),
+        paper_bgcolor="#FFFAF3",
+        plot_bgcolor="#FFFAF3",
+        font=dict(color="#000000", size=10),
         xaxis=dict(
             side="top",
             fixedrange=True,
@@ -784,25 +900,23 @@ def confusion_figure(row_eval, model_name):
     return fig
 
 
-def wordcloud_figure(text, sentiment):
+def wordcloud_figure(text, sentiment, model_name):
     if not text.strip():
         return None
 
     wc = WordCloud(
-        background_color="white",
+        background_color="#FFFAF3",
         max_words=50,
         width=520,
         height=280
     ).generate(text)
 
-    if sentiment == "positif":
-        wc = wc.recolor(
-            color_func=lambda *args, **kwargs: "#1a9c11"
-        )
-    else:
-        wc = wc.recolor(
-            color_func=lambda *args, **kwargs: "#cc0000"
-        )
+    sentiment_key = sentiment.capitalize()
+    sentiment_color = MODEL_SENTIMENT_COLOR_MAP[model_name][sentiment_key]
+
+    wc = wc.recolor(
+        color_func=lambda *args, **kwargs: sentiment_color
+    )
 
     fig, ax = plt.subplots(figsize=(5.2, 2.8))
     ax.imshow(wc, interpolation="bilinear")
@@ -817,20 +931,26 @@ st.markdown("""
 <style>
     [data-testid="stHeader"],
     header[data-testid="stHeader"] {
-        background: #fff1ea !important;
-        border-bottom: 1px solid rgba(255, 119, 60, 0.16) !important;
+        background: #FFFAF3 !important;
+        border-bottom: 1px solid #FFF2DB !important;
     }
 
     [data-testid="stSidebar"] {
-        background-color: #ffffff !important;
-        border-right: 1px solid #e5e7eb !important;
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF5E6 34%,
+            #FFF8EE 68%,
+            #FFFAF3 100%
+        ) !important;
+        border-right: 1px solid #FFF2DB !important;
     }
 
     .sidebar-nav-title {
         margin-bottom: 12px;
         padding-bottom: 10px;
-        border-bottom: 1px solid #e5e7eb;
-        color: #111827;
+        border-bottom: 1px solid #FFF2DB;
+        color: #000000;
         font-weight: 800;
         font-size: 18px;
     }
@@ -1109,16 +1229,15 @@ for selected_app in ["DANA", "GoPay", "ShopeePay"]:
                         ]
                     })
 
+                    sentiment_colors = MODEL_SENTIMENT_COLOR_MAP[model_name]
+
                     fig_pie = px.pie(
                         pie_data,
                         values="Jumlah",
                         names="Sentimen",
                         hole=0.45,
                         color="Sentimen",
-                        color_discrete_map={
-                            "Positif": "#1ccc0d",
-                            "Negatif": "#cc0000"
-                        },
+                        color_discrete_map=sentiment_colors,
                         category_orders={
                             "Sentimen": ["Positif", "Negatif"]
                         }
@@ -1145,7 +1264,7 @@ for selected_app in ["DANA", "GoPay", "ShopeePay"]:
                             xanchor="center",
                             x=0.5
                         ),
-                        paper_bgcolor="rgba(0,0,0,0)"
+                        paper_bgcolor="#FFFAF3"
                     )
 
                     st.plotly_chart(
@@ -1159,13 +1278,15 @@ for selected_app in ["DANA", "GoPay", "ShopeePay"]:
                     sentiment_html = (
                         f'<div class="sentiment-summary-grid">'
                         f'<div class="sentiment-summary-item">'
-                        f'<p class="sentiment-summary-value" style="color:#1a9c11;">'
+                        f'<p class="sentiment-summary-value" '
+                        f'style="color:{sentiment_colors["Positif"]};">'
                         f'{summary["positifPct"]:.1f}%</p>'
                         f'<p class="sentiment-summary-label">'
                         f'Positif ({summary["positif"]:,})</p>'
                         f'</div>'
                         f'<div class="sentiment-summary-item">'
-                        f'<p class="sentiment-summary-value" style="color:#cc0000;">'
+                        f'<p class="sentiment-summary-value" '
+                        f'style="color:{sentiment_colors["Negatif"]};">'
                         f'{summary["negatifPct"]:.1f}%</p>'
                         f'<p class="sentiment-summary-label">'
                         f'Negatif ({summary["negatif"]:,})</p>'
@@ -1281,7 +1402,7 @@ for selected_app in selected_apps:
                 height=330,
                 margin=dict(t=10, b=35, l=20, r=20),
                 showlegend=False,
-                paper_bgcolor="rgba(0,0,0,0)"
+                paper_bgcolor="#FFFAF3"
             )
 
             st.plotly_chart(
@@ -1368,8 +1489,8 @@ for selected_app in selected_apps:
                 showlegend=False,
                 xaxis_title="Jumlah Ulasan",
                 yaxis_title="",
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)"
+                paper_bgcolor="#FFFAF3",
+                plot_bgcolor="#FFFAF3"
             )
 
             st.plotly_chart(
@@ -1476,8 +1597,8 @@ for selected_app in selected_apps:
                     ),
                     xaxis_title="Periode Bulan",
                     yaxis_title="Jumlah Ulasan",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(0,0,0,0)"
+                    paper_bgcolor="#FFFAF3",
+                    plot_bgcolor="#FFFAF3"
                 )
 
                 st.plotly_chart(
@@ -1529,8 +1650,8 @@ for selected_app in selected_apps:
             height=430,
             margin=dict(t=35, b=65, l=60, r=30),
             xaxis=dict(dtick=1),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)"
+            paper_bgcolor="#FFFAF3",
+            plot_bgcolor="#FFFAF3"
         )
 
         st.plotly_chart(
@@ -1754,7 +1875,7 @@ for selected_app in selected_apps:
             yaxis=dict(
                 range=[0, 1.08],
                 tickformat=".2f",
-                gridcolor="rgba(0,0,0,0.08)",
+                gridcolor="#FFF2DB",
                 zeroline=False
             ),
             legend_title_text="",
@@ -1765,8 +1886,8 @@ for selected_app in selected_apps:
                 xanchor="center",
                 x=0.5
             ),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)"
+            paper_bgcolor="#FFFAF3",
+            plot_bgcolor="#FFFAF3"
         )
 
         st.plotly_chart(
