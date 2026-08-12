@@ -25,8 +25,8 @@ APP_COLOR_MAP = {
 }
 
 MODEL_COLOR_MAP = {
-    "NBC": "#111844",
-    "SVM": "#662222"
+    "NBC": "#7288AE",
+    "SVM": "#D17D98"
 }
 
 MODEL_SENTIMENT_COLOR_MAP = {
@@ -1445,14 +1445,16 @@ for selected_app in ["DANA", "GoPay", "ShopeePay"]:
                         f'<p class="sentiment-summary-value" '
                         f'style="color:{sentiment_colors["Positif"]};">'
                         f'{summary["positifPct"]:.1f}%</p>'
-                        f'<p class="sentiment-summary-label">'
+                        f'<p class="sentiment-summary-label" '
+                        f'style="color:{sentiment_colors["Positif"]};">'
                         f'Positif ({summary["positif"]:,})</p>'
                         f'</div>'
                         f'<div class="sentiment-summary-item">'
                         f'<p class="sentiment-summary-value" '
                         f'style="color:{sentiment_colors["Negatif"]};">'
                         f'{summary["negatifPct"]:.1f}%</p>'
-                        f'<p class="sentiment-summary-label">'
+                        f'<p class="sentiment-summary-label" '
+                        f'style="color:{sentiment_colors["Negatif"]};">'
                         f'Negatif ({summary["negatif"]:,})</p>'
                         f'</div>'
                         f'</div>'
