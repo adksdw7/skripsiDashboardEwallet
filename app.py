@@ -25,18 +25,18 @@ APP_COLOR_MAP = {
 }
 
 MODEL_COLOR_MAP = {
-    "NBC": "#9D6638",
-    "SVM": "#9D6638"
+    "NBC": "#111844",
+    "SVM": "#662222"
 }
 
 MODEL_SENTIMENT_COLOR_MAP = {
     "NBC": {
-        "Positif": "#9D6638",
-        "Negatif": "#9D6638"
+        "Positif": "#4B5694",
+        "Negatif": "#111844"
     },
     "SVM": {
-        "Positif": "#9D6638",
-        "Negatif": "#9D6638"
+        "Positif": "#A3485A",
+        "Negatif": "#662222"
     }
 }
 
@@ -708,6 +708,118 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+
+st.markdown("""
+<style>
+    /* ================================
+       WARNA TEKS UMUM
+       ================================ */
+    html, body, [data-testid="stAppViewContainer"],
+    p, div, h1, h2, h3, h4, h5, h6,
+    label, span, strong, small, a,
+    button, input, textarea,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stMetricLabel"],
+    [data-testid="stMetricValue"] {
+        color: #9D6638 !important;
+    }
+
+    /* Nama aplikasi juga mengikuti warna teks umum. */
+    .dataset-app-title,
+    .distribution-app-title,
+    .section-title,
+    .panel-title,
+    .dashboard-main-title,
+    .dashboard-subtitle,
+    .section-subtitle {
+        color: #9D6638 !important;
+    }
+
+    /* ================================
+       BACKGROUND DASHBOARD
+       ================================ */
+    .stApp,
+    [data-testid="stAppViewContainer"] {
+        background: #FFFAF3 !important;
+    }
+
+    /* ================================
+       SEMUA GARIS / BORDER
+       ================================ */
+    hr {
+        background: #FFF2DB !important;
+        border-color: #FFF2DB !important;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"],
+    [data-testid="stAlertContainer"],
+    [data-testid="stAlert"],
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarContent"],
+    [data-testid="stHeader"],
+    .metric-card,
+    .wallet-card,
+    .wallet-link,
+    .dataset-app-panel,
+    .dataset-metric-card,
+    .compare-kpi,
+    .insight-card,
+    .note-box,
+    .dashboard-subtitle,
+    .section-subtitle {
+        border-color: #FFF2DB !important;
+    }
+
+    /* ================================
+       SEMUA BOX
+       Gradient cream dari atas ke bawah
+       ================================ */
+    [data-testid="stVerticalBlockBorderWrapper"],
+    [data-testid="stAlertContainer"],
+    [data-testid="stAlert"],
+    .metric-card,
+    .wallet-card,
+    .wallet-link,
+    .dataset-app-panel,
+    .dataset-metric-card,
+    .compare-kpi,
+    .insight-card,
+    .note-box,
+    .dashboard-subtitle,
+    .section-subtitle {
+        background: linear-gradient(
+            to bottom,
+            #FFF2DB 0%,
+            #FFF4E1 22%,
+            #FFF6E7 45%,
+            #FFF8ED 70%,
+            #FFFAF3 100%
+        ) !important;
+    }
+
+    /* Sidebar/header tetap bersih dengan warna dasar dashboard. */
+    [data-testid="stSidebar"],
+    [data-testid="stSidebarContent"],
+    [data-testid="stHeader"] {
+        background: #FFFAF3 !important;
+    }
+
+    /* ================================
+       TOGGLE
+       ================================ */
+    [role="switch"][aria-checked="true"] {
+        background-color: #9D6638 !important;
+        border-color: #9D6638 !important;
+    }
+
+    [role="switch"][aria-checked="false"] {
+        background-color: #FFF2DB !important;
+        border-color: #FFF2DB !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 # Load data
 @st.cache_data
 def load_data():
@@ -964,7 +1076,7 @@ def wordcloud_figure(text, sentiment, model_name):
     ).generate(text)
 
     sentiment_key = sentiment.capitalize()
-    sentiment_color = "#9D6638"
+    sentiment_color = MODEL_SENTIMENT_COLOR_MAP[model_name][sentiment_key]
 
     wc = wc.recolor(
         color_func=lambda *args, **kwargs: sentiment_color
