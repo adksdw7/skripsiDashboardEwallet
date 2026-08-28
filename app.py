@@ -443,10 +443,6 @@ st.markdown(
 
 # ------------------------------------------------------------
 # 3B. FINAL VISUAL OVERRIDE
-# Background luar #FFFAF3
-# Semua box gradient #FFF2DB -> #FFFAF3
-# Tanpa border/garis box
-# Semua box memiliki shadow
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -461,9 +457,7 @@ st.markdown(
         --shadow-soft: 0 5px 14px rgba(117, 78, 42, 0.11);
     }
 
-    /* =========================
-       LATAR BELAKANG LUAR
-       ========================= */
+    /* LATAR BELAKANG LUAR */
     .stApp,
     [data-testid="stAppViewContainer"],
     [data-testid="stMain"],
@@ -483,9 +477,7 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* =========================
-       SEMUA CONTAINER STREAMLIT
-       ========================= */
+    /* SEMUA CONTAINER STREAMLIT */
     [data-testid="stVerticalBlockBorderWrapper"] {
         background: linear-gradient(
             180deg,
@@ -505,9 +497,7 @@ st.markdown(
         outline: none !important;
     }
 
-    /* =========================
-       HEADER HORIZONTAL
-       ========================= */
+    /* HEADER HORIZONTAL */
     .top-title-wrap {
         min-height: 120px;
         height: 100%;
@@ -630,9 +620,7 @@ st.markdown(
         font-weight: 700 !important;
     }
 
-    /* =========================
-       SEMUA CUSTOM BOX
-       ========================= */
+    /* SEMUA CUSTOM BOX */
     .hero,
     .wallet-card,
     .kpi-card,
@@ -659,7 +647,6 @@ st.markdown(
         box-shadow: 0 8px 22px rgba(117,78,42,.14) !important;
     }
 
-    /* Link kecil dalam box */
     .wallet-link {
         background: linear-gradient(
             180deg,
@@ -671,36 +658,13 @@ st.markdown(
         box-shadow: 0 3px 8px rgba(117,78,42,.09) !important;
     }
 
-    /* KPI */
-    .kpi-card {
-        border-radius: 12px !important;
-    }
+    .kpi-card { border-radius: 12px !important; }
+    .sentiment-mini { border-radius: 9px !important; }
+    .agreement-card { border-radius: 10px !important; }
+    .cm-box { border-radius: 9px !important; }
+    .cm-note { border-radius: 8px !important; }
+    .metric-box { border-radius: 9px !important; }
 
-    /* Box sentiment */
-    .sentiment-mini {
-        border-radius: 9px !important;
-    }
-
-    /* Ringkasan prediksi */
-    .agreement-card {
-        border-radius: 10px !important;
-    }
-
-    /* TN TP FN FP */
-    .cm-box {
-        border-radius: 9px !important;
-    }
-
-    .cm-note {
-        border-radius: 8px !important;
-    }
-
-    /* Accuracy / Precision / Recall / Specificity / F1 */
-    .metric-box {
-        border-radius: 9px !important;
-    }
-
-    /* Sidebar */
     .nav-link {
         border-radius: 9px !important;
         margin: 8px 0 !important;
@@ -711,7 +675,6 @@ st.markdown(
         box-shadow: 0 8px 22px rgba(117,78,42,.14) !important;
     }
 
-    /* Selectbox */
     [data-baseweb="select"] > div {
         background: linear-gradient(
             180deg,
@@ -723,7 +686,6 @@ st.markdown(
         box-shadow: 0 5px 14px rgba(117,78,42,.11) !important;
     }
 
-    /* Dataframe */
     [data-testid="stDataFrame"] {
         border: none !important;
         outline: none !important;
@@ -732,12 +694,10 @@ st.markdown(
         overflow: hidden !important;
     }
 
-    /* Plotly transparan agar gradient parent tetap terlihat */
     [data-testid="stPlotlyChart"] {
         background: transparent !important;
     }
 
-    /* Toggle */
     [role="switch"][aria-checked="true"] {
         background-color: #9D6638 !important;
         border-color: transparent !important;
@@ -748,7 +708,6 @@ st.markdown(
         border-color: transparent !important;
     }
 
-    /* Tidak ada border dekoratif lama */
     .app-divider {
         height: 1px !important;
         background: linear-gradient(
@@ -797,12 +756,10 @@ st.markdown(
 
 # ------------------------------------------------------------
 # 3C. HEADER APP CARD FIX
-# Logo + links + toggle berada di dalam box yang sama
 # ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Tinggi judul kiri disamakan dengan kartu aplikasi kanan */
     .top-title-wrap {
         min-height: 158px !important;
         height: 158px !important;
@@ -810,18 +767,15 @@ st.markdown(
         padding: 6px 10px 6px 2px !important;
     }
 
-    /* Outer header tetap rapi */
     .st-key-top_header [data-testid="stHorizontalBlock"] {
         align-items: stretch !important;
     }
 
-    /* Kolom aplikasi dibuat setinggi judul kiri */
     .st-key-top_header [data-testid="stColumn"] {
         display: flex !important;
         flex-direction: column !important;
     }
 
-    /* Container DANA / GoPay / ShopeePay = kartu sebenarnya */
     .st-key-header_card_dana,
     .st-key-header_card_gopay,
     .st-key-header_card_shopeepay {
@@ -858,8 +812,6 @@ st.markdown(
         justify-content: space-between !important;
     }
 
-    /* Hilangkan box kedua pada HTML top-wallet-card.
-       Box utamanya sekarang adalah container Streamlit di atas. */
     .top-wallet-card {
         min-height: auto !important;
         height: auto !important;
@@ -899,7 +851,6 @@ st.markdown(
         line-height: 1.15 !important;
     }
 
-    /* Toggle sekarang benar-benar berada DI DALAM kartu */
     .st-key-header_card_dana [data-testid="stToggle"],
     .st-key-header_card_gopay [data-testid="stToggle"],
     .st-key-header_card_shopeepay [data-testid="stToggle"] {
@@ -923,7 +874,6 @@ st.markdown(
         color: #9D6638 !important;
     }
 
-    /* Supaya outer header tidak memotong shadow kartu */
     .st-key-top_header [data-testid="stVerticalBlockBorderWrapper"] {
         overflow: visible !important;
     }
@@ -953,7 +903,6 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* Padding umum panel agar isi tidak mepet */
     [data-testid="stVerticalBlockBorderWrapper"] {
         padding: 14px 16px !important;
         box-sizing: border-box !important;
@@ -963,12 +912,10 @@ st.markdown(
         gap: .55rem !important;
     }
 
-    /* Header tetap sedikit lebih rapat */
     .st-key-top_header [data-testid="stVerticalBlockBorderWrapper"] {
         padding: 12px 14px !important;
     }
 
-    /* Lebarkan kartu filter aplikasi */
     .top-title-wrap {
         min-height: 176px !important;
         height: 176px !important;
@@ -1033,7 +980,6 @@ st.markdown(
         font-weight: 600 !important;
     }
 
-    /* Konten panel ringkasan dibuat lebih simetris */
     .agreement-grid {
         gap: 10px !important;
         margin-bottom: 12px !important;
@@ -1057,7 +1003,6 @@ st.markdown(
         padding: 12px 8px !important;
     }
 
-    /* Summary TN TP FN FP */
     .cm-summary-grid {
         gap: 10px !important;
     }
@@ -1080,7 +1025,6 @@ st.markdown(
         font-size: clamp(18px, 1.45vw, 28px) !important;
     }
 
-    /* Note bawah confusion summary tanpa box */
     .cm-note-text {
         text-align: center;
         font-size: 12px;
@@ -1090,7 +1034,6 @@ st.markdown(
         padding-top: 8px;
     }
 
-    /* Box metric cards */
     .metric-row {
         gap: 8px !important;
         margin-bottom: 12px !important;
@@ -1105,12 +1048,10 @@ st.markdown(
         padding: 12px 6px !important;
     }
 
-    /* select & dataframe padding */
     [data-baseweb="select"] > div {
         min-height: 42px !important;
     }
 
-    /* Table wrapper */
     [data-testid="stDataFrame"] {
         margin-top: 4px !important;
     }
@@ -1136,12 +1077,10 @@ st.markdown(
 
 # ------------------------------------------------------------
 # 3E. FINAL HEADER LAYOUT
-# Judul + subjudul tengah, filter aplikasi di bawahnya
 # ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Blok judul utama */
     .dashboard-heading-block {
         width: min(100%, 1180px);
         margin: 0 auto 22px auto;
@@ -1171,7 +1110,6 @@ st.markdown(
         text-align: center;
     }
 
-    /* Box aplikasi mengikuti lebar kolom secara penuh */
     .final-wallet-card {
         width: 100%;
         min-height: 210px;
@@ -1245,7 +1183,6 @@ st.markdown(
         box-shadow: 0 6px 13px rgba(117,78,42,.13);
     }
 
-    /* Toggle tepat di bawah masing-masing kartu */
     .st-key-final_selector_dana [data-testid="stToggle"],
     .st-key-final_selector_gopay [data-testid="stToggle"],
     .st-key-final_selector_shopeepay [data-testid="stToggle"] {
@@ -1270,7 +1207,6 @@ st.markdown(
         font-weight: 500 !important;
     }
 
-    /* Container selector hanya untuk grouping, bukan box tambahan */
     .st-key-final_selector_dana [data-testid="stVerticalBlockBorderWrapper"],
     .st-key-final_selector_gopay [data-testid="stVerticalBlockBorderWrapper"],
     .st-key-final_selector_shopeepay [data-testid="stVerticalBlockBorderWrapper"] {
@@ -1288,7 +1224,6 @@ st.markdown(
         gap: 0 !important;
     }
 
-    /* Jarak bawah selector sebelum dashboard aplikasi */
     .final-wallet-spacer {
         height: 12px;
     }
@@ -1330,7 +1265,7 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# 3F. VERIFIED SIDEBAR + UNIFORM PANEL HEIGHT
+# 3F. UNIFORM PANEL HEIGHT
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -1341,7 +1276,6 @@ st.markdown(
         background: #FFF2DB !important;
     }
 
-    /* Semua kolom pada baris visualisasi stretch */
     .block-container [data-testid="stHorizontalBlock"] {
         align-items: stretch !important;
     }
@@ -1370,7 +1304,7 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    /* ROW 2 - distribusi sentimen + ringkasan */
+    /* ROW 2 */
     [class*="st-key-panel_row2_"] {
         height: 100% !important;
     }
@@ -1417,7 +1351,7 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    /* ROW 5 dan ROW 6 - wordcloud vs tabel klasifikasi */
+    /* ROW 5 & ROW 6 */
     [class*="st-key-panel_row5_"],
     [class*="st-key-panel_row6_"] {
         height: 100% !important;
@@ -1490,7 +1424,6 @@ st.markdown(
         text-align: center;
     }
 
-    /* Dua kartu terakhir dibuat center pada baris kedua */
     .performance-winner-card:nth-child(4) {
         grid-column: 2 / span 2;
     }
@@ -1555,12 +1488,12 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# 3I. FINAL POLISH & SIDEBAR TOGGLE ICON FIX
+# 3I. FINAL POLISH & SINGLE SIDEBAR TOGGLE FIX
 # ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Kembalikan font icon material */
+    /* Kembalikan font icon material bawaan Streamlit */
     [data-testid="stIconMaterial"] {
         font-family: "Material Symbols Rounded", "Material Symbols Outlined",
                       "Material Symbols Sharp", "Material Icons" !important;
@@ -1568,9 +1501,25 @@ st.markdown(
     }
 
     /* -----------------------------------------------------------
-       TOMBOL BUKA / TUTUP SIDEBAR (KONSISTEN & JELAS TERLIHAT)
+       TOMBOL BUKA & TUTUP SIDEBAR (TAMPIL TUNGGAL & JELAS)
        ----------------------------------------------------------- */
-    /* Tombol Pembuka Sidebar (>> saat sidebar tertutup) */
+    
+    /* 1. Reset & hilangkan seluruh ::before / ::after / svg lama agar tidak menumpuk */
+    [data-testid="stSidebarHeader"] button svg,
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="collapsedControl"] svg {
+        display: none !important;
+    }
+
+    [data-testid="stSidebarHeader"]::after,
+    [data-testid="stSidebarCollapseButton"]::after,
+    [data-testid="stSidebarCollapsedControl"]::after,
+    [data-testid="collapsedControl"]::after {
+        content: none !important;
+    }
+
+    /* 2. Tombol Buka Sidebar (saat sidebar tertutup) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
         display: block !important;
@@ -1581,9 +1530,7 @@ st.markdown(
     }
 
     [data-testid="stSidebarCollapsedControl"] button,
-    [data-testid="collapsedControl"] button,
-    button[data-testid="stSidebarCollapsedControl"],
-    button[data-testid="collapsedControl"] {
+    [data-testid="collapsedControl"] button {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1595,17 +1542,11 @@ st.markdown(
         cursor: pointer !important;
         box-shadow: 0 2px 8px rgba(157,102,56,.12) !important;
         padding: 0 !important;
+        font-size: 0 !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button svg,
-    [data-testid="collapsedControl"] button svg {
-        display: none !important;
-    }
-
-    [data-testid="stSidebarCollapsedControl"] button::after,
-    [data-testid="collapsedControl"] button::after,
-    button[data-testid="stSidebarCollapsedControl"]::after,
-    button[data-testid="collapsedControl"]::after {
+    [data-testid="stSidebarCollapsedControl"] button::before,
+    [data-testid="collapsedControl"] button::before {
         content: "»" !important;
         font-size: 20px !important;
         font-weight: 800 !important;
@@ -1613,7 +1554,7 @@ st.markdown(
         color: #9D6638 !important;
     }
 
-    /* Tombol Penutup Sidebar (<< saat sidebar terbuka) */
+    /* 3. Tombol Tutup Sidebar (saat sidebar terbuka) */
     [data-testid="stSidebarHeader"] {
         display: flex !important;
         justify-content: flex-end !important;
@@ -1622,10 +1563,7 @@ st.markdown(
         background: transparent !important;
     }
 
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarHeader"] button,
-    button[data-testid="stSidebarCollapseButton"],
-    button[aria-label="Close sidebar"] {
+    [data-testid="stSidebarHeader"] button {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1638,19 +1576,10 @@ st.markdown(
         box-shadow: 0 2px 8px rgba(157,102,56,.10) !important;
         padding: 0 !important;
         margin-left: auto !important;
+        font-size: 0 !important;
     }
 
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarHeader"] button svg,
-    button[data-testid="stSidebarCollapseButton"] svg,
-    button[aria-label="Close sidebar"] svg {
-        display: none !important;
-    }
-
-    [data-testid="stSidebarCollapseButton"]::after,
-    [data-testid="stSidebarHeader"] button::after,
-    button[data-testid="stSidebarCollapseButton"]::after,
-    button[aria-label="Close sidebar"]::after {
+    [data-testid="stSidebarHeader"] button::before {
         content: "«" !important;
         font-size: 20px !important;
         font-weight: 800 !important;
@@ -1658,15 +1587,15 @@ st.markdown(
         color: #9D6638 !important;
     }
 
-    [data-testid="stSidebarCollapseButton"]:hover,
     [data-testid="stSidebarHeader"] button:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover {
+    [data-testid="stSidebarCollapsedControl"] button:hover,
+    [data-testid="collapsedControl"] button:hover {
         background: #F4E1C2 !important;
         transform: scale(1.04) !important;
     }
 
     /* -----------------------------------------------------------
-       NAVIGATION BAR ATAS: warna solid #FFF2DB + posisi fixed
+       NAVIGATION BAR ATAS FIXED
        ----------------------------------------------------------- */
     [data-testid="stHeader"] {
         background: #FFF2DB !important;
@@ -2204,7 +2133,6 @@ for app, default in [("DANA", True), ("GoPay", True), ("ShopeePay", True)]:
     if key not in st.session_state:
         st.session_state[key] = default
 
-# Judul dan subjudul berada di tengah.
 st.markdown(
     """
     <div class="dashboard-heading-block">
@@ -2221,7 +2149,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Filter aplikasi ditempatkan tepat SETELAH judul dan subjudul.
 st.markdown('<div id="pilih-aplikasi" style="scroll-margin-top:85px"></div>', unsafe_allow_html=True)
 selector_cols = st.columns(3, gap="medium")
 
@@ -2309,9 +2236,7 @@ for selected_app in APP_ORDER:
         unsafe_allow_html=True,
     )
 
-    # --------------------------------------------------------
-    # ROW 0: Total data, training, testing
-    # --------------------------------------------------------
+    # ROW 0
     st.markdown(
         f'<div class="kpi-grid-3">'
         f'<div class="kpi-card"><p class="kpi-value">{total_data:,}</p><p class="kpi-label">Total Data Preparation</p></div>'
@@ -2321,9 +2246,7 @@ for selected_app in APP_ORDER:
         unsafe_allow_html=True,
     )
 
-    # --------------------------------------------------------
-    # ROW 1: Rating | Tren Positif | Tren Negatif
-    # --------------------------------------------------------
+    # ROW 1
     row1 = st.columns([1, 1, 1], gap="medium")
 
     with row1[0]:
@@ -2341,9 +2264,7 @@ for selected_app in APP_ORDER:
             st.markdown('<div class="panel-title">Tren Sentimen Negatif</div>', unsafe_allow_html=True)
             st.plotly_chart(trend_figure(nbc_app, svm_app, "Negatif"), use_container_width=True, config=PLOTLY_CONFIG)
 
-    # --------------------------------------------------------
-    # ROW 2: Donut NBC | Donut SVM | Ringkasan distribusi/perbedaan
-    # --------------------------------------------------------
+    # ROW 2
     row2 = st.columns([1, 1, 1], gap="medium")
 
     with row2[0]:
@@ -2384,9 +2305,7 @@ for selected_app in APP_ORDER:
                 )
                 st.plotly_chart(difference_figure(compare), use_container_width=True, config=PLOTLY_CONFIG)
 
-    # --------------------------------------------------------
-    # ROW 3: Confusion NBC | Confusion SVM | Ringkasan TN/TP/FN/FP
-    # --------------------------------------------------------
+    # ROW 3
     row3 = st.columns([1, 1, 1], gap="medium")
 
     with row3[0]:
@@ -2410,9 +2329,7 @@ for selected_app in APP_ORDER:
                 unsafe_allow_html=True,
             )
 
-    # --------------------------------------------------------
-    # ROW 4: Diagram metrik | Perbandingan kinerja
-    # --------------------------------------------------------
+    # ROW 4
     row4 = st.columns([1, 1], gap="medium")
 
     with row4[0]:
@@ -2464,9 +2381,7 @@ for selected_app in APP_ORDER:
                 unsafe_allow_html=True,
             )
 
-    # --------------------------------------------------------
-    # ROW 5: Wordcloud NBC | Contoh klasifikasi NBC
-    # --------------------------------------------------------
+    # ROW 5
     row5 = st.columns([0.72, 2.1], gap="medium")
 
     with row5[0]:
@@ -2484,9 +2399,7 @@ for selected_app in APP_ORDER:
             st.markdown('<div class="panel-title model-nbc">Contoh Hasil Klasifikasi Ulasan Model NBC</div>', unsafe_allow_html=True)
             classification_table(nbc_app, "predictLabelNBC", "NBC", selected_app)
 
-    # --------------------------------------------------------
-    # ROW 6: Wordcloud SVM | Contoh klasifikasi SVM
-    # --------------------------------------------------------
+    # ROW 6
     row6 = st.columns([0.72, 2.1], gap="medium")
 
     with row6[0]:
