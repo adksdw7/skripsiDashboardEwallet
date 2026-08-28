@@ -1488,12 +1488,12 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# 3I. FINAL POLISH & SINGLE SIDEBAR TOGGLE FIX
+# 3I. FINAL POLISH & PERMANENT VISIBLE SIDEBAR TOGGLE FIX
 # ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Kembalikan font icon material bawaan Streamlit */
+    /* Kembalikan font icon material bawaan */
     [data-testid="stIconMaterial"] {
         font-family: "Material Symbols Rounded", "Material Symbols Outlined",
                       "Material Symbols Sharp", "Material Icons" !important;
@@ -1501,25 +1501,25 @@ st.markdown(
     }
 
     /* -----------------------------------------------------------
-       TOMBOL BUKA & TUTUP SIDEBAR (TAMPIL TUNGGAL & JELAS)
+       TOMBOL BUKA / TUTUP SIDEBAR (SELALU MUNCUL & TUNGGAL)
        ----------------------------------------------------------- */
-    
-    /* 1. Reset & hilangkan seluruh ::before / ::after / svg lama agar tidak menumpuk */
-    [data-testid="stSidebarHeader"] button svg,
+
+    /* Reset SVG dan pseudo-element container */
     [data-testid="stSidebarCollapseButton"] svg,
     [data-testid="stSidebarCollapsedControl"] svg,
-    [data-testid="collapsedControl"] svg {
+    [data-testid="collapsedControl"] svg,
+    [data-testid="stSidebarHeader"] button svg {
         display: none !important;
     }
 
-    [data-testid="stSidebarHeader"]::after,
     [data-testid="stSidebarCollapseButton"]::after,
     [data-testid="stSidebarCollapsedControl"]::after,
-    [data-testid="collapsedControl"]::after {
+    [data-testid="collapsedControl"]::after,
+    [data-testid="stSidebarHeader"]::after {
         content: none !important;
     }
 
-    /* 2. Tombol Buka Sidebar (saat sidebar tertutup) */
+    /* 1. KONTROL PEMBUKA (saat sidebar TERTUTUP -> muncul di kiri atas) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
         display: block !important;
@@ -1527,6 +1527,8 @@ st.markdown(
         top: 0.45rem !important;
         left: 0.65rem !important;
         z-index: 1000000 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] button,
@@ -1543,6 +1545,8 @@ st.markdown(
         box-shadow: 0 2px 8px rgba(157,102,56,.12) !important;
         padding: 0 !important;
         font-size: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
     [data-testid="stSidebarCollapsedControl"] button::before,
@@ -1554,16 +1558,21 @@ st.markdown(
         color: #9D6638 !important;
     }
 
-    /* 3. Tombol Tutup Sidebar (saat sidebar terbuka) */
+    /* 2. KONTROL PENUTUP (saat sidebar TERBUKA -> muncul di kanan atas sidebar) */
     [data-testid="stSidebarHeader"] {
         display: flex !important;
         justify-content: flex-end !important;
         align-items: center !important;
         padding: 0.6rem 0.8rem 0.2rem 0.8rem !important;
         background: transparent !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
-    [data-testid="stSidebarHeader"] button {
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarHeader"] button,
+    button[data-testid="stSidebarCollapseButton"],
+    button[aria-label="Close sidebar"] {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1577,9 +1586,14 @@ st.markdown(
         padding: 0 !important;
         margin-left: auto !important;
         font-size: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
-    [data-testid="stSidebarHeader"] button::before {
+    [data-testid="stSidebarCollapseButton"]::before,
+    [data-testid="stSidebarHeader"] button::before,
+    button[data-testid="stSidebarCollapseButton"]::before,
+    button[aria-label="Close sidebar"]::before {
         content: "«" !important;
         font-size: 20px !important;
         font-weight: 800 !important;
@@ -1587,6 +1601,7 @@ st.markdown(
         color: #9D6638 !important;
     }
 
+    [data-testid="stSidebarCollapseButton"]:hover,
     [data-testid="stSidebarHeader"] button:hover,
     [data-testid="stSidebarCollapsedControl"] button:hover,
     [data-testid="collapsedControl"] button:hover {
