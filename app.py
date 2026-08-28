@@ -1488,7 +1488,7 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# 3I. FINAL POLISH & PERMANENT VISIBLE SIDEBAR TOGGLE FIX
+# 3I. FINAL POLISH & CLEAN SIDEBAR TOGGLE
 # ------------------------------------------------------------
 st.markdown(
     """
@@ -1501,10 +1501,10 @@ st.markdown(
     }
 
     /* -----------------------------------------------------------
-       TOMBOL BUKA / TUTUP SIDEBAR (SELALU MUNCUL & TUNGGAL)
+       TOMBOL BUKA & TUTUP SIDEBAR (BERSIH, FLAT, TANPA KOTAK)
        ----------------------------------------------------------- */
 
-    /* Reset SVG dan pseudo-element container */
+    /* 1. Sembunyikan SVG bawaan & bersihkan semua pseudo-element */
     [data-testid="stSidebarCollapseButton"] svg,
     [data-testid="stSidebarCollapsedControl"] svg,
     [data-testid="collapsedControl"] svg,
@@ -1512,19 +1512,24 @@ st.markdown(
         display: none !important;
     }
 
+    [data-testid="stSidebarCollapseButton"]::before,
     [data-testid="stSidebarCollapseButton"]::after,
+    [data-testid="stSidebarCollapsedControl"]::before,
     [data-testid="stSidebarCollapsedControl"]::after,
+    [data-testid="collapsedControl"]::before,
     [data-testid="collapsedControl"]::after,
-    [data-testid="stSidebarHeader"]::after {
+    [data-testid="stSidebarHeader"]::before,
+    [data-testid="stSidebarHeader"]::after,
+    [data-testid="stSidebarHeader"] button::after {
         content: none !important;
     }
 
-    /* 1. KONTROL PEMBUKA (saat sidebar TERTUTUP -> muncul di kiri atas) */
+    /* 2. KONTROL PEMBUKA (saat sidebar TERTUTUP -> >> di kiri atas) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
         display: block !important;
         position: fixed !important;
-        top: 0.45rem !important;
+        top: 0.55rem !important;
         left: 0.65rem !important;
         z-index: 1000000 !important;
         opacity: 1 !important;
@@ -1536,13 +1541,10 @@ st.markdown(
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        background: #FFF2DB !important;
-        border: 1.4px solid #9D6638 !important;
-        border-radius: 8px !important;
-        width: 34px !important;
-        height: 34px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         cursor: pointer !important;
-        box-shadow: 0 2px 8px rgba(157,102,56,.12) !important;
         padding: 0 !important;
         font-size: 0 !important;
         opacity: 1 !important;
@@ -1552,13 +1554,13 @@ st.markdown(
     [data-testid="stSidebarCollapsedControl"] button::before,
     [data-testid="collapsedControl"] button::before {
         content: "»" !important;
-        font-size: 20px !important;
+        font-size: 24px !important;
         font-weight: 800 !important;
         line-height: 1 !important;
         color: #9D6638 !important;
     }
 
-    /* 2. KONTROL PENUTUP (saat sidebar TERBUKA -> muncul di kanan atas sidebar) */
+    /* 3. KONTROL PENUTUP (saat sidebar TERBUKA -> « murni tanpa kotak) */
     [data-testid="stSidebarHeader"] {
         display: flex !important;
         justify-content: flex-end !important;
@@ -1569,20 +1571,15 @@ st.markdown(
         visibility: visible !important;
     }
 
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarHeader"] button,
-    button[data-testid="stSidebarCollapseButton"],
-    button[aria-label="Close sidebar"] {
+    [data-testid="stSidebarHeader"] button {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        background: #FFFAF3 !important;
-        border: 1.4px solid #9D6638 !important;
-        border-radius: 8px !important;
-        width: 34px !important;
-        height: 34px !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
         cursor: pointer !important;
-        box-shadow: 0 2px 8px rgba(157,102,56,.10) !important;
         padding: 0 !important;
         margin-left: auto !important;
         font-size: 0 !important;
@@ -1590,23 +1587,19 @@ st.markdown(
         visibility: visible !important;
     }
 
-    [data-testid="stSidebarCollapseButton"]::before,
-    [data-testid="stSidebarHeader"] button::before,
-    button[data-testid="stSidebarCollapseButton"]::before,
-    button[aria-label="Close sidebar"]::before {
+    [data-testid="stSidebarHeader"] button::before {
         content: "«" !important;
-        font-size: 20px !important;
+        font-size: 24px !important;
         font-weight: 800 !important;
         line-height: 1 !important;
         color: #9D6638 !important;
     }
 
-    [data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarHeader"] button:hover,
-    [data-testid="stSidebarCollapsedControl"] button:hover,
-    [data-testid="collapsedControl"] button:hover {
-        background: #F4E1C2 !important;
-        transform: scale(1.04) !important;
+    [data-testid="stSidebarHeader"] button:hover::before,
+    [data-testid="stSidebarCollapsedControl"] button:hover::before,
+    [data-testid="collapsedControl"] button:hover::before {
+        color: #662222 !important;
+        transform: scale(1.1) !important;
     }
 
     /* -----------------------------------------------------------
