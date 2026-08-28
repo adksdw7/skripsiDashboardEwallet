@@ -1488,43 +1488,62 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# 3I. FINAL POLISH & CLEAN SIDEBAR TOGGLE
+# 3I. FINAL POLISH & CLEAN SINGLE SIDEBAR TOGGLE
 # ------------------------------------------------------------
 st.markdown(
     """
     <style>
-    /* Kembalikan font icon material bawaan */
-    [data-testid="stIconMaterial"] {
-        font-family: "Material Symbols Rounded", "Material Symbols Outlined",
-                      "Material Symbols Sharp", "Material Icons" !important;
-        color: #9D6638 !important;
-    }
-
     /* -----------------------------------------------------------
-       TOMBOL BUKA & TUTUP SIDEBAR (BERSIH, FLAT, TANPA KOTAK)
+       TOMBOL BUKA / TUTUP SIDEBAR MURNI (ICON TUNGGAL)
        ----------------------------------------------------------- */
 
-    /* 1. Sembunyikan SVG bawaan & bersihkan semua pseudo-element */
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapsedControl"] svg,
-    [data-testid="collapsedControl"] svg,
-    [data-testid="stSidebarHeader"] button svg {
-        display: none !important;
+    /* Bersihkan semua pseudo-element buatan agar tidak double */
+    *::before, *::after {
+        content: normal;
     }
 
-    [data-testid="stSidebarCollapseButton"]::before,
-    [data-testid="stSidebarCollapseButton"]::after,
-    [data-testid="stSidebarCollapsedControl"]::before,
-    [data-testid="stSidebarCollapsedControl"]::after,
-    [data-testid="collapsedControl"]::before,
-    [data-testid="collapsedControl"]::after,
-    [data-testid="stSidebarHeader"]::before,
-    [data-testid="stSidebarHeader"]::after,
-    [data-testid="stSidebarHeader"] button::after {
-        content: none !important;
+    /* 1. Header Sidebar (tempat tombol penutup saat sidebar terbuka) */
+    [data-testid="stSidebarHeader"] {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        padding: 0.6rem 0.8rem 0.2rem 0.8rem !important;
+        background: transparent !important;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 
-    /* 2. KONTROL PEMBUKA (saat sidebar TERTUTUP -> >> di kiri atas) */
+    /* Tombol Penutup (Close Sidebar «) */
+    [data-testid="stSidebarHeader"] button,
+    [data-testid="stSidebarCollapseButton"],
+    button[data-testid="stSidebarCollapseButton"],
+    button[aria-label="Close sidebar"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        color: #9D6638 !important;
+        fill: #9D6638 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        margin-left: auto !important;
+    }
+
+    [data-testid="stSidebarHeader"] button svg,
+    [data-testid="stSidebarCollapseButton"] svg {
+        display: block !important;
+        width: 22px !important;
+        height: 22px !important;
+        color: #9D6638 !important;
+        fill: #9D6638 !important;
+        stroke: #9D6638 !important;
+    }
+
+    /* 2. Tombol Pembuka (Open Sidebar » saat tertutup) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
         display: block !important;
@@ -1544,61 +1563,31 @@ st.markdown(
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
+        color: #9D6638 !important;
+        fill: #9D6638 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
         cursor: pointer !important;
         padding: 0 !important;
-        font-size: 0 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
     }
 
-    [data-testid="stSidebarCollapsedControl"] button::before,
-    [data-testid="collapsedControl"] button::before {
-        content: "»" !important;
-        font-size: 24px !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
+    [data-testid="stSidebarCollapsedControl"] button svg,
+    [data-testid="collapsedControl"] button svg {
+        display: block !important;
+        width: 22px !important;
+        height: 22px !important;
         color: #9D6638 !important;
+        fill: #9D6638 !important;
+        stroke: #9D6638 !important;
     }
 
-    /* 3. KONTROL PENUTUP (saat sidebar TERBUKA -> « murni tanpa kotak) */
-    [data-testid="stSidebarHeader"] {
-        display: flex !important;
-        justify-content: flex-end !important;
-        align-items: center !important;
-        padding: 0.6rem 0.8rem 0.2rem 0.8rem !important;
-        background: transparent !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-
-    [data-testid="stSidebarHeader"] button {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        outline: none !important;
-        cursor: pointer !important;
-        padding: 0 !important;
-        margin-left: auto !important;
-        font-size: 0 !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-
-    [data-testid="stSidebarHeader"] button::before {
-        content: "«" !important;
-        font-size: 24px !important;
-        font-weight: 800 !important;
-        line-height: 1 !important;
-        color: #9D6638 !important;
-    }
-
-    [data-testid="stSidebarHeader"] button:hover::before,
-    [data-testid="stSidebarCollapsedControl"] button:hover::before,
-    [data-testid="collapsedControl"] button:hover::before {
+    /* Efek hover */
+    [data-testid="stSidebarHeader"] button:hover svg,
+    [data-testid="stSidebarCollapsedControl"] button:hover svg,
+    [data-testid="collapsedControl"] button:hover svg {
         color: #662222 !important;
+        fill: #662222 !important;
+        stroke: #662222 !important;
         transform: scale(1.1) !important;
     }
 
